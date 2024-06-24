@@ -1,0 +1,14 @@
+beautifulsoup4
+keyboard
+matplotlib
+numpy
+pygame
+Pillow
+plotly
+psutil
+pyautogui
+PyQt5
+qiskit
+requests
+schemdraw
+schedule
