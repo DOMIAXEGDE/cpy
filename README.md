@@ -97,7 +97,7 @@ Here are the features and functionalities offered by Amalec:
 ## Installation
 1. **Clone the repository**:
    ```sh
-   git clone https://github.com/domiaxegde/cpy.git
+   git clone https://github.com/DOMIAXEGDE/cpy.git
 2. **Navigate to the directory in terminal or console.**
 3. **pip install -r requirements.txt**
 
