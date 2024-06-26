@@ -2,11 +2,10 @@ from tkinter import *
 import tkinter as tk
 import random
 import os
-os.environ['QT_API'] = 'pyqt5'
 import math
 from PIL import Image
 import subprocess
-import io #experiment
+import io # experiment
 import pygame
 import importlib
 import requests
@@ -21,8 +20,8 @@ from PIL import ImageGrab
 import pickle
 from tkinter import simpledialog
 from tkinter import Menu, Checkbutton, BooleanVar #For Windows OS
-#from tkinter import Menu, Checkbutton #For macOS
-#from tkinter import BooleanVar #For macOS
+# from tkinter import Menu, Checkbutton #For macOS
+# from tkinter import BooleanVar #For macOS
 from tkinter.colorchooser import askcolor
 import logging
 import time
@@ -48,15 +47,15 @@ import schedule
 from pathlib import Path
 import shutil
 import importlib.util
-#import pyautogui
-#from PIL import Image, experiment
+# import pyautogui
+# from PIL import Image, experiment
 
 from PIL import Image, ImageDraw
 import plotly.graph_objects as go
 from PyQt5 import QtWidgets, QtCore
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
-
+os.environ['QT_API'] = 'pyqt5'
 templates = {
     "basic": ["id", "name", "value"],
     "detailed": ["id", "name", "description", "timestamp"]
@@ -2079,6 +2078,7 @@ while(True):
                     print(f"Error loading image: {e}")
 
 
+        '''
         def update_image_selection_area():
             global image_selection_frame
 
@@ -2092,7 +2092,7 @@ while(True):
                 btn = tk.Button(image_selection_frame, image=tk_image, command=lambda img=img: select_image(img))
                 btn.image = tk_image  # Keep a reference to avoid garbage collection
                 btn.pack(side='left')
-
+        '''
 
         def select_and_add_images():
             global selected_image_path
