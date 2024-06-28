@@ -63,7 +63,6 @@
 #include <fstream>
 #include "D:/vcpkgm/vcpkg/installed/x64-windows/include/nlohmann/json.hpp"
 #include <filesystem>
-//#include <nlohmann/json.hpp>
 
 using json = nlohmann::json;
 
@@ -145,17 +144,22 @@ public:
 
     void save(const std::string& filename) const {
         json j;
-        j["id"] = id;
-        j["timestamp"] = timestamp;
-        j["properties"] = propertySet->to_json();
+        std::ifstream inFile(filename);
+        if (inFile.is_open()) {
+            inFile >> j;
+            inFile.close();
+        }
+        
+        j[id]["timestamp"] = timestamp;
+        j[id]["properties"] = propertySet->to_json();
 
-        std::ofstream file(filename);
-        if (file.is_open()) {
-            file << j.dump(4);
+        std::ofstream outFile(filename);
+        if (outFile.is_open()) {
+            outFile << j.dump(4);
         }
     }
 
-    static Cooper load(const std::string& filename) {
+    static std::unordered_map<std::string, std::unique_ptr<Cooper>> loadAll(const std::string& filename) {
         std::ifstream file(filename);
         if (!file.is_open()) {
             throw std::runtime_error("Could not open file for reading");
@@ -163,14 +167,20 @@ public:
         json j;
         file >> j;
 
-        std::string id = j["id"];
-        std::string timestamp = j["timestamp"];
-        json properties = j["properties"];
+        std::unordered_map<std::string, std::unique_ptr<Cooper>> cooperMap;
 
-        auto propertySet = std::make_unique<DynamicPropertySet>(properties);
-        Cooper loadedCooper(id, std::move(propertySet));
-        loadedCooper.timestamp = timestamp; // Ensure the timestamp is preserved
-        return loadedCooper;
+        for (auto& [id, data] : j.items()) {
+            std::string timestamp = data["timestamp"];
+            json properties = data["properties"];
+            
+            auto propertySet = std::make_unique<DynamicPropertySet>(properties);
+            auto cooper = std::make_unique<Cooper>(id, std::move(propertySet));
+            cooper->timestamp = timestamp; // Ensure the timestamp is preserved
+            
+            cooperMap[id] = std::move(cooper);
+        }
+
+        return cooperMap;
     }
 
     void updatePropertySet(const json& newProps) {
@@ -352,9 +362,7 @@ int main() {
                 case 7: {
                     std::cout << "Enter filename to load from: ";
                     std::getline(std::cin, filename);
-                    Cooper loadedCooper = Cooper::load("config/" + filename);
-                    std::string loadedId = loadedCooper.getId();
-                    cooperMap[loadedId] = std::make_unique<Cooper>(std::move(loadedCooper));
+                    cooperMap = Cooper::loadAll("config/" + filename);
                     break;
                 }
                 case 8: {
@@ -389,6 +397,7 @@ int main() {
 
     return 0;
 }
+
 
 
 
