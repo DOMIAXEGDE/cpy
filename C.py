@@ -55,6 +55,7 @@ import plotly.graph_objects as go
 from PyQt5 import QtWidgets, QtCore
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QLineEdit, QLabel, QPushButton, QScrollArea, QTextEdit
 os.environ['QT_API'] = 'pyqt5'
 templates = {
     "basic": ["id", "name", "value"],
@@ -2002,6 +2003,7 @@ def help_print():
     print("Enter 27: Construct your own Linguistic Language")
     print("Enter 28: Convert Text Encoding (From 12) to a Convergent Image")
     print("Enter 29: Mathematics Lab")
+    print("Enter 30: Multi-Language Character Mapper")
         
 while(True):
     
@@ -4929,5 +4931,140 @@ while(True):
 
                     #if __name__ == "__main__":
                     main()
+    if(entrance == 30):
+            while(5 > 2):
+                intys30 = int(input("0 for main menu, 1 to continue: "))
+                if(intys30 == 0):
+                    break
+                if(intys30 == 1):
+                    class CharacterMapper(QWidget):
+                        def __init__(self):
+                            super().__init__()
+
+                            # Initialize the character map from a text file and add special characters
+                            self.char_map = self.load_characters_from_file('alpha.txt')
+                            self.add_special_characters()
+
+                            # Reverse map for character to number conversion
+                            self.reverse_char_map = {v: k for k, v in self.char_map.items()}
+
+                            # Now initialize the UI
+                            self.initUI()
+
+                        def initUI(self):
+                            self.setWindowTitle('Multi-Language Character Mapper')
+
+                            self.layout = QVBoxLayout()
+
+                            self.string_input_label = QLabel('Enter String to Convert to Number Sequence:', self)
+                            self.layout.addWidget(self.string_input_label)
+
+                            self.string_input_field = QTextEdit(self)
+                            self.layout.addWidget(self.string_input_field)
+
+                            self.convert_button = QPushButton('Convert String to Number Sequence', self)
+                            self.convert_button.clicked.connect(self.convert_string_to_numbers)
+                            self.layout.addWidget(self.convert_button)
+
+                            self.input_label = QLabel('Enter Number Sequence (comma-separated):', self)
+                            self.layout.addWidget(self.input_label)
+
+                            self.input_field = QLineEdit(self)
+                            self.layout.addWidget(self.input_field)
+
+                            self.map_button = QPushButton('Map to Characters', self)
+                            self.map_button.clicked.connect(self.show_characters)
+                            self.layout.addWidget(self.map_button)
+
+                            self.result_label = QLabel('Mapped Characters:', self)
+                            self.layout.addWidget(self.result_label)
+
+                            self.result_scroll_area = QScrollArea(self)
+                            self.result_scroll_area.setWidgetResizable(True)
+                            self.result_scroll_content = QWidget()
+                            self.result_scroll_layout = QVBoxLayout(self.result_scroll_content)
+
+                            self.result_text_label = QLabel('', self.result_scroll_content)
+                            self.result_text_label.setWordWrap(True)
+                            self.result_scroll_layout.addWidget(self.result_text_label)
+
+                            self.result_scroll_area.setWidget(self.result_scroll_content)
+                            self.layout.addWidget(self.result_scroll_area)
+
+                            self.available_chars_label = QLabel('Available Characters:', self)
+                            self.layout.addWidget(self.available_chars_label)
+
+                            self.chars_scroll_area = QScrollArea(self)
+                            self.chars_scroll_area.setWidgetResizable(True)
+                            self.chars_scroll_content = QWidget()
+                            self.chars_scroll_layout = QVBoxLayout(self.chars_scroll_content)
+
+                            self.chars_text_label = QLabel('', self.chars_scroll_content)
+                            self.chars_text_label.setWordWrap(True)
+                            self.chars_scroll_layout.addWidget(self.chars_text_label)
+
+                            self.chars_scroll_area.setWidget(self.chars_scroll_content)
+                            self.layout.addWidget(self.chars_scroll_area)
+
+                            self.setLayout(self.layout)
+
+                            self.update_available_characters()
+                            self.show()
+
+                        def load_characters_from_file(self, filename):
+                            char_map = {}
+                            try:
+                                with open(filename, 'r', encoding='utf-8') as file:
+                                    for idx, line in enumerate(file):
+                                        character = line.strip()
+                                        if character:  # Skip empty lines
+                                            char_map[idx + 1] = character
+                            except FileNotFoundError:
+                                print(f"File {filename} not found. Ensure the file is in the correct path.")
+                            except Exception as e:
+                                print(f"An error occurred while reading the file: {e}")
+                            return char_map
+
+                        def add_special_characters(self):
+                            special_chars = {
+                                ' ': 'SPACE',
+                                '\t': 'TAB',
+                                '\n': 'NEWLINE',
+                                '\0': 'NULL'
+                            }
+                            for key, value in special_chars.items():
+                                self.char_map[len(self.char_map) + 1] = key
+
+                        def convert_string_to_numbers(self):
+                            input_text = self.string_input_field.toPlainText()
+                            number_sequence = []
+                            for char in input_text:
+                                if char in self.reverse_char_map:
+                                    number_sequence.append(str(self.reverse_char_map[char]))
+                            self.input_field.setText(', '.join(number_sequence))
+
+                        def show_characters(self):
+                            input_text = self.input_field.text()
+                            try:
+                                # Split the input text by comma and convert to integers
+                                numbers = [int(num.strip()) for num in input_text.split(',')]
+                                # Map each number to the corresponding character
+                                characters = [self.char_map.get(num, 'Character not found') for num in numbers]
+                                # Join the characters to form the result string
+                                result = ''.join(characters)
+                                self.result_text_label.setText(f'Characters: {result}')
+                            except ValueError:
+                                self.result_text_label.setText('Please enter valid numbers separated by commas')
+
+                        def update_available_characters(self):
+                            available_chars = ', '.join(f'{key}: {value}' for key, value in self.char_map.items())
+                            self.chars_text_label.setText(available_chars)
+
+
+                    #if __name__ == '__main__':
+                    app = QApplication(sys.argv)
+                    ex = CharacterMapper()
+                    sys.exit(app.exec_())
+
 
         
