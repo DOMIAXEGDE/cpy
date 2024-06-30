@@ -4647,7 +4647,14 @@ while(True):
                 if(intys29 == 0):
                     break
                 if(intys29 == 1):
-
+                    '''
+                    import sys
+                    import numpy as np
+                    import pickle
+                    from PyQt5 import QtWidgets, QtCore
+                    from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+                    from matplotlib.figure import Figure
+                    '''
                     class MplCanvas(FigureCanvas):
                         def __init__(self, parent=None, width=5, height=4, dpi=100, projection='3d'):
                             fig = Figure(figsize=(width, height), dpi=dpi)
@@ -4764,7 +4771,7 @@ while(True):
                             y = np.linspace(-5, 5, 100)
                             X, Y = np.meshgrid(x, y)
                             Z = eval(function, {'X': X, 'Y': Y, 'np': np})
-                            self.canvas.axes.contourf(X, Y, Z, cmap='viridis')
+                            self.canvas.axes.contour(X, Y, Z, levels=[0], colors='black')  # Change here
                             self.canvas.axes.set_title("2D Contour Plot")
 
                         def draw_3d(self, function):
@@ -4799,8 +4806,8 @@ while(True):
                                     except Exception as e:
                                         QtWidgets.QMessageBox.critical(self, "Error", str(e))
 
-                                # Draw the layered shapes on a single plot
-                                self.draw_layered_shapes(labels.split())
+                                    # Draw the layered shapes on a single plot
+                                    self.draw_layered_shapes(labels.split())
 
                         def draw_layered_shapes(self, labels):
                             if labels:
@@ -4931,6 +4938,7 @@ while(True):
 
                     #if __name__ == "__main__":
                     main()
+
     if(entrance == 30):
             while(5 > 2):
                 intys30 = int(input("0 for main menu, 1 to continue: "))
