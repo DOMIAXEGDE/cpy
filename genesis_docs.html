@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>genesis.exe Documentation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            width: 80%;
+            margin: auto;
+            overflow: hidden;
+        }
+        header {
+            background: #333;
+            color: #fff;
+            padding-top: 30px;
+            min-height: 70px;
+            border-bottom: #77A6F7 3px solid;
+        }
+        header a {
+            color: #fff;
+            text-decoration: none;
+            text-transform: uppercase;
+            font-size: 16px;
+        }
+        header ul {
+            padding: 0;
+            list-style: none;
+        }
+        header li {
+            float: left;
+            display: inline;
+            padding: 0 20px 0 20px;
+        }
+        header #branding {
+            float: left;
+        }
+        header #branding h1 {
+            margin: 0;
+        }
+        header nav {
+            float: right;
+            margin-top: 10px;
+        }
+        section#main {
+            padding: 20px;
+            background: #fff;
+            margin-top: 20px;
+        }
+        .steps {
+            margin-top: 20px;
+        }
+        .steps h2 {
+            color: #333;
+        }
+        .steps p, .steps pre {
+            background: #f4f4f4;
+            padding: 10px;
+            border: #ddd 1px solid;
+        }
+        .explanation {
+            margin-top: 20px;
+            background: #fff;
+            padding: 20px;
+            border: #ddd 1px solid;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div id="branding">
+                <h1>genesis.exe Documentation</h1>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="#steps">Steps</a></li>
+                    <li><a href="#explanation">Explanation</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    <div class="container">
+        <section id="main">
+            <h1>Using genesis.exe</h1>
+            <div class="steps">
+                <h2>Steps to Use genesis.exe</h2>
+                <p>Follow these steps to use <code>genesis.exe</code> for generating, compiling, and executing C++ source files:</p>
+                <h3>Step 1: Compile genesis.cpp</h3>
+                <p>First, you need to compile <code>genesis.cpp</code> to create the <code>genesis.exe</code> executable.</p>
+                <pre>
+g++ genesis.cpp -o genesis.exe
+                </pre>
+                <h3>Step 2: Run genesis.exe</h3>
+                <p>Run <code>genesis.exe</code> with the required arguments. For example, to generate files with 1 character per file and a character set size of 100, use:</p>
+                <pre>
+./genesis.exe 1 100
+                </pre>
+                <h3>Step 3: Navigate to the Production Directory</h3>
+                <p>Navigate to the <code>production</code> directory where the generated files and scripts are located:</p>
+                <pre>
+cd production
+                </pre>
+                <h3>Step 4: Run the Generated Compilation Script</h3>
+                <p>Run the generated <code>compile.bat</code> script to compile all the generated C++ source files:</p>
+                <pre>
+./compile.bat
+                </pre>
+                <h3>Step 5: Run the Generated Executor Script</h3>
+                <p>Run the generated <code>executor.bat</code> script to execute each compiled executable in sequence:</p>
+                <pre>
+./executor.bat
+                </pre>
+            </div>
+            <div class="explanation">
+                <h2>Why Use a Supercomputer?</h2>
+                <p>The process described above involves generating, compiling, and executing a potentially large number of C++ source files. Here’s why a supercomputer might be necessary:</p>
+                <h3>1. Large Number of Combinations</h3>
+                <p>The number of generated files is determined by the formula <code>(k + 1)^n</code>, where <code>k</code> is the character set size minus one, and <code>n</code> is the number of characters per file. For large values of <code>k</code> and <code>n</code>, the number of combinations can be extremely large. For example, with <code>k = 99</code> and <code>n = 2</code>, there will be <code>(100)^2 = 10,000</code> combinations.</p>
+                <h3>2. High Computational Load</h3>
+                <p>Compiling and executing thousands or even millions of C++ files requires significant computational power and resources. A supercomputer can handle this load efficiently, distributing the tasks across many processors and performing parallel computations.</p>
+                <h3>3. Time Efficiency</h3>
+                <p>On a regular computer, generating, compiling, and executing a large number of files can take a prohibitively long time. A supercomputer, with its vast computational capabilities, can perform these tasks much faster, saving valuable time.</p>
+                <h3>4. Memory and Storage</h3>
+                <p>Handling a large number of files also requires substantial memory and storage capacity. A supercomputer is equipped with high memory and storage resources to manage such tasks without running into hardware limitations.</p>
+            </div>
+        </section>
+    </div>
+</body>
+</html>
