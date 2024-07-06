@@ -56,6 +56,10 @@ from PyQt5 import QtWidgets, QtCore
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QLineEdit, QLabel, QPushButton, QScrollArea, QTextEdit
+from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QTextEdit, QPushButton,
+                             QMessageBox, QScrollArea, QVBoxLayout, QFormLayout, QFileDialog, QMenuBar, QInputDialog, QDialog, QDialogButtonBox)
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QIcon, QFont
 os.environ['QT_API'] = 'pyqt5'
 templates = {
     "basic": ["id", "name", "value"],
@@ -2004,6 +2008,7 @@ def help_print():
     print("Enter 28: Convert Text Encoding (From 12) to a Convergent Image")
     print("Enter 29: Mathematics Lab")
     print("Enter 30: Multi-Language Character Mapper")
+    print("Enter 31: Database - Structures of Mathematics")
         
 while(True):
     
@@ -5073,6 +5078,233 @@ while(True):
                     app = QApplication(sys.argv)
                     ex = CharacterMapper()
                     sys.exit(app.exec_())
+                    
+    if(entrance == 31):
+                while(5 > 2):
+                    intys31 = int(input("0 for main menu, 1 to continue: "))
+                    if(intys31 == 0):
+                        break
+                    if(intys31 == 1):
 
+                        class MathStructureDatabaseApp(QWidget):
+                            def __init__(self):
+                                super().__init__()
+                                self.setWindowTitle("Database - Structures of Mathematics")
+                                self.setGeometry(100, 100, 800, 600)
+                                
+                                self.database = {}
+                                
+                                self.initUI()
+                            
+                            def initUI(self):
+                                layout = QVBoxLayout()
+                                
+                                self.menuBar = QMenuBar(self)
+                                fileMenu = self.menuBar.addMenu("File")
+                                editMenu = self.menuBar.addMenu("Edit")
+                                sequenceMenu = self.menuBar.addMenu("Sequence")
+
+                                saveAction = fileMenu.addAction(QIcon.fromTheme("document-save"), "Save Session")
+                                loadAction = fileMenu.addAction(QIcon.fromTheme("document-open"), "Load Session")
+                                loadFromFileAction = fileMenu.addAction(QIcon.fromTheme("document-import"), "Load from File")
+
+                                saveAction.triggered.connect(self.saveSession)
+                                loadAction.triggered.connect(self.loadSession)
+                                loadFromFileAction.triggered.connect(self.loadFromFile)
+
+                                addAction = editMenu.addAction(QIcon.fromTheme("list-add"), "Add Mapping")
+                                viewAction = editMenu.addAction(QIcon.fromTheme("view-list-details"), "View Mappings")
+
+                                addAction.triggered.connect(self.addMapping)
+                                viewAction.triggered.connect(self.viewMappings)
+
+                                integerSequenceAction = sequenceMenu.addAction(QIcon.fromTheme("preferences-system-time"), "Integer Sequence Mode")
+                                integerSequenceAction.triggered.connect(self.integerSequenceMode)
+
+                                layout.setMenuBar(self.menuBar)
+                                
+                                formLayout = QFormLayout()
+                                
+                                self.integerInput = QLineEdit(self)
+                                self.integerInput.setPlaceholderText("Enter a positive integer")
+                                
+                                self.mathStringInput = QTextEdit(self)
+                                self.mathStringInput.setPlaceholderText("Enter the multi-line mathematical string structure")
+                                
+                                formLayout.addRow(QLabel("Integer:"), self.integerInput)
+                                formLayout.addRow(QLabel("Math String:"), self.mathStringInput)
+                                
+                                layout.addLayout(formLayout)
+                                
+                                self.scrollArea = QScrollArea(self)
+                                self.scrollArea.setWidgetResizable(True)
+                                self.scrollWidget = QWidget()
+                                self.scrollLayout = QVBoxLayout(self.scrollWidget)
+                                self.scrollArea.setWidget(self.scrollWidget)
+                                
+                                layout.addWidget(self.scrollArea)
+                                
+                                self.setLayout(layout)
+                                
+                                # Apply Style Sheet
+                                self.setStyleSheet("""
+                                    QWidget {
+                                        font-size: 14px;
+                                        font-family: Arial, sans-serif;
+                                    }
+                                    QMenuBar {
+                                        background-color: #333;
+                                        color: white;
+                                    }
+                                    QMenuBar::item {
+                                        background-color: #333;
+                                        color: white;
+                                    }
+                                    QMenuBar::item:selected {
+                                        background-color: #555;
+                                    }
+                                    QMenu {
+                                        background-color: #333;
+                                        color: white;
+                                    }
+                                    QMenu::item:selected {
+                                        background-color: #555;
+                                    }
+                                    QLineEdit, QTextEdit {
+                                        border: 1px solid #ccc;
+                                        border-radius: 4px;
+                                        padding: 4px;
+                                    }
+                                    QPushButton {
+                                        background-color: #333;
+                                        color: white;
+                                        border-radius: 4px;
+                                        padding: 8px;
+                                    }
+                                    QPushButton:hover {
+                                        background-color: #555;
+                                    }
+                                    QLabel {
+                                        font-weight: bold;
+                                    }
+                                """)
+                            
+                            def addMapping(self):
+                                try:
+                                    key = int(self.integerInput.text())
+                                    if key <= 0:
+                                        raise ValueError
+                                except ValueError:
+                                    QMessageBox.warning(self, "Invalid Input", "Please enter a valid positive integer.")
+                                    return
+                                
+                                mathString = self.mathStringInput.toPlainText().strip()
+                                if not mathString:
+                                    QMessageBox.warning(self, "Invalid Input", "Please enter a non-empty mathematical string.")
+                                    return
+                                
+                                if key in self.database:
+                                    QMessageBox.warning(self, "Duplicate Key", "This integer is already mapped to a mathematical string.")
+                                    return
+                                
+                                self.database[key] = mathString
+                                QMessageBox.information(self, "Success", f"Mapping added: {key} -> {mathString}")
+                                
+                                self.integerInput.clear()
+                                self.mathStringInput.clear()
+                                
+                            def viewMappings(self):
+                                for i in reversed(range(self.scrollLayout.count())):
+                                    self.scrollLayout.itemAt(i).widget().deleteLater()
+                                
+                                if not self.database:
+                                    noMappingsLabel = QLabel("No mappings available.")
+                                    self.scrollLayout.addWidget(noMappingsLabel)
+                                else:
+                                    for key, value in sorted(self.database.items()):
+                                        mappingLabel = QLabel(f"{key}:\n{value}")
+                                        mappingLabel.setTextInteractionFlags(Qt.TextSelectableByMouse)
+                                        self.scrollLayout.addWidget(mappingLabel)
+                                
+                                self.scrollWidget.setLayout(self.scrollLayout)
+                                self.scrollArea.setWidget(self.scrollWidget)
+                            
+                            def saveSession(self):
+                                options = QFileDialog.Options()
+                                fileName, _ = QFileDialog.getSaveFileName(self, "Save Session", "", "Pickle Files (*.pkl);;All Files (*)", options=options)
+                                if fileName:
+                                    with open(fileName, 'wb') as file:
+                                        pickle.dump(self.database, file)
+                                    QMessageBox.information(self, "Success", "Session saved successfully.")
+                            
+                            def loadSession(self):
+                                options = QFileDialog.Options()
+                                fileName, _ = QFileDialog.getOpenFileName(self, "Load Session", "", "Pickle Files (*.pkl);;All Files (*)", options=options)
+                                if fileName:
+                                    with open(fileName, 'rb') as file:
+                                        self.database = pickle.load(file)
+                                    QMessageBox.information(self, "Success", "Session loaded successfully.")
+                                    self.viewMappings()
+
+                            def loadFromFile(self):
+                                options = QFileDialog.Options()
+                                fileName, _ = QFileDialog.getOpenFileName(self, "Load from File", "", "Text Files (*.txt);;All Files (*)", options=options)
+                                if fileName:
+                                    with open(fileName, 'r') as file:
+                                        lines = file.readlines()
+                                        for line in lines:
+                                            parts = line.strip().split(':')
+                                            if len(parts) == 2:
+                                                try:
+                                                    key = int(parts[0].strip())
+                                                    mathString = parts[1].strip()
+                                                    if key > 0 and mathString:
+                                                        if key not in self.database:
+                                                            self.database[key] = mathString
+                                                except ValueError:
+                                                    continue
+                                    QMessageBox.information(self, "Success", "Mappings loaded successfully from file.")
+                                    self.viewMappings()
+
+                            def integerSequenceMode(self):
+                                sequence, ok = QInputDialog.getText(self, "Integer Sequence Mode", "Enter a sequence of integers (separated by spaces):")
+                                if ok and sequence:
+                                    sequenceList = sequence.split()
+                                    result = ""
+                                    for num in sequenceList:
+                                        try:
+                                            key = int(num)
+                                            if key in self.database:
+                                                result += self.database[key] + " "
+                                            else:
+                                                result += f"[{key} not mapped]\n"
+                                        except ValueError:
+                                            result += f"[{num} is not a valid integer]\n"
+                                    self.showResultDialog(result)
+
+                            def showResultDialog(self, result):
+                                dialog = QDialog(self)
+                                dialog.setWindowTitle("Sequence Result")
+                                dialog.setGeometry(100, 100, 600, 400)
+
+                                layout = QVBoxLayout()
+
+                                resultDisplay = QTextEdit(dialog)
+                                resultDisplay.setPlainText(result)
+                                resultDisplay.setReadOnly(True)
+                                layout.addWidget(resultDisplay)
+
+                                buttonBox = QDialogButtonBox(QDialogButtonBox.Ok)
+                                buttonBox.accepted.connect(dialog.accept)
+                                layout.addWidget(buttonBox)
+
+                                dialog.setLayout(layout)
+                                dialog.exec_()
+
+                        #if __name__ == '__main__':
+                        app = QApplication(sys.argv)
+                        mainWin = MathStructureDatabaseApp()
+                        mainWin.show()
+                        sys.exit(app.exec_())
 
         
