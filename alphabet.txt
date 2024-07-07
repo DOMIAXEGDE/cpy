@@ -1,0 +1,256 @@
+equals
+not equal to
+approximately equal to
+less than
+less than or equal to
+greater than
+greater than or equal to
+square root
+infinity
+pi
+Euler's number
+factorial
+binomial coefficient
+real numbers
+rational numbers
+integers
+natural numbers
+complex numbers
+integers modulo n
+positive real numbers
+positive rational numbers
+positive integers
+nonzero real numbers
+nonzero rational numbers
+nonzero integers
+nonzero complex numbers
+alpha
+beta
+gamma
+delta
+epsilon
+zeta
+eta
+theta
+iota
+kappa
+lambda
+mu
+nu
+xi
+pi
+rho
+sigma
+tau
+upsilon
+phi
+chi
+psi
+omega
+set notation
+set builder notation
+open interval
+closed interval
+half-open interval left
+half-open interval right
+interval from negative infinity to a
+interval from negative infinity to a inclusive
+interval from a to infinity
+interval from a inclusive to infinity
+empty set
+a is in A
+a is not in A
+A is a subset of B
+A is a proper subset of B
+A equals B
+union of A and B
+intersection of A and B
+set difference A minus B
+absolute value of x
+arrow notation
+composition of g and f
+inverse of f
+inverse sine
+exponential function
+derivative of f at x
+second derivative of f at x
+magnitude of vector v
+zero
+imaginary unit vectors
+ordered pair
+ordered triple
+row interchange
+row scaling
+row replacement
+matrix elements
+augmented matrix
+augmented matrix with identity
+zero matrix
+identity matrix
+transpose of A
+inverse of A
+determinant of A
+element of A
+m by n matrix
+permutation matrix
+span of S
+image of t
+kernel of t
+spectrum of lambda
+symmetric group of degree 3
+symmetric group of degree 4
+group G with operation
+order of group G
+identity element
+inverse element
+negation of x
+isomorphic
+cyclic group of order n
+symmetric group of degree n
+alternating group of degree n
+dihedral group of order n
+quaternion group
+general linear group of degree 2
+special linear group of degree 2
+general linear group of degree n
+special linear group of degree n
+fractional part of x
+quotient group
+conjugate
+k modulo n
+image of phi
+kernel of phi
+orbit of x
+stabilizer of x
+fixed points of g
+maximum of E
+minimum of E
+supremum of E
+infimum of E
+limit as n approaches infinity of a sub n
+sequence s sub n
+sum from n1 to infinity of a sub n
+norm of c
+limit as x approaches c
+right-hand limit as x approaches c
+left-hand limit as x approaches c
+derivative of y with respect to x
+second derivative of y with respect to x
+nth derivative of f
+left-hand derivative of f at c
+right-hand derivative of f at c
+minimum of f on ab
+maximum of f on ab
+infimum of f on ab
+supremum of f on ab
+integral of f from a to b
+a
+b
+c
+d
+e
+f
+g
+h
+i
+j
+k
+l
+m
+n
+o
+p
+q
+r
+s
+t
+u
+v
+w
+x
+y
+z
+A
+B
+C
+D
+E
+F
+G
+H
+I
+J
+K
+L
+M
+N
+O
+P
+Q
+R
+S
+T
+U
+V
+W
+X
+Y
+Z
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+exclamation mark
+double quote
+hash
+dollar
+percent
+ampersand
+single quote
+left parenthesis
+right parenthesis
+asterisk
+plus
+comma
+hyphen
+period
+slash
+colon
+semicolon
+less than
+equals
+greater than
+question mark
+at
+left square bracket
+backslash
+right square bracket
+caret
+underscore
+backtick
+left curly brace
+vertical bar
+right curly brace
+tilde
+left arrow
+right arrow
+left-right arrow
+logical AND
+logical OR
+logical NOT
+tautology
+contradiction
+satisfies
+absolutely permanent
+identical to
+similar to
+perpendicular
+proportional to
+asymptotically equal to
+change
