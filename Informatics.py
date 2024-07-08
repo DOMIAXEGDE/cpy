@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import Canvas, Tk
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFont
 import time
 import sys
 import os
@@ -48,41 +48,61 @@ def load_mapping(filename):
         raise ValueError("Mapping file must contain exactly 256 lines.")
     return mapping
 
-def create_gif(sequence, img_width, img_height, block_size, gif_filename):
-    frames = []
+def create_gif(sequence, img_width, img_height, block_size, gif_filename, fps=24):
     cols, rows = img_width // block_size, img_height // block_size
     grid_size = cols * rows
+
+    # Colors for the active squares
+    colors = [(255, 215, 0), (128, 0, 128), (255, 0, 0), (0, 128, 0)]  # Gold, Purple, Red, Green
 
     # Initialize the grid with white squares
     grid = [(255, 255, 255)] * grid_size
 
-    # Create frames based on the sequence
-    for step, idx in enumerate(sequence):
-        # Ensure the index is within the bounds
-        if 0 <= idx < grid_size:
-            grid[idx] = (255, 215, 0)  # Gold color for active square
+    # Open a GIF writer
+    with imageio.get_writer(gif_filename, mode='I', duration=1/fps) as writer:
+        # Create frames based on the sequence
+        for frame_num in range(0, len(sequence), 100):
+            # Dictionary to count occurrences
+            occurrences = {}
+            
+            # Set colors for up to 500 active squares in this frame
+            for i in range(500):
+                if frame_num + i < len(sequence):
+                    idx = sequence[frame_num + i]
+                    if 0 <= idx < grid_size:
+                        occurrences[idx] = occurrences.get(idx, 0) + 1
+                        grid[idx] = colors[i % 4]  # Cycle through the 4 colors
 
-        # Create an image for the current frame
-        image = Image.new('RGB', (img_width, img_height), (255, 255, 255))
-        draw = ImageDraw.Draw(image)
+            # Create an image for the current frame
+            image = Image.new('RGB', (img_width, img_height), (255, 255, 255))
+            draw = ImageDraw.Draw(image)
 
-        for i in range(grid_size):
-            x = (i % cols) * block_size
-            y = (i // cols) * block_size
-            draw.rectangle([x, y, x + block_size, y + block_size], fill=grid[i], outline=(0, 0, 0))
+            # Load a font
+            font = ImageFont.load_default()
 
-        frames.append(image)
+            for j in range(grid_size):
+                x = (j % cols) * block_size
+                y = (j // cols) * block_size
+                draw.rectangle([x, y, x + block_size, y + block_size], fill=grid[j], outline=(0, 0, 0))
 
-        # Reset the square to white for the next frame
-        if 0 <= idx < grid_size:
-            grid[idx] = (255, 255, 255)
+                # Draw the occurrence count if it exists and is greater than 1
+                if j in occurrences and occurrences[j] > 1:
+                    count = str(occurrences[j])
+                    bbox = draw.textbbox((0, 0), count, font=font)
+                    text_width = bbox[2] - bbox[0]
+                    text_height = bbox[3] - bbox[1]
+                    text_x = x + (block_size - text_width) / 2
+                    text_y = y + (block_size - text_height) / 2
+                    draw.text((text_x, text_y), count, fill=(0, 0, 0), font=font)
 
-        # Ensure the GIF is not too long
-        if len(frames) >= 9000:
-            break
+            writer.append_data(imageio.core.util.asarray(image))
 
-    # Save frames as a gif
-    frames[0].save(gif_filename, save_all=True, append_images=frames[1:], duration=int(300000 / len(frames)), loop=0)
+            # Reset the squares to white for the next frame
+            for i in range(500):
+                if frame_num + i < len(sequence):
+                    idx = sequence[frame_num + i]
+                    if 0 <= idx < grid_size:
+                        grid[idx] = (255, 255, 255)
 
 def process_statement():
     statement_file = get_input("Input 'statement_id.txt': ")
