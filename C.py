@@ -60,6 +60,7 @@ from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout, QL
                              QMessageBox, QScrollArea, QVBoxLayout, QFormLayout, QFileDialog, QMenuBar, QInputDialog, QDialog, QDialogButtonBox)
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon, QFont
+from concurrent.futures import ThreadPoolExecutor
 os.environ['QT_API'] = 'pyqt5'
 templates = {
     "basic": ["id", "name", "value"],
@@ -5314,6 +5315,7 @@ while(True):
                     if(intys32 == 0):
                         break
                     if(intys32 == 1):
+
                         # Function to load custom charset from configuration file
                         def load_custom_charset(config_file):
                             custom_charset = []
@@ -5329,22 +5331,35 @@ while(True):
                             with open(config_file, 'w') as file:
                                 file.write(''.join(custom_charset))
 
+                        # Function to validate charset
+                        def validate_charset(charset):
+                            if len(charset) < 2:
+                                raise ValueError("Charset must contain at least two characters.")
+
                         # Function to generate combinations and write to individual files
-                        def generate_combinations(charset, n):
+                        def generate_combinations(charset, n, output_file, use_multithreading=False):
+                            validate_charset(charset)
                             k = len(charset) - 1
                             nbr_comb = int(math.pow(k + 1, n))
-                            id = 0
 
-                            for row in range(nbr_comb):
-                                id += 1
-                                filename = f"{n}.txt"
-                                with open(filename, 'a') as file:
-                                    file.write(f"{id}\t")
-                                    for col in range(n - 1, -1, -1):
-                                        rdiv = int(math.pow(k + 1, col))
-                                        cell = (row // rdiv) % (k + 1)
-                                        file.write(charset[cell])
-                                    file.write("\n")
+                            def write_combination(row):
+                                id = row + 1
+                                combination = f"{id}\t"
+                                for col in range(n - 1, -1, -1):
+                                    rdiv = int(math.pow(k + 1, col))
+                                    cell = (row // rdiv) % (k + 1)
+                                    combination += charset[cell]
+                                return combination + "\n"
+
+                            with open(output_file, 'w') as file:
+                                if use_multithreading:
+                                    with ThreadPoolExecutor() as executor:
+                                        combinations = executor.map(write_combination, range(nbr_comb))
+                                        for combination in combinations:
+                                            file.write(combination)
+                                else:
+                                    for row in range(nbr_comb):
+                                        file.write(write_combination(row))
 
                         # Function to calculate string ID
                         def calculate_string_id(input_string, charset):
@@ -5362,10 +5377,91 @@ while(True):
                             while id > 0:
                                 chars.append(charset[id % k])
                                 id //= k
-                            return ''.join(reversed(chars))
+                            return ''.join(reversed(chars)) if chars else charset[0]
+
+                        # Function to append content to a file
+                        def append_to_file(filename, content):
+                            with open(filename, 'a') as file:
+                                file.write(content + "\n")
+
+                        # Function to read content from a file
+                        def read_file(filename):
+                            if not os.path.exists(filename):
+                                print(f"File not found: {filename}")
+                                return ""
+                            with open(filename, 'r') as file:
+                                return file.read()
+
+                        # Function to list all files in the current directory
+                        def list_files():
+                            files = [f for f in os.listdir() if os.path.isfile(f)]
+                            if files:
+                                print("Available files:")
+                                for file in files:
+                                    print(file)
+                            else:
+                                print("No files found.")
+
+                        # Function to delete a file
+                        def delete_file(filename):
+                            if os.path.exists(filename):
+                                os.remove(filename)
+                                print(f"File '{filename}' deleted.")
+                            else:
+                                print(f"File '{filename}' not found.")
+
+                        # Function to rename a file
+                        def rename_file(old_name, new_name):
+                            if os.path.exists(old_name):
+                                os.rename(old_name, new_name)
+                                print(f"File '{old_name}' renamed to '{new_name}'.")
+                            else:
+                                print(f"File '{old_name}' not found.")
+
+                        # Function to encode a text file to unique IDs character-by-character
+                        def encode_file(input_file, output_file, charset):
+                            content = read_file(input_file)
+                            if not content:
+                                return
+                            with open(output_file, 'w') as file:
+                                for char in content:
+                                    id = calculate_string_id(char, charset)
+                                    file.write(f"{id} ")
+                                file.write("\n")
+                            print(f"Encoded content saved to {output_file}")
+
+                        # Function to decode a file of IDs back to text
+                        def decode_file(input_file, output_file, charset):
+                            content = read_file(input_file)
+                            if not content:
+                                return
+                            ids = content.split()
+                            with open(output_file, 'w') as file:
+                                for id_str in ids:
+                                    try:
+                                        id = int(id_str)
+                                        decoded_string = decode_id(id, charset)
+                                        file.write(decoded_string)
+                                    except ValueError:
+                                        print(f"Invalid ID '{id_str}' in {input_file}")
+                            print(f"Decoded content saved to {output_file}")
+
+                        # Function to display the menu
+                        def display_menu():
+                            print("\nSelect an option:")
+                            print("(1) Generate combinations")
+                            print("(2) Enter custom string and calculate ID")
+                            print("(3) Decode ID to string")
+                            print("(4) Read from a file")
+                            print("(5) Append to a file")
+                            print("(6) List files")
+                            print("(7) Delete a file")
+                            print("(8) Rename a file")
+                            print("(9) Encode a text file to unique IDs")
+                            print("(10) Decode a file of IDs back to text")
+                            print("(11) Exit")
 
                         def main():
-                            # Define the default character set
                             default_charset = [
                                 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 
                                 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
@@ -5378,57 +5474,105 @@ while(True):
                             charset = default_charset
                             config_file = "charset_config.txt"
 
-                            # Check if custom charset config file exists and load it
                             if os.path.exists(config_file):
                                 charset = load_custom_charset(config_file)
 
-                            # User input mode selection
-                            mode = int(input("Select mode: (1) Generate combinations, (2) Enter custom string, (3) Decode ID to string: "))
+                            while True:
+                                display_menu()
+                                try:
+                                    mode = int(input("Enter your choice: "))
+                                except ValueError:
+                                    print("Invalid input! Please enter a number between 1 and 11.")
+                                    continue
 
-                            if mode == 1:
-                                array_size = int(input("Enter the size of your array: "))
+                                if mode == 1:
+                                    array_size = int(input("Enter the size of your array: "))
 
-                                use_custom_array = int(input("Do you want to create a custom array? (1 for Yes, 0 for No): "))
+                                    use_custom_array = int(input("Do you want to create a custom array? (1 for Yes, 0 for No): "))
 
-                                if use_custom_array == 1:
-                                    charset = []
-                                    print(f"\nEnter the {array_size} characters of your array:")
-                                    for i in range(array_size):
-                                        c = input()
-                                        charset.append(c)
-                                    save_custom_charset(charset, config_file)
+                                    if use_custom_array == 1:
+                                        charset = []
+                                        print(f"\nEnter the {array_size} characters of your array:")
+                                        for i in range(array_size):
+                                            c = input()
+                                            charset.append(c)
+                                        save_custom_charset(charset, config_file)
 
-                                n = int(input("\nEnter the number of cells (n): "))
-                                print(f"\nNumber of FILE Cells = {n}")
+                                    n = int(input("\nEnter the number of cells (n): "))
+                                    output_file = f"{n}_combinations.txt"
+                                    use_multithreading = int(input("Use multithreading for faster generation? (1 for Yes, 0 for No): ")) == 1
+                                    generate_combinations(charset, n, output_file, use_multithreading)
+                                    print(f"Combinations saved to {output_file}")
 
-                                generate_combinations(charset, n)
-                            elif mode == 2:
-                                print("Enter your string (type 'EOF' on a new line to end input):")
-                                input_string = ""
-                                while True:
-                                    line = input()
-                                    if line == "EOF":
-                                        break
-                                    input_string += line + "\n"
+                                elif mode == 2:
+                                    print("Enter your string (type 'EOF' on a new line to end input):")
+                                    input_string = ""
+                                    while True:
+                                        line = input()
+                                        if line == "EOF":
+                                            break
+                                        input_string += line + "\n"
 
-                                if input_string.endswith("\n"):
-                                    input_string = input_string[:-1]
+                                    if input_string.endswith("\n"):
+                                        input_string = input_string[:-1]
 
-                                id = calculate_string_id(input_string, charset)
-                                string_length = len(input_string)
+                                    id = calculate_string_id(input_string, charset)
+                                    string_length = len(input_string)
 
-                                filename = f"{string_length}.txt"
-                                with open(filename, 'a') as file:
-                                    file.write(f"{id}\t{input_string}\n")
+                                    filename = f"{string_length}.txt"
+                                    append_to_file(filename, f"{id}\t{input_string}")
 
-                                print(f"String ID: {id}")
-                                print(f"String length: {string_length}")
-                            elif mode == 3:
-                                id_to_decode = int(input("Enter the ID to decode: "))
-                                decoded_string = decode_id(id_to_decode, charset)
-                                print(f"Decoded string: {decoded_string}")
-                            else:
-                                print("Invalid mode selected!")
+                                    print(f"String ID: {id}")
+                                    print(f"String length: {string_length}")
+
+                                elif mode == 3:
+                                    try:
+                                        id_to_decode = int(input("Enter the ID to decode: "))
+                                        decoded_string = decode_id(id_to_decode, charset)
+                                        print(f"Decoded string: {decoded_string}")
+                                    except ValueError:
+                                        print("Invalid input! Please enter a valid numerical ID.")
+
+                                elif mode == 4:
+                                    filename = input("Enter the filename to read: ")
+                                    content = read_file(filename)
+                                    if content:
+                                        print(f"Contents of {filename}:\n{content}")
+
+                                elif mode == 5:
+                                    filename = input("Enter the filename to append to: ")
+                                    content = input("Enter the content to append: ")
+                                    append_to_file(filename, content)
+                                    print(f"Content appended to {filename}")
+
+                                elif mode == 6:
+                                    list_files()
+
+                                elif mode == 7:
+                                    filename = input("Enter the filename to delete: ")
+                                    delete_file(filename)
+
+                                elif mode == 8:
+                                    old_name = input("Enter the current filename: ")
+                                    new_name = input("Enter the new filename: ")
+                                    rename_file(old_name, new_name)
+
+                                elif mode == 9:
+                                    input_file = input("Enter the name of the input file to encode: ")
+                                    output_file = input("Enter the name of the output file: ")
+                                    encode_file(input_file, output_file, charset)
+
+                                elif mode == 10:
+                                    input_file = input("Enter the name of the input file to decode: ")
+                                    output_file = input("Enter the name of the output file: ")
+                                    decode_file(input_file, output_file, charset)
+
+                                elif mode == 11:
+                                    print("Exiting the program.")
+                                    break
+
+                                else:
+                                    print("Invalid choice! Please select a valid option.")
 
                         #if __name__ == "__main__":
                         main()
