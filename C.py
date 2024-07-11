@@ -5314,10 +5314,6 @@ while(True):
                     if(intys32 == 0):
                         break
                     if(intys32 == 1):
-                        #import os
-                        #import math
-                        #import json
-
                         # Function to load custom charset from configuration file
                         def load_custom_charset(config_file):
                             custom_charset = []
@@ -5359,6 +5355,15 @@ while(True):
                                 id = id * k + char_map[c]
                             return id
 
+                        # Function to decode ID back to string
+                        def decode_id(id, charset):
+                            k = len(charset)
+                            chars = []
+                            while id > 0:
+                                chars.append(charset[id % k])
+                                id //= k
+                            return ''.join(reversed(chars))
+
                         def main():
                             # Define the default character set
                             default_charset = [
@@ -5370,8 +5375,6 @@ while(True):
                                 '$', '#', '%'
                             ]
 
-
-                            
                             charset = default_charset
                             config_file = "charset_config.txt"
 
@@ -5380,7 +5383,7 @@ while(True):
                                 charset = load_custom_charset(config_file)
 
                             # User input mode selection
-                            mode = int(input("Select mode: (1) Generate combinations, (2) Enter custom string: "))
+                            mode = int(input("Select mode: (1) Generate combinations, (2) Enter custom string, (3) Decode ID to string: "))
 
                             if mode == 1:
                                 array_size = int(input("Enter the size of your array: "))
@@ -5420,8 +5423,12 @@ while(True):
 
                                 print(f"String ID: {id}")
                                 print(f"String length: {string_length}")
+                            elif mode == 3:
+                                id_to_decode = int(input("Enter the ID to decode: "))
+                                decoded_string = decode_id(id_to_decode, charset)
+                                print(f"Decoded string: {decoded_string}")
                             else:
                                 print("Invalid mode selected!")
 
-                            #if __name__ == "__main__":
+                        #if __name__ == "__main__":
                         main()
