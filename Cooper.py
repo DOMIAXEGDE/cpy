@@ -5811,6 +5811,7 @@ while(True):
                             messagebox.showerror("Error", "Please set the network structure first.")
                             return
                         
+                        # Calculate which square was clicked
                         layer_size = self.network.layers[self.current_layer]
                         grid_size = math.isqrt(layer_size)
                         square_size = min(self.canvas.winfo_width(), self.canvas.winfo_height()) // grid_size
@@ -5818,9 +5819,15 @@ while(True):
                         row = event.y // square_size
                         index = row * grid_size + col + 1
                         
-                        filename = f"{index}.rb"
-                        if os.path.exists(filename):
-                            self.run_file(filename)
+                        # List of possible extensions to check
+                        extensions = ['rb', 'py', 'txt', 'cpp', 'c', 'js', 'php', 'html', 'css']
+                        
+                        # Iterate over each extension and check if the file exists
+                        for ext in extensions:
+                            filename = f"{index}.{ext}"
+                            if os.path.exists(filename):
+                                self.run_file(filename)
+                                break
                         else:
                             messagebox.showerror("File Not Found", f"No file found for index {index}.")
 
@@ -5848,7 +5855,14 @@ while(True):
                                 messagebox.showerror("Error", f"Failed to run {filename}: {e}")
                         
                         elif extension == 'txt':
-                            # Open in the default web browser
+                            # Open in the default web browser or text editor
+                            try:
+                                os.startfile(filename)
+                            except Exception as e:
+                                messagebox.showerror("Error", f"Failed to open {filename}: {e}")
+                        
+                        elif extension in ['html', 'css']:
+                            # Open HTML/CSS files in the default browser
                             try:
                                 os.startfile(filename)
                             except Exception as e:
