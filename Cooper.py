@@ -5820,7 +5820,7 @@ while(True):
                         index = row * grid_size + col + 1
                         
                         # List of possible extensions to check
-                        extensions = ['rb', 'py', 'txt', 'cpp', 'c', 'js', 'php', 'html', 'css']
+                        extensions = ['rb', 'py', 'txt', 'cpp', 'c', 'js', 'php', 'html', 'css', 'wav']
                         
                         # Iterate over each extension and check if the file exists
                         for ext in extensions:
@@ -5868,6 +5868,13 @@ while(True):
                             except Exception as e:
                                 messagebox.showerror("Error", f"Failed to open {filename}: {e}")
                         
+                        elif extension == 'wav':
+                            # Play the WAV file
+                            try:
+                                os.startfile(filename)
+                            except Exception as e:
+                                messagebox.showerror("Error", f"Failed to play {filename}: {e}")
+                                
                         else:
                             messagebox.showerror("Unsupported File Type", f"Cannot run files with extension {extension}")
 
