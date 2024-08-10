@@ -5701,7 +5701,7 @@ while(True):
                         self.next_layer_button = tk.Button(nav_frame, text="Next Layer", command=self.show_next_layer)
                         self.next_layer_button.pack(side="left", padx=5)
                         
-                        self.canvas = tk.Canvas(self.root, width=400, height=400, bg="white")
+                        self.canvas = tk.Canvas(self.root, width=700, height=700, bg="white")
                         self.canvas.pack(pady=10)
                         self.canvas.bind("<Button-1>", self.on_canvas_click)  # Bind click event
                     
@@ -5817,19 +5817,27 @@ while(True):
                         square_size = min(self.canvas.winfo_width(), self.canvas.winfo_height()) // grid_size
                         col = event.x // square_size
                         row = event.y // square_size
-                        index = row * grid_size + col + 1
+                        base_index = row * grid_size + col + 1
+                        
+                        # Adjust the index by considering previous layers' sizes
+                        # Here, we accumulate the total number of nodes in all previous layers
+                        previous_nodes_count = sum(self.network.layers[:self.current_layer])
+                        
+                        # Adjust the index for the current layer
+                        adjusted_index = previous_nodes_count + base_index
                         
                         # List of possible extensions to check
                         extensions = ['rb', 'py', 'txt', 'cpp', 'c', 'js', 'php', 'html', 'css', 'wav']
                         
-                        # Iterate over each extension and check if the file exists
+                        # Iterate over each extension and check if the file exists with the adjusted index
                         for ext in extensions:
-                            filename = f"{index}.{ext}"
+                            filename = f"{adjusted_index}.{ext}"
                             if os.path.exists(filename):
                                 self.run_file(filename)
                                 break
                         else:
-                            messagebox.showerror("File Not Found", f"No file found for index {index}.")
+                            messagebox.showerror("File Not Found", f"No file found for index {adjusted_index}.")
+
 
                     def run_file(self, filename):
                         extension = filename.split('.')[-1]
