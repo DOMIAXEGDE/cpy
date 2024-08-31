@@ -17,7 +17,7 @@
 #define BUTTON_SIZE 100
 #define MAX_SCRIPTS 25
 #define MAX_TEXT_LENGTH 512
-#define MAX_GRIDS 33
+#define MAX_GRIDS 200
 #define GAME_FILES_PATH "gameFiles/"
 
 // Function declarations
@@ -259,7 +259,7 @@ int main() {
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
 
     // Initialize window
-    InitWindow(800, 600, "Script Editor with Grid Navigation and Feedback Panel");
+    InitWindow(800, 600, "Script Editor - press h for Help Menu");
     MaximizeWindow();  // Maximize window on startup
     SetTargetFPS(60);
 
