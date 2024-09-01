@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prefix-Free Code System with Simple Grid Visualization</title>
+    
+    <!-- External CSS for Styling -->
+    <link rel="stylesheet" href="unscripted.css">
+
+    <!-- External JavaScript -->
+    <script src="unscripted.js" defer></script>
+
+    <!-- Content Security Policy with 'unsafe-eval' -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-eval'; object-src 'none'; style-src 'self'; base-uri 'self';">
+</head>
+<body>
+    <div class="container">
+        <h1>Prefix-Free Code System with Simple Grid Visualization</h1>
+        <form id="prefixForm">
+            <textarea id="inputCombination" placeholder="Enter letter combinations (one per line)" required></textarea>
+            <button type="submit">Add Combinations</button>
+        </form>
+
+        <div id="feedback"></div>
+        
+        <h2>Stored Combinations:</h2>
+        <div id="combinationContainer">
+            <ul id="combinationList"></ul>
+        </div>
+        
+        <h2>Trie Visualization:</h2>
+        <div id="trieVisualization" class="grid-container"></div>
+
+        <!-- Download Button -->
+        <button id="downloadTrieButton">Download Trie Data</button>
+    </div>
+</body>
+</html>

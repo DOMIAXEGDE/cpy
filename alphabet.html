@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tile Color Viewer</title>
+    <link rel="stylesheet" href="alphabet.css">
+</head>
+<body>
+    <h1>Tile Color Viewer</h1>
+    
+    <div id="controls">
+        <label for="tile-color">Tile Color (Hex): </label>
+        <input type="text" id="tile-color" value="#ff0000">
+        
+        <label for="tile-size">Tile Size (px): </label>
+        <input type="number" id="tile-size" value="100">
+        
+        <button id="update-grid">Update Grid</button>
+    </div>
+
+    <div id="grid-container"></div>
+	<br>
+	<div id="color-list-container">
+		<h2>Sequence List</h2>
+		<ul id="color-list"></ul>
+		<button id="download-colors">Download Tile ID</button>
+	</div>
+	<div id="compounded-id-input-container">
+		<h2>Generate Specific Grid by Compounded ID</h2>
+		<input type="text" id="compounded-id-input" placeholder="Enter Compounded Grid ID">
+		<button id="generate-grid-by-id">Generate Grid</button>
+	</div>
+
+
+    <script src="alphabet.js"></script>
+</body>
+</html>

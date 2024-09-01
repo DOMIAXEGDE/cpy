@@ -1,0 +1,162 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(120deg, #f6d365 0%, #fda085 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.container {
+    background: white;
+    padding: 30px 40px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    width: 800px;
+    max-height: 90vh;
+    overflow: hidden;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+h1 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+    color: #333;
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+input[type="text"], textarea {
+    width: 100%;
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.3s;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+input[type="text"]:focus, textarea:focus {
+    border-color: #007bff;
+}
+
+textarea {
+    height: 120px;
+    resize: none;  /* Disable resizing of the textarea */
+}
+
+button {
+    width: 100%;
+    padding: 15px 0;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: background-color 0.3s, transform 0.2s;
+    box-shadow: 0 4px 8px rgba(0, 123, 255, 0.2);
+}
+
+button:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 123, 255, 0.3);
+}
+
+button:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
+}
+
+#feedback {
+    margin: 15px 0;
+    padding: 10px;
+    border-radius: 8px;
+    background-color: #f8f9fa;
+    color: #333;
+    font-size: 1rem;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+#combinationContainer {
+    max-height: 150px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    padding: 10px;
+    width: 100%;
+    background: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+    white-space: pre;  /* Respect whitespace such as newlines, tabs, etc. */
+    text-align: left;
+}
+
+#combinationList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#combinationList li {
+    padding: 8px;
+    border-bottom: 1px solid #ddd;
+    color: #333;
+    font-size: 1rem;
+}
+
+#combinationList li:last-child {
+    border-bottom: none;
+}
+
+/* Grid-Based Visualization Styling */
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); /* Larger elements */
+    grid-gap: 15px;
+    justify-content: center;
+    max-height: 400px;
+    overflow: auto;
+    margin-top: 20px;
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.grid-item {
+    width: 100px;  /* Larger size */
+    height: 100px;  /* Larger size */
+    background-color: #fff;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 16px;  /* Larger font */
+    font-weight: bold;
+    color: #333;
+    transition: background-color 0.3s, transform 0.2s;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.grid-item:hover {
+    background-color: #007bff;
+    color: white;
+    transform: translateY(-4px);
+}
+
+.grid-item:active {
+    transform: translateY(1px);
+}

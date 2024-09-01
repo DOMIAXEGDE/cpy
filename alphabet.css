@@ -1,0 +1,162 @@
+/* General Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Body Styling */
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #f4f4f9;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+/* Header Styling */
+h1 {
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+    color: #4a4e69;
+}
+
+/* Controls Container */
+#controls, #compounded-id-input-container {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    align-items: center;
+}
+
+#controls label, #compounded-id-input-container label {
+    font-size: 1rem;
+    color: #4a4e69;
+}
+
+#controls input, #compounded-id-input-container input {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1rem;
+    color: #333;
+    background-color: #f9f9f9;
+}
+
+#controls button, #compounded-id-input-container button {
+    padding: 10px 20px;
+    font-size: 1rem;
+    color: #fff;
+    background-color: #4a4e69;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#controls button:hover, #compounded-id-input-container button:hover {
+    background-color: #6c757d;
+}
+
+/* Grid Container */
+#grid-container {
+    display: grid;
+    gap: 10px;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+/* Tile Styling */
+.tile {
+    background-color: var(--tile-color, #ff0000);
+    width: var(--tile-size, 100px);
+    height: var(--tile-size, 100px);
+    display: inline-block;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border-radius: 0px;
+}
+
+.tile:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* Color List and Grid ID Display */
+#color-list-container {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 600px;
+    margin-bottom: 20px;
+}
+
+#color-list-container h2 {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+    color: #4a4e69;
+}
+
+#color-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+#color-list li {
+    background: #f9f9f9;
+    padding: 10px;
+    margin-bottom: 5px;
+    border-radius: 4px;
+    font-size: 1rem;
+    color: #333;
+}
+
+#grid-id {
+    font-size: 1rem;
+    color: #4a4e69;
+    margin-top: 10px;
+}
+
+#download-colors {
+    margin-top: 10px;
+    padding: 10px 20px;
+    font-size: 1rem;
+    color: #fff;
+    background-color: #4a4e69;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#download-colors:hover {
+    background-color: #6c757d;
+}
+
+/* Responsive Styling */
+@media (max-width: 768px) {
+    #controls, #compounded-id-input-container {
+        flex-direction: column;
+    }
+
+    #controls input, #compounded-id-input-container input {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    #controls button, #compounded-id-input-container button {
+        width: 100%;
+    }
+}
