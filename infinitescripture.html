@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Genesis.cpp - Infinite Script Generator</title>
+    <link rel="stylesheet" href="infinitescripture.css">
+</head>
+<body>
+    <header>
+        <h1>Genesis.cpp - Infinite Script Generator</h1>
+    </header>
+
+    <section id="overview">
+        <h2>Overview</h2>
+        <p>
+            <strong>Genesis.cpp</strong> is a powerful C++ program designed to generate a vast number of files with various extensions based on combinations of characters from a specified character set. It automates the creation of source files, compile scripts, and executor scripts, facilitating extensive testing, simulation, or data generation tasks.
+        </p>
+    </section>
+
+    <section id="source-code">
+        <h2>Source Code</h2>
+        <pre><code>
+// genesis.cpp
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+// Function to generate the files with different extensions
+void generate_files(int n, int k, char a[]) {
+    // Calculate the number of combinations
+    unsigned long long nbr_comb = 1;
+    for (int i = 0; i < n; i++) {
+        nbr_comb *= (k + 1);
+    }
+    unsigned long long id = 0;
+
+    // Define the array of file extensions
+    const char *extensions[] = {
+        // Document Formats
+        ".txt", ".doc", ".docx", ".pdf", ".rtf", ".odt", ".tex", ".wpd", ".pages", ".numbers",
+        ".key", ".md", ".markdown", ".log", ".csv", ".tsv", ".xls", ".xlsx", ".ppt", ".pptx",
+        ".pps", ".ppsx", ".pub", ".mobi", ".epub",
+
+        // Image Formats
+        ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".tif", ".svg", ".webp", ".ico",
+        ".raw", ".psd", ".ai", ".eps", ".indd", ".heic", ".jfif", ".pjpeg", ".pjp", ".svgz",
+        ".apng",
+
+        // Audio Formats
+        ".mp3", ".wav", ".flac", ".aac", ".ogg", ".wma", ".m4a", ".aiff", ".alac", ".mid",
+        ".midi", ".opus", ".amr", ".pcm", ".caf", ".dsd", ".vqf",
+
+        // Video Formats
+        ".mp4", ".avi", ".mkv", ".mov", ".wmv", ".flv", ".webm", ".mpeg", ".mpg", ".m4v",
+        ".3gp", ".3g2", ".ts", ".mts", ".m2ts", ".rmvb", ".vob", ".divx", ".xvid", ".ogv",
+        ".swf", ".f4v", ".mxf", ".rm",
+
+        // Programming and Markup Languages
+        ".c", ".cpp", ".h", ".hpp", ".cs", ".java", ".py", ".js", ".ts", ".rb", ".go",
+        ".php", ".swift", ".kt", ".rs", ".scala", ".pl", ".sh", ".bat", ".ps1", ".lua",
+        ".sql", ".html", ".css", ".xml", ".json", ".yml", ".yaml", ".ini", ".cfg", ".make",
+        ".gradle", ".pom", ".dockerfile", ".tsx", ".jsx",
+
+        // Archives and Compressed Files
+        ".zip", ".rar", ".7z", ".tar", ".gz", ".bz2", ".xz", ".iso", ".dmg", ".deb",
+        ".rpm", ".pkg", ".cab", ".msi", ".arj", ".ace", ".lzh", ".alz", ".z", ".cpio",
+        ".tar.gz", ".tgz", ".tar.bz2", ".tbz2", ".tar.xz", ".txz",
+
+        // Executables and Scripts
+        ".exe", ".dll", ".so", ".dylib", ".app", ".msi", ".bat", ".cmd", ".sh", ".bash",
+        ".zsh", ".ksh", ".csh", ".fish", ".pyw", ".pl", ".pm", ".ps1", ".vbs", ".jar",
+        ".apk", ".appx", ".msix",
+
+        // Fonts
+        ".ttf", ".otf", ".woff", ".woff2", ".eot", ".fon", ".fnt", ".pfb", ".pfm", ".sfd",
+
+        // Database Files
+        ".sql", ".db", ".mdb", ".accdb", ".sqlite", ".dbf", ".tar", ".bak", ".dump",
+
+        // Miscellaneous
+        ".iso", ".img", ".bin", ".cue", ".nrg", ".vcd", ".mdf", ".vhd", ".vdi", ".qcow2",
+        ".bak", ".tmp", ".temp", ".lock", ".pid", ".swp", ".swo", ".swn", ".dmp",
+        ".sys", ".drv", ".icns", ".lnk", ".url", ".torrent", ".crdownload",
+
+        // 3D Models and CAD
+        ".obj", ".fbx", ".3ds", ".dae", ".blend", ".stl", ".iges", ".step", ".skp",
+        ".max", ".c4d", ".dwg", ".dxf",
+
+        // eBook Formats
+        ".epub", ".mobi", ".azw", ".azw3", ".kf8", ".ibooks",
+
+        // Web Files
+        ".html", ".htm", ".css", ".js", ".php", ".asp", ".aspx", ".jsp", ".twig",
+        ".erb", ".vue", ".jsx", ".tsx", ".less", ".scss", ".sass", ".json", ".xml",
+        ".rss", ".atom", ".md",
+
+        // Configuration Files
+        ".ini", ".cfg", ".conf", ".config", ".json", ".yaml", ".yml", ".toml",
+        ".env", ".properties", ".htaccess",
+
+        // LaTeX
+        ".tex", ".bib", ".cls", ".sty", ".dtx", ".ins",
+
+        // Virtualization
+        ".vmdk", ".vdi", ".vhd", ".vhdx", ".ova", ".ovf",
+
+        // Design and Multimedia
+        ".psd", ".ai", ".indd", ".eps", ".svg", ".sketch", ".fig", ".xd",
+
+        // Scientific Data
+        ".csv", ".tsv", ".xlsx", ".xls", ".ods", ".sav", ".rda", ".mat", ".h5",
+        ".hdf5", ".nc", ".json", ".xml",
+
+        // Other Common Extensions
+        ".bak", ".old", ".tmp", ".cache", ".dat", ".db", ".dump", ".log", ".cfg",
+        ".ini", ".db3", ".sqlite3", ".tsv", ".plist", ".jar", ".war", ".ear"	
+    };
+    int num_extensions = sizeof(extensions) / sizeof(extensions[0]);
+
+    for (unsigned long long row = 0; row < nbr_comb; row++) {
+        char filename[500];
+        // Select the file extension
+        const char *ext = extensions[row % num_extensions];
+        sprintf(filename, "production/fs%d_%llu%s", n, id, ext);
+        FILE *p = fopen(filename, "w");
+        id++;
+        // Generate the content of the file
+        unsigned long long temp_row = row;
+        for (int col = n - 1; col >= 0; col--) {
+            int cell = temp_row % (k + 1);
+            fprintf(p, "%c", a[cell]);
+            temp_row /= (k + 1);
+        }
+        fclose(p);
+    }
+}
+
+// Function to generate the compile script for Windows (only for .cpp files)
+void generate_compile_script(int n, int k) {
+    FILE *script = fopen("production/compile.bat", "w");
+    fprintf(script, "@echo off\n\n");
+    fprintf(script, "setlocal enabledelayedexpansion\n\n");
+    fprintf(script, "set DIRECTORY=.\n");
+    fprintf(script, "set EXE_DIR=executables\n\n");
+    fprintf(script, "if not exist %%EXE_DIR%% mkdir %%EXE_DIR%%\n\n");
+
+    // Calculate the number of combinations
+    unsigned long long nbr_comb = 1;
+    for (int i = 0; i < n; i++) {
+        nbr_comb *= (k + 1);
+    }
+
+    unsigned long long id = 0;
+    const char *extensions[] = {
+        // Same extensions array as before
+        ".txt", ".cpp", /* ... other extensions ... */ ".old"
+    };
+    int num_extensions = sizeof(extensions) / sizeof(extensions[0]);
+
+    for (unsigned long long row = 0; row < nbr_comb; row++) {
+        const char *ext = extensions[row % num_extensions];
+        if (strcmp(ext, ".cpp") == 0) {
+            fprintf(script, "g++ %%DIRECTORY%%\\fs%d_%llu.cpp -o %%EXE_DIR%%\\fs%d_%llu.exe\n", n, id, n, id);
+        }
+        id++;
+    }
+    fclose(script);
+}
+
+// Function to generate the executor script for Windows (only for .exe files)
+void generate_executor_script(int n, int k) {
+    FILE *executor = fopen("production/executor.bat", "w");
+    fprintf(executor, "@echo off\n\n");
+    fprintf(executor, "set EXE_DIR=executables\n\n");
+
+    // Calculate the number of combinations
+    unsigned long long nbr_comb = 1;
+    for (int i = 0; i < n; i++) {
+        nbr_comb *= (k + 1);
+    }
+
+    unsigned long long id = 0;
+    const char *extensions[] = {
+        // Same extensions array as before
+	    // Document Formats
+		".txt", ".doc", ".docx", ".pdf", ".rtf", ".odt", ".tex", ".wpd", ".pages", ".numbers",
+		".key", ".md", ".markdown", ".log", ".csv", ".tsv", ".xls", ".xlsx", ".ppt", ".pptx",
+		".pps", ".ppsx", ".pub", ".mobi", ".epub",
+
+		// Image Formats
+		".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".tif", ".svg", ".webp", ".ico",
+		".raw", ".psd", ".ai", ".eps", ".indd", ".heic", ".jfif", ".pjpeg", ".pjp", ".svgz",
+		".apng",
+
+		// Audio Formats
+		".mp3", ".wav", ".flac", ".aac", ".ogg", ".wma", ".m4a", ".aiff", ".alac", ".mid",
+		".midi", ".opus", ".amr", ".pcm", ".caf", ".dsd", ".vqf",
+
+		// Video Formats
+		".mp4", ".avi", ".mkv", ".mov", ".wmv", ".flv", ".webm", ".mpeg", ".mpg", ".m4v",
+		".3gp", ".3g2", ".ts", ".mts", ".m2ts", ".rmvb", ".vob", ".divx", ".xvid", ".ogv",
+		".swf", ".f4v", ".mxf", ".rm",
+
+		// Programming and Markup Languages
+		".c", ".cpp", ".h", ".hpp", ".cs", ".java", ".py", ".js", ".ts", ".rb", ".go",
+		".php", ".swift", ".kt", ".rs", ".scala", ".pl", ".sh", ".bat", ".ps1", ".lua",
+		".sql", ".html", ".css", ".xml", ".json", ".yml", ".yaml", ".ini", ".cfg", ".make",
+		".gradle", ".pom", ".dockerfile", ".tsx", ".jsx",
+
+		// Archives and Compressed Files
+		".zip", ".rar", ".7z", ".tar", ".gz", ".bz2", ".xz", ".iso", ".dmg", ".deb",
+		".rpm", ".pkg", ".cab", ".msi", ".arj", ".ace", ".lzh", ".alz", ".z", ".cpio",
+		".tar.gz", ".tgz", ".tar.bz2", ".tbz2", ".tar.xz", ".txz",
+
+		// Executables and Scripts
+		".exe", ".dll", ".so", ".dylib", ".app", ".msi", ".bat", ".cmd", ".sh", ".bash",
+		".zsh", ".ksh", ".csh", ".fish", ".pyw", ".pl", ".pm", ".ps1", ".vbs", ".jar",
+		".apk", ".appx", ".msix",
+
+		// Fonts
+		".ttf", ".otf", ".woff", ".woff2", ".eot", ".fon", ".fnt", ".pfb", ".pfm", ".sfd",
+
+		// Database Files
+		".sql", ".db", ".mdb", ".accdb", ".sqlite", ".dbf", ".tar", ".bak", ".dump",
+
+		// Miscellaneous
+		".iso", ".img", ".bin", ".cue", ".nrg", ".vcd", ".mdf", ".vhd", ".vdi", ".qcow2",
+		".bak", ".tmp", ".temp", ".lock", ".pid", ".swp", ".swo", ".swn", ".dmp",
+		".sys", ".drv", ".icns", ".lnk", ".url", ".torrent", ".crdownload",
+
+		// 3D Models and CAD
+		".obj", ".fbx", ".3ds", ".dae", ".blend", ".stl", ".iges", ".step", ".skp",
+		".max", ".c4d", ".dwg", ".dxf",
+
+		// eBook Formats
+		".epub", ".mobi", ".azw", ".azw3", ".kf8", ".ibooks",
+
+		// Web Files
+		".html", ".htm", ".css", ".js", ".php", ".asp", ".aspx", ".jsp", ".twig",
+		".erb", ".vue", ".jsx", ".tsx", ".less", ".scss", ".sass", ".json", ".xml",
+		".rss", ".atom", ".md",
+
+		// Configuration Files
+		".ini", ".cfg", ".conf", ".config", ".json", ".yaml", ".yml", ".toml",
+		".env", ".properties", ".htaccess",
+
+		// LaTeX
+		".tex", ".bib", ".cls", ".sty", ".dtx", ".ins",
+
+		// Virtualization
+		".vmdk", ".vdi", ".vhd", ".vhdx", ".ova", ".ovf",
+
+		// Design and Multimedia
+		".psd", ".ai", ".indd", ".eps", ".svg", ".sketch", ".fig", ".xd",
+
+		// Scientific Data
+		".csv", ".tsv", ".xlsx", ".xls", ".ods", ".sav", ".rda", ".mat", ".h5",
+		".hdf5", ".nc", ".json", ".xml",
+
+		// Other Common Extensions
+		".bak", ".old", ".tmp", ".cache", ".dat", ".db", ".dump", ".log", ".cfg",
+		".ini", ".db3", ".sqlite3", ".tsv", ".plist", ".jar", ".war", ".ear"	
+		/*
+        ".txt", ".cpp", ".py", ".java", ".html", ".css", ".js", ".c", ".h",
+        ".sh", ".bat", ".exe", ".dll", ".so", ".png", ".jpg", ".gif", ".bmp",
+        ".zip", ".rar", ".7z", ".tar", ".gz", ".mp3", ".wav", ".mp4", ".avi",
+        ".mkv", ".mov", ".flv", ".iso", ".bin", ".apk", ".deb", ".rpm", ".dmg",
+        ".pkg", ".log", ".conf", ".ini", ".json", ".xml", ".csv", ".tsv",
+        ".md", ".rtf", ".psd", ".ai", ".eps", ".svg", ".ttf", ".otf", ".woff",
+        ".woff2", ".eot", ".bak", ".tmp", ".old"
+		*/
+    };
+    int num_extensions = sizeof(extensions) / sizeof(extensions[0]);
+
+    for (unsigned long long row = 0; row < nbr_comb; row++) {
+        const char *ext = extensions[row % num_extensions];
+        if (strcmp(ext, ".cpp") == 0) {
+            fprintf(executor, "%%EXE_DIR%%\\fs%d_%llu.exe\n", n, id);
+        }
+        id++;
+    }
+    fclose(executor);
+}
+
+int main(int argc, char *argv[]) {
+    if (argc < 3) {
+        printf("Usage: %s <n value> <character set size (max 100)>\n", argv[0]);
+        return 1;
+    }
+
+    int n = atoi(argv[1]);
+    int char_set_size = atoi(argv[2]);
+    if (char_set_size > 100) {
+        printf("Character set size cannot exceed 100.\n");
+        return 1;
+    }
+    int k = char_set_size - 1;
+
+    // Define the character set dynamically based on the input size
+    char a[100];
+    // Example character set (you can customize this as needed)
+    char full_char_set[100] = {
+        'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
+        'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+        'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
+        'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+        '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ' ', '\n', '\t',
+        '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '_', '+',
+        '=', '{', '}', '[', ']', '|', '\\', ':', ';', '"', '\'', '<', '>',
+        ',', '.', '?', '/', '`', '~'
+    };
+    // Copy the required number of characters to 'a'
+    memcpy(a, full_char_set, char_set_size * sizeof(char));
+
+    // Create the production directories
+    system("mkdir production");
+    system("mkdir production\\executables");
+
+    // Generate the files and scripts
+    generate_files(n, k, a);
+    generate_compile_script(n, k);
+    generate_executor_script(n, k);
+
+    return 0;
+}
+        </code></pre>
+    </section>
+
+    <section id="instructions">
+        <h2>Instructions to Compile and Run</h2>
+        <h3>Prerequisites</h3>
+        <ul>
+            <li><strong>Compiler:</strong> Ensure you have a C++ compiler installed (e.g., <a href="https://gcc.gnu.org/">GCC</a>, <a href="https://visualstudio.microsoft.com/">Visual Studio</a>, or <a href="https://clang.llvm.org/">Clang</a>).</li>
+            <li><strong>Operating System:</strong> The provided scripts are tailored for Windows environments.</li>
+        </ul>
+
+        <h3>Steps to Compile</h3>
+        <ol>
+            <li>
+                <strong>Open Terminal or Command Prompt:</strong> Navigate to the project directory containing `genesis.cpp`.
+            </li>
+            <li>
+                <strong>Compile the Program:</strong> Use the following command based on your compiler:
+                <ul>
+                    <li><strong>GCC:</strong>
+                        <pre><code>g++ genesis.cpp -o genesis</code></pre>
+                    </li>
+                    <li><strong>Clang:</strong>
+                        <pre><code>clang++ genesis.cpp -o genesis</code></pre>
+                    </li>
+                    <li><strong>Visual Studio (Developer Command Prompt):</strong>
+                        <pre><code>cl /EHsc genesis.cpp /Fe:genesis.exe</code></pre>
+                    </li>
+                </ul>
+            </li>
+            <li>
+                <strong>Verify Compilation:</strong> Ensure that an executable named `genesis` or `genesis.exe` is created in the project directory.
+            </li>
+        </ol>
+
+        <h3>Steps to Run</h3>
+        <ol>
+            <li>
+                <strong>Prepare Character Set and Parameters:</strong>
+                <ul>
+                    <li><strong>n value:</strong> Determines the length of each generated file's content.</li>
+                    <li><strong>Character Set Size:</strong> Number of unique characters from the predefined set to use (maximum 100).</li>
+                </ul>
+            </li>
+            <li>
+                <strong>Execute the Program:</strong> Run the compiled executable with desired parameters. For example:
+                <pre><code>genesis 3 50</code></pre>
+                This command generates files with content length 3 using the first 50 characters from the character set.
+            </li>
+            <li>
+                <strong>Generated Files:</strong> The program creates a `production` directory containing:
+                <ul>
+                    <li>Generated files with various extensions.</li>
+                    <li>`executables` subdirectory for compiled `.exe` files.</li>
+                    <li>`compile.bat`: Batch script to compile `.cpp` files.</li>
+                    <li>`executor.bat`: Batch script to execute `.exe` files.</li>
+                </ul>
+            </li>
+            <li>
+                <strong>Compile Generated `.cpp` Files:</strong>
+                <ul>
+                    <li>Navigate to the `production` directory.</li>
+                    <li>Run the `compile.bat` script:
+                        <pre><code>compile.bat</code></pre>
+                    </li>
+                </ul>
+            </li>
+            <li>
+                <strong>Execute Compiled `.exe` Files:</strong>
+                <ul>
+                    <li>After compilation, run the `executor.bat` script to execute all generated executables:
+                        <pre><code>executor.bat</code></pre>
+                    </li>
+                </ul>
+            </li>
+        </ol>
+
+        <h3>Example Usage</h3>
+        <p>To generate all possible 2-character combinations using the first 10 characters of the character set:</p>
+        <pre><code>genesis 2 10</code></pre>
+        <p>This command will create 10<sup>2</sup> = 100 files with different extensions and a corresponding compile and executor scripts.</p>
+    </section>
+
+    <section id="use-cases">
+        <h2>Potential Scope and Use Cases</h2>
+        <p>The <strong>Genesis.cpp</strong> program is versatile and can be utilized in various domains. Below are some potential use cases:</p>
+
+        <h3>1. Automated Testing</h3>
+        <p>
+            Generate a large number of files with different extensions and contents to test file handling capabilities of applications, ensuring they can process diverse file types without errors.
+        </p>
+
+        <h3>2. Security and Penetration Testing</h3>
+        <p>
+            Create files with unconventional names and extensions to test the robustness of security systems, antivirus software, and intrusion detection systems against obscure or malicious file types.
+        </p>
+
+        <h3>3. Data Generation for Machine Learning</h3>
+        <p>
+            Produce synthetic datasets containing various file types and contents to train machine learning models for tasks like file type classification, malware detection, or content analysis.
+        </p>
+
+        <h3>4. Simulation and Stress Testing</h3>
+        <p>
+            Simulate environments with massive file counts to assess system performance, storage capabilities, and file management efficiency under heavy load.
+        </p>
+
+        <h3>5. Educational Purposes</h3>
+        <p>
+            Serve as a teaching tool to demonstrate file generation, scripting, and automation techniques in computer science courses or workshops.
+        </p>
+
+        <h3>6. Backup and Archiving Solutions</h3>
+        <p>
+            Test backup systems' ability to handle diverse and large-scale file types and volumes, ensuring reliable data preservation across various scenarios.
+        </p>
+
+        <h3>7. Creative Projects</h3>
+        <p>
+            Use the generated files in artistic or creative projects, such as generative art, where the diversity of file types and contents can inspire new forms of digital expression.
+        </p>
+
+        <h3>8. Software Development</h3>
+        <p>
+            Aid developers in creating mock data for applications that require handling multiple file formats, facilitating development and debugging processes.
+        </p>
+
+        <h3>9. File System Research</h3>
+        <p>
+            Conduct research on file system behaviors, performance metrics, and optimization strategies by observing how different file types and volumes interact with storage systems.
+        </p>
+
+        <h3>10. Automation and Scripting Practice</h3>
+        <p>
+            Provide a practical scenario for practicing batch scripting, automation, and file manipulation techniques in Windows environments.
+        </p>
+    </section>
+	<br><br><br><br><br>
+    <footer>
+        <p>&copy; 2024 InfiniteScripture. All rights reserved.</p>
+    </footer>
+</body>
+</html>
