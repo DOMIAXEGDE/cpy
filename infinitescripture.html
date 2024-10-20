@@ -114,34 +114,38 @@ void generate_files(int n, int k, char a[]) {
     
 	int num_extensions = sizeof(extensions) / sizeof(extensions[0]);
 
+	// Outer loop: Iterate over all content combinations
 	for (unsigned long long row = 0; row < nbr_comb; row++) {
-		// Iterate over each file extension type
+		// Inner loop: Iterate over each file extension type
 		for (int ext_idx = 0; ext_idx < num_extensions; ext_idx++) {
-			// Iterate over all configurations for this file extension
-			for (unsigned long long config = 0; config < nbr_comb; config++) { // This ensures multiple configurations
-				char filename[700];
-				const char *ext = extensions[ext_idx];
-				sprintf(filename, "production/fs%d_%llu_config%llu%s", n, id, config, ext);
-				
-				FILE *p = fopen(filename, "w");
-				if (p == NULL) {
-					fprintf(stderr, "Error creating file %s\n", filename);
-					exit(1);
-				}
-				
-				// Generate the content of the file for this configuration
-				unsigned long long temp_row = row;
-				for (int col = n - 1; col >= 0; col--) {
-					int cell = temp_row % (k + 1);
-					fprintf(p, "%c", a[cell]);
-					temp_row /= (k + 1);
-				}
-				fprintf(p, "\n"); // Optional: Add a newline for readability
-				fclose(p);
-				id++; // Increment the unique identifier after each file is created
+			char filename[700];
+			const char *ext = extensions[ext_idx];
+			
+			// Create a unique filename for each combination and extension
+			sprintf(filename, "production/fs%d_comb%llu%s", n, row, ext);  
+
+			FILE *p = fopen(filename, "w");
+			if (p == NULL) {
+				fprintf(stderr, "Error creating file %s\n", filename);
+				exit(1);
 			}
+
+			// Generate the content of the file based on the current combination (row)
+			unsigned long long temp_row = row;
+			for (int col = n - 1; col >= 0; col--) {
+				int cell = temp_row % (k + 1);  // Select a character from the set
+				fprintf(p, "%c", a[cell]);      // Write the character to the file
+				temp_row /= (k + 1);            // Update the combination index
+			}
+			fprintf(p, "\n"); // Optional: Add a newline for readability
+			fclose(p);
+
+			// Increment the unique identifier for each file (can remove id if not needed)
+			id++;
 		}
 	}
+
+
 }
 
 /*
@@ -233,6 +237,7 @@ int main(int argc, char *argv[]) {
 
     return 0;
 }
+
         </code></pre>
     </section>
 
