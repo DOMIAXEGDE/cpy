@@ -3742,15 +3742,15 @@ while(True):
                             if gate in ['x', 'y', 'z', 'h', 's', 'sdg', 't', 'tdg']:
                                 getattr(qc, gate)(qubit)
                                 gate_sequence += f"{gate}({qubit}) "
-                            elif gate == 'cx':
+                            elif gate == 'cx' and num_qubits > 1:
                                 getattr(qc, gate)(qubit, (qubit + 1) % num_qubits)
                                 gate_sequence += f"{gate}({qubit},{(qubit + 1) % num_qubits}) "
                             elif gate in ['rx', 'ry', 'rz']:
                                 getattr(qc, gate)(np.pi/2, qubit)
                                 gate_sequence += f"{gate}(pi/2,{qubit}) "
 
-                        file.write(f"Circuit {idx}: {gate_sequence.strip()}\n")
-                        print(f"Saved configuration for Circuit {idx}")
+                        file.write(f"Circuit {idx + 1}: {gate_sequence.strip()}\n")
+                        print(f"Saved configuration for Circuit {idx + 1}")
 
             elif mode == 2:
                 # Generate .png files from an existing .txt file
