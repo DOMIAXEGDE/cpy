@@ -3730,8 +3730,8 @@ while(True):
                 gates = ['x', 'y', 'z', 'h', 's', 'sdg', 't', 'tdg', 'rx', 'ry', 'rz', 'cx']
                 num_qubits = qbits  # Number of qubits in the circuit
                 num_cells = get_user_input("Enter the number of cells (gate layers) per circuit: ")
-
-                with open('source.txt', 'w') as file:
+                enterqfn = input("Enter directory (e.g qcircuits), note that the directory must already exist: ")
+                with open(enterqfn + "/source.txt", 'w') as file:
                     gate_combinations = product(gates, repeat=num_cells * num_qubits)
 
                     for idx, combo in enumerate(gate_combinations):
@@ -3754,29 +3754,30 @@ while(True):
 
             elif mode == 2:
                 # Generate .png files from an existing .txt file
-                filename = get_user_input("Enter the name of the source file (including .txt extension): ", str)
+                filename = get_user_input("Enter the name of the filepath (including .txt extension), the default config filename is source.txt: ", str)
                 qbits = get_user_input("Enter number of qubits per circuit configuration (Positive Integer): ")
                 num_qubits = qbits  # Use this for constructing QuantumCircuit instances
 
                 print("Enter the line numbers or ranges (e.g., 1-3, 5, 7-10) to generate .png files:")
                 line_numbers = input("Line numbers/ranges: ").split(',')  # Direct input call for complex string input
-
+                enterqfn = input("Enter directory (e.g qcircuits), note that the directory must already exist: ")
                 with open(filename, 'r') as file:
                     lines = file.readlines()
+                    print(f"Saving circuits in {enterqfn}")
                     for number in line_numbers:
                         if '-' in number:
                             start, end = map(int, number.split('-'))
                             for i in range(start, end + 1):
                                 qc = generate_circuit_from_line(lines[i - 1], num_qubits)
-                                circuit_drawer(qc, output='mpl', filename=f"circuit_{i - 1}.png")
+                                circuit_drawer(qc, output='mpl', filename=f"{enterqfn}/circuit_{i - 1}.png")
                                 plt.close()  # Close the figure after saving
-                                print(f"Saved circuit_{i - 1}.png")
+                                
                         else:
                             i = int(number)
                             qc = generate_circuit_from_line(lines[i - 1], num_qubits)
-                            circuit_drawer(qc, output='mpl', filename=f"circuit_{i - 1}.png")
+                            circuit_drawer(qc, output='mpl', filename=f"{enterqfn}/circuit_{i - 1}.png")
                             plt.close()  # Close the figure after saving
-                            print(f"Saved circuit_{i - 1}.png")
+                            #print(f"Saving files in {enterqfn}")
 
             elif mode == 3:
                 break
