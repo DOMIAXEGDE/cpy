@@ -1,11 +1,5 @@
 # cpy
-# A Python application for generating quantum circuits and performing arithmetic geometry using state shapes, and much more.
-# Amalec: A Comprehensive Multi-Tool Python Application
-
-## Overview
-Welcome to Amalec, a versatile Python application that integrates a variety of tools and features designed to assist with image generation, programming, cosmology, quantum computing, classical circuit design, language generation, and more. 
-
-Amalec is created to solve problems across different domains with a single, unified application. Developed by Mr. Dominic Alexander Cooper, Amalec aims to provide users with a robust set of tools for both professional and educational purposes.
+## A Computer Engineering System (Digital Workbench)
 
 ## Features
 Here are the features and functionalities offered by Amalec:
