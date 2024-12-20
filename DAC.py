@@ -1299,6 +1299,37 @@ def generate_cmp():
 
     # Note: For logging, you can add a line to write the executed or evaluated command to a log file.
     # Note: For user authentication, you can add a line to check user credentials before executing or evaluating a command.
+
+def generate_cmp_multi():
+    # Create the 'instructionSet.txt' file
+    name_m = input("Enter the name for your command matrix: ")
+    with open(name_m, 'w') as f:
+        # Lines 1 to 13107: Single-line definition with multi-line input
+        for i in range(13107):
+            f.write(f"string_var{i} = '\\n'.join(iter(lambda: input('Enter lines for string_var{i} (type END to finish): '), 'END'))\n")
+        
+        # Lines 13108 to 26214: var_given# = input('Enter the variable name to be used: ')
+        for i in range(13107):
+            f.write(f"var_given{i} = input('Enter the variable name to be used: ')\n")
+        
+        # Lines 26215 to 39321: var_glob# = globals()[var_given#]
+        for i in range(13107):
+            f.write(f"var_glob{i} = globals().get(var_given{i}, 'Variable not found')  # Error handling: 'Variable not found'\n")
+        
+        # Lines 39322 to 52428: exec(var_glob#)
+        for i in range(13107):
+            f.write(f"if isinstance(var_glob{i}, str): exec(var_glob{i})  # Error handling: Execute only if it's a string\n")
+        
+        # Lines 52429 to 65535: eval(var_glob#)
+        for i in range(13107):
+            f.write(f"if isinstance(var_glob{i}, str): result = eval(var_glob{i})  # Error handling: Evaluate only if it's a string\n")
+        
+        # Line 65536: Hyperlink
+        f.write("webbrowser.open('https://www.openai.com')")
+
+    # Note: For logging, you can add a line to write the executed or evaluated command to a log file.
+    # Note: For user authentication, you can add a line to check user credentials before executing or evaluating a command.
+
     
 def text_editor():
     print("Simple Text Editor")
@@ -1500,483 +1531,53 @@ def compile_image_file():
     #master.mainloop()
 
 def programming_engine():
-    ####import pywebbrowser
-    #create a custom event type
-    MY_CUSTOM_EVENT = pygame.USEREVENT + 1
+    def load_commands(file_name):
+        with open(file_name, 'r') as file:
+            return [command.strip() for command in file.readlines()]
 
-    # Initialize pygame
-    pygame.init()
+    def execute_command(commands, cma):
+        try:
+            if 0 <= cma < len(commands):
+                exec(commands[cma], globals())
+            else:
+                print("Invalid command ID.")
+        except Exception as e:
+            print(f"Command Execution Failed: {e}")
 
-    # Initialize joystick module
-    pygame.joystick.init()
+    command_matrix_file = "Command_Template.txt"
+    commands = load_commands(command_matrix_file)
 
-    # Check if any joysticks are connected
-    if pygame.joystick.get_count() > 0:
-        # Get the first joystick
-        joystick = pygame.joystick.Joystick(0)
-        # Initialize the joystick
-        joystick.init()
+    print("\nConsole Menu:")
+    print("1. Execute a Command")
+    print("2. Switch Command Matrix File")
+    print("3. Exit")
 
-    # Set screen size
-    #enter = int(input("Enter the dimension --> options 422, and multiples of 422"))
-    enter = 422
-    screen_width = enter
-    screen_height = enter
-
-
-    bls = 52
-    screen = pygame.display.set_mode((screen_width, screen_height))
-    #screen = pygame.display.set_mode((screen_width, screen_height), pygame.RESIZABLE)
-    ##################
-
-    #Create Commands
-    bus_ = 255
-    amount_ = (bus_ + 1) * (bus_ + 1)
-    line_number_ = 0
-                
-    create_f = open("Command_Template.txt", "w")
-    while(line_number_ < amount_):
-        #i = log10(line_number)
-        create_f.write("print(\"[Empty Command Slot] (Change using a text-editor to Update this slot in Command_Template.txt\") #remembering to rename Command_Template.txt\n")
-        line_number_ = line_number_ + 1
-
-    create_f.close()
-
-    #LoadCommands
-    xin = 0
-    filnam = "Command_Template.txt"
-    with open(filnam, 'r') as file:
-        commands = file.readlines()
-        xin = xin + 1
-
-
-    star = [0]
-
-    for i, command in enumerate(commands):
-        commands[i] = command.strip()
-        #cmd = command.split(",")
-        star.append(command)
-    del star[0]
-
-    ###################
-
-    ##################
-
-    #LoadCoordinates
-    xin2 = 0
-    with open('Coordinates_Python.txt', 'r') as file2:
-        commands2 = file2.readlines()
-        xin2 = xin2 + 1
-
-
-    starsx = [0]
-    starsy = [0]
-
-    for i2, command2 in enumerate(commands2):
-        commands2[i2] = command2.strip()
-        cmd2 = command2.split(",")
-        starsx.append(int(cmd2[1]))
-        varys = int(cmd2[2].strip())
-        starsy.append(varys)
-        
-    del starsx[0]
-    del starsy[0]
-
-    """
-    for i3, commandy in starsy:
-        new = starsy[i3].strip()
-        starsy[i3] = int(new)
-    """
-
-    print(starsx)
-    print(starsy)
-    ###################
-
-
-    # Load images
-    block_images = []
-    for i in range(256):
-        block_images.append(pygame.image.load(f"block{i+1}.png"))
-
-
-    # Maze layout
-    maze_layout = [
-        [0, 1, 2, 3],
-        [4, 5, 6, 7],
-        [8, 9, 10, 11],
-        [12, 13, 14, 15]
-    ]
-
-
-    #Function to check if a position is inside the maze
-    def is_inside_maze(x, y, maze_width, maze_height, bls):
-        return 0 <= x < maze_width * bls and 0 <= y < maze_height * bls
-
-    # Load player images
-    player_image = pygame.image.load("player.png")
-    player_image2 = pygame.image.load("player2.png")
-
-    #scaled_block_images = [pygame.transform.scale(img, (int(img.get_width() * scale_factor), int(img.get_height() * scale_factor))) for img in block_images]
-    #scaled_player_image = pygame.transform.scale(player_image, (int(player_image.get_width() * scale_factor), int(player_image.get_height() * scale_factor)))
-
-
-    # Set player position
-    player_x = 0
-    player_y = 0
-    con_program = int(input("Continue? 1 [yes], 0 [no]: "))
-    if(con_program == 1):
-        print("Ok ...")
-    if(con_program == 0):
-        print("Exiting ...")
-        exit()
-    if(con_program != 0 and con_program != 1):
-        print("Error")
-        exit()
-    # Set initial input type
-    typei = "k"
-    print("\n\nIn Local Command Mode\n\n")
-    print("Switch Command Matrix [s],\n mouse [m],\nkeyboard arrows [k],\nD-Pad (Xbox One Controller) [d]\nPress [SPACEBAR] to call a command from Commands_Template.txt (Commands can be changed using a text-editor)  ... ")
-    print("For mode 'd' A (sub-matrix start region) Then A (sub-matrix end region). Press start for help (Secure Internet Access Required).")
-    # some input variable
-    input_variable = 0
-    # add the custom event to the event queue
-    pygame.event.post(pygame.event.Event(MY_CUSTOM_EVENT, {"input_variable": input_variable}))
-    #etch loop
-    etch = 0
-
-    #maze width
-    maze_width = 16
-    maze_height = 16
-    # Main game loop
     running = True
-    #new screen size settings
-    ##screen_width, screen_height = pygame.display.get_surface().get_size()
-    scale_factor_x = screen_width / maze_width
-    #scale_factor_y = screen_height / maze_height
-    #scale_factor = min(scale_factor_x, scale_factor_y)
-    scale_factor = scale_factor_x
-
-    bls = int(bls * 0.5)
-
-    scaled_block_images = []
-
-    # Before the main loop
-    is_selecting_submatrix = False
-    submatrix_start_pos = None
-    selected_command = None
-    execute_command_prompt = False
-
-    for ni in range(256):
-        s_i = pygame.transform.scale(block_images[ni], (bls, bls))
-        block_images[ni] = s_i
-
-
 
     while running:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-    ############
-            elif event.type == pygame.KEYDOWN:
-                # Check for key press event
-                if event.key == pygame.K_m and typei != "m":
-                    # Update input type
-                    typei = "m"
-                elif event.key == pygame.K_k and typei != "k":
-                    # Update input type
-                    typei = "k"
-                elif event.key == pygame.K_s and typei != "s":
-                    # Update input type
-                    typei = "s"
-                elif event.key == pygame.K_d and typei != "d":
-                    # Update input type
-                    typei = "d"
-                elif event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_SPACE:
-                        #update input_type
-                        typei = "n"
-                        #check for status
-                        enter_cma = int(input("Enter command? 1[yes], 0 [no]: "))
-                        """
-                        # user input variable
-                        if(enter_cma == 0):
-                            typei = "k"
-                            player_x = 0
-                            player_y = 0
-                            etch = 1
-                        """
-                        if(enter_cma == 0):
-                            typei = "k"
-                            player_x = 0
-                            player_y = 0
-                        if(enter_cma == 1):
-                            input_variable = int(input("Enter command number ID (0 to 65535): "))
-                        # add the custom event to the event queue
-                        pygame.event.post(pygame.event.Event(MY_CUSTOM_EVENT, {"input_variable": input_variable}))
-                        #pygame.event.post(pygame.event.Event(MY_CUSTOM_EVENT, {"input_variable": cma}))
-                '''
-                elif event.type == pygame.MOUSEBUTTONUP:
-                    # Get mouse position
-                    mouse_x, mouse_y = pygame.mouse.get_pos()
+        choice = input("Enter your choice: ")
 
-                    # Check if the clicked position is inside the maze
-                    if is_inside_maze(mouse_x, mouse_y, len(maze_layout[0]), len(maze_layout), bls):
-                        # Calculate the clicked cell
-                        cell_x = mouse_x // bls
-                        cell_y = mouse_y // bls
-
-                        # Execute the desired action (e.g., print a message with the image ID)
-                        print(f"Hello, world! Image ID: {maze_layout[cell_y][cell_x]}")
-                '''
-         
-            # check for custom event type
-            for event in pygame.event.get(MY_CUSTOM_EVENT):
-                # access the input variable from the event object
-                cma = event.input_variable
-                # do something with the input variable
-                #pass...
-                if(typei == 'n'):
-                    
-                    #enter_cma = int(input("Enter command? 1[yes], 0 [no]: "))
-                    if(enter_cma == 1 and enter_cma != 0):
-                        player_x = 0
-                        player_y = 0
-                        
-                        # Clear screen
-                        screen.fill((255, 255, 255))
-                        # Update display
-                        #pygame.display.update()
-                        
-                        #cma = int(input("Enter command number ID (0 to 65535): "))
-                        try:
-                            exec(star[cma], globals())
-                        except:
-                            print("Try again, there was an error")
-                        #update command index pointer
-                        bus = 255 + 1
-                        if(cma <= 255):
-                            cmd_index = 0
-                            command_point = cma
-                        elif(cma > 255):
-                            cmd_index = cma//bus
-                            command_point = cma
-                            for tip in range(0, cmd_index):
-                                command_point = command_point - (bus)
-                        #print(command_point)
-
-                        prompt = "Executing Command " + str(cma) + " from index: " + str(cmd_index)
-                        print(prompt)
-                        #print(starsx)
-                        
-                        player_x = starsy[cmd_index]
-                        player_y = starsx[cmd_index]
-                        command_point_x = starsy[command_point]
-                        command_point_y = starsx[command_point]
-                        
-       
-
-                        # Render player image at new position --> screen.blit(player_image, (player_x, player_y))
-
-                        ####################
-
-         
-
-                        # Draw blocks
-                        for y in range(int(screen_height/bls)):
-                            for x in range(int(screen_width /bls)):
-                                relative_x = x - player_x
-                                relative_y = y - player_y
-                                screen.blit(block_images[relative_x + relative_y * int(screen_width/bls)], (x * bls, y * bls))
-                                #screen.blit(scaled_block_images[relative_x + relative_y * int(screen_width // (bls * scale_factor))], (x * bls * scale_factor, y * bls * scale_factor))
-
-                        if(typei == 'n'):
-                            #Draw2 player
-                            screen.blit(player_image2, (player_x * bls, player_y * bls))
-                            #Draw Command pointer
-                            screen.blit(player_image, (command_point_x * bls, command_point_y * bls))
-                            #screen.blit(scaled_player_image, (player_x * bls * scale_factor, player_y * bls * scale_factor))
-
-                        # Update display
-                        pygame.display.update()
-                        
-                        #cma = int(input("Enter command number ID (0 to 65535): "))
-                        
-                        ####################
-            '''                
-            if(typei == 'd'):
-                # Check for Xbox controller input
-                if pygame.joystick.get_count() > 0:
-                    joystick = pygame.joystick.Joystick(0)
-                    joystick.init()
-                    # Check for D-Pad input
-                    dpad = joystick.get_hat(0)
-                    if dpad == (1, 0):
-                        player_x += 1
-                    elif dpad == (-1, 0):
-                        player_x -= 1
-                    elif dpad == (0, 1):
-                        player_y -= 1
-                    elif dpad == (0, -1):
-                        player_y += 1
-                    if player_x < 0:
-                        player_x = 0
-                    if player_x >= int(screen_width / bls):
-                        player_x = int(screen_width / bls) - 1
-                    if player_y < 0:
-                        player_y = 0
-                    if player_y >= int(screen_height / bls):
-                        player_y = int(screen_height / bls) - 1
-            '''
-            # Assuming your commands are laid out in a grid with a known width (e.g., 16 for a 16x16 grid)
-            comp = 16  # Adjust this based on your actual layout
-            copmy = 256
-            # Inside the main loop, in the 'if(typei == 'd'):' block
-            if(typei == 'd'):
-                # Check for Xbox controller input
-                if pygame.joystick.get_count() > 0:
-                    joystick = pygame.joystick.Joystick(0)
-                    joystick.init()
-                    # Check for D-Pad input
-                    dpad = joystick.get_hat(0)
-                    if dpad == (1, 0):
-                        player_x += 1
-                    elif dpad == (-1, 0):
-                        player_x -= 1
-                    elif dpad == (0, 1):
-                        player_y -= 1
-                    elif dpad == (0, -1):
-                        player_y += 1
-                    if player_x < 0:
-                        player_x = 0
-                    if player_x >= int(screen_width / bls):
-                        player_x = int(screen_width / bls) - 1
-                    if player_y < 0:
-                        player_y = 0
-                    if player_y >= int(screen_height / bls):
-                        player_y = int(screen_height / bls) - 1
-
-                    # Handling button presses for A, X, B, Y
-                    buttons = joystick.get_numbuttons()
-                    for i in range(buttons):
-                        if joystick.get_button(i):
-                            if i == 0:  # A button
-                                if not is_selecting_submatrix:
-                                    is_selecting_submatrix = True
-                                    submatrix_start_pos = (player_x, player_y)
-                                    print("Sub-matrix selection started at position:", submatrix_start_pos)
-                                else:
-                                    is_selecting_submatrix = False
-                                    print("Sub-matrix selected:", submatrix_start_pos, "to", (player_x, player_y))
-                                    
-                            # Assuming index 7 represents the Start button; adjust if necessary
-                            elif i == 7:  # Start button
-                                print("Start button pressed. Executing command 65535 to access documentation (Secure Internet Access Required).")
-                                # Assuming command 65535 takes the user to the documentation
-                                exec(star[65535])
-                                # Optionally, set a flag or take additional action as needed
+        if choice == "1":
+            try:
+                cma = int(input("Enter command number ID (0 to 65535): "))
+                execute_command(commands, cma)
+            except ValueError:
+                print("Invalid input. Please enter a number.")
+        elif choice == "2":
+            command_matrix_file = input("Enter new command matrix file name: ")
+            try:
+                commands = load_commands(command_matrix_file)
+                print(f"Switched to command matrix: {command_matrix_file}")
+            except FileNotFoundError:
+                print(f"File not found: {command_matrix_file}")
+        elif choice == "3":
+            running = False
+        else:
+            print("Invalid choice. Please try again.")
 
 
 
-            if(typei == 's'):
-                
-                ##################
 
-                #LoadCommands
-                xin = 0
-                filnam = input("Enter name of Command Matrix file, 'filename.txt': ")
-                quet = int(input("Enter 1 if file already exists [Read mode], Else Enter 2 [Write mode], choose carefully: "))
-                
-                bus = 255
-                amount = (bus + 1) * (bus + 1)
-                line_number = 0
-                #ai = log10(amount)
-                if(quet == 2):
-                    create_f = open(filnam, "w")
-                    while(line_number < amount):
-                        #i = log10(line_number)
-                        create_f.write("print(\"[Empty Command Slot] Change using a text-editor to Update this slot in Command_Template.txt after renaming it accordingly.\")\n")
-                        line_number = line_number + 1
-
-                    create_f.close()
-                
-                with open(filnam, 'r') as file:
-                    commands = file.readlines()
-                    xin = xin + 1
-
-                star = [0]
-
-                for i, command in enumerate(commands):
-                    commands[i] = command.strip()
-                    #cmd = command.split(",")
-                    star.append(command)
-                del star[0]
-                
-                #reset state of matrix
-                typei = "k"
-                player_x = 0
-                player_y = 0
-            
-            if(typei == 'k'):
-                # Get user keyboard input
-                keys = pygame.key.get_pressed()
-
-                # Update move flag based on keyboard input
-                if keys[pygame.K_LEFT] or keys[pygame.K_RIGHT] or keys[pygame.K_UP] or keys[pygame.K_DOWN]:
-                    move = True
-                else:
-                    move = False
-
-                # Update player position based on keyboard input
-                if(move):
-                    if keys[pygame.K_LEFT]:
-                        player_x -= 1
-                    if keys[pygame.K_RIGHT]:
-                        player_x += 1
-                    if keys[pygame.K_UP]:
-                        player_y -= 1
-                    if keys[pygame.K_DOWN]:
-                        player_y += 1
-                    if player_x < 0:
-                        player_x = 0
-                    if player_x >= int(screen_width / bls):
-                        player_x = int(screen_width / bls) - 1
-                    if player_y < 0:
-                        player_y = 0
-                    if player_y >= int(screen_height / bls):
-                        player_y = int(screen_height / bls) - 1
-                    
-            if(typei == 'm'):
-                # Get mouse position
-                mouse_x, mouse_y = pygame.mouse.get_pos()
-
-                # Update player position based on mouse position
-                player_x = mouse_x // bls
-                player_y = mouse_y // bls
-
-        
-        # Clear screen
-        screen.fill((255, 255, 255))
-
-        
-        
-        # Draw blocks
-        if(typei == 'k' or typei == 'm' or typei == 'd'):
-            for y in range(int(screen_height/bls)):
-                for x in range(int(screen_width/bls)):
-                    relative_x = x - player_x
-                    relative_y = y - player_y
-                    screen.blit(block_images[relative_x + relative_y * int(screen_width // (bls))], (x * bls, y * bls))
-            if(typei == 'k' or typei == 'm' or typei == 'd'):
-                screen.blit(player_image, (player_x * bls, player_y * bls))
-
-
-        if(typei == 'k' or typei == 'm' or typei == 'd'):
-            # Update display
-            pygame.display.update()
-        
-
-    # Quit pygame
-    pygame.quit()
 
 def help_print():
     print("\nWelcome to Amalec, here are your options ...\n\n")
@@ -2012,7 +1613,7 @@ def help_print():
     print("Enter 30: Multi-Language Character Mapper")
     print("Enter 31: Database - Structures of Mathematics")
     print("Enter 32: Genesis - Large Language Model")
-    print("Enter 33: NeuroShell - Similar to mode 2, but with more capabilities")
+    print("Enter 33: Generate Command Matrix Plugin for 2 with multi-line support")
         
 while(True):
     
@@ -5509,26 +5110,38 @@ while(True):
                         print(f"Error: {e}")
 
                 elif mode == 2:
-                    print("Enter your string (type 'EOF' on a new line to end input):")
-                    input_string = ""
                     while True:
-                        line = input()
-                        if line == "EOF":
+                        print("Enter your string (type 'EOF' on a new line to end input, or '-1' to back out):")
+                        input_string = ""
+                        
+                        while True:
+                            line = input()
+                            if line == "EOF":
+                                break
+                            elif line == "-1":
+                                print("Backing out of command.")
+                                return  # Or `break` to return to mode selection, depending on program flow.
+                            input_string += line + "\n"
+
+                        if input_string.endswith("\n"):
+                            input_string = input_string[:-1]
+
+                        try:
+                            id = calculate_string_id(input_string, charset)
+                            string_length = len(input_string)
+                            filename = f"{string_length}.txt"
+                            append_to_file(filename, f"{id}\t{input_string}")
+                            print(f"String ID: {id}")
+                            print(f"String length: {string_length}")
                             break
-                        input_string += line + "\n"
+                        except ValueError as e:
+                            print(f"Error: {e}")
+                            print("Would you like to try again? (yes/no)")
+                            retry = input().strip().lower()
+                            if retry != "yes":
+                                print("Exiting command execution.")
+                                break
 
-                    if input_string.endswith("\n"):
-                        input_string = input_string[:-1]
-
-                    try:
-                        id = calculate_string_id(input_string, charset)
-                        string_length = len(input_string)
-                        filename = f"{string_length}.txt"
-                        append_to_file(filename, f"{id}\t{input_string}")
-                        print(f"String ID: {id}")
-                        print(f"String length: {string_length}")
-                    except ValueError as e:
-                        print(f"Error: {e}")
 
                 elif mode == 3:
                     try:
@@ -5595,325 +5208,4 @@ while(True):
             if(intys33 == 0):
                 break
             if(intys33 == 1):
-                class NeuralNetwork:
-                    def __init__(self, layers):
-                        self.layers = layers
-                        self.weights = [self.initialize_weights(layers[i], layers[i+1]) for i in range(len(layers)-1)]
-                        self.biases = [self.initialize_biases(layers[i+1]) for i in range(len(layers)-1)]
-                        self.outputs = None
-                    
-                    def initialize_weights(self, input_size, output_size):
-                        return [[1 for _ in range(output_size)] for _ in range(input_size)]
-                    
-                    def initialize_biases(self, output_size):
-                        return [1 for _ in range(output_size)]
-                    
-                    def forward_propagation(self, inputs):
-                        for layer_idx, (weights, biases) in enumerate(zip(self.weights, self.biases)):
-                            outputs = []
-                            for node_idx in range(len(biases)):
-                                output = sum(weights[i][node_idx] * inputs[i] for i in range(len(inputs))) + biases[node_idx]
-                                outputs.append(max(0, output))  # ReLU activation function
-                            inputs = outputs  # Output of this layer becomes the input for the next
-                        self.outputs = inputs
-                        return self.outputs
-                    
-                    def backpropagation(self, target):
-                        for layer_idx in range(len(self.weights)):
-                            self.weights[layer_idx] = [[w + 1 for w in weights] for weights in self.weights[layer_idx]]
-                            self.biases[layer_idx] = [b + 1 for b in self.biases[layer_idx]]
-                    
-                    def reset_network(self):
-                        self.weights = [self.initialize_weights(self.layers[i], self.layers[i+1]) for i in range(len(self.layers)-1)]
-                        self.biases = [self.initialize_biases(self.layers[i+1]) for i in range(len(self.layers)-1)]
-                        self.outputs = None
-                    
-                    def save_session(self, filename):
-                        with open(filename, 'wb') as f:
-                            pickle.dump(self, f)
-
-                    @staticmethod
-                    def load_session(filename):
-                        with open(filename, 'rb') as f:
-                            return pickle.load(f)
-
-                class TrainingApp:
-                    def __init__(self, root):
-                        self.root = root
-                        self.root.title("Neural Network Training")
-                        self.network = None
-                        self.current_layer = 0
-                        self.create_widgets()
-                    
-                    def create_widgets(self):
-                        menubar = tk.Menu(self.root)
-                        self.root.config(menu=menubar)
-                        
-                        file_menu = tk.Menu(menubar, tearoff=0)
-                        menubar.add_cascade(label="File", menu=file_menu)
-                        file_menu.add_command(label="Load Session", command=self.load_session)
-                        file_menu.add_command(label="Save Session", command=self.save_session)
-                        file_menu.add_separator()
-                        file_menu.add_command(label="Exit", command=self.root.quit)
-                        
-                        training_menu = tk.Menu(menubar, tearoff=0)
-                        menubar.add_cascade(label="Training", menu=training_menu)
-                        training_menu.add_command(label="Set Network Structure", command=self.set_network_structure)
-                        training_menu.add_command(label="Forward Propagation", command=self.forward_propagation)
-                        training_menu.add_command(label="Backpropagation", command=self.backpropagation)
-                        training_menu.add_command(label="Reset", command=self.reset_network)
-                        training_menu.add_command(label="Run Test", command=self.run_test)
-
-                        help_menu = tk.Menu(menubar, tearoff=0)
-                        menubar.add_cascade(label="Help", menu=help_menu)
-                        help_menu.add_command(label="Help Documentation", command=self.show_help)
-
-                        input_frame = tk.Frame(self.root, padx=10, pady=10)
-                        input_frame.pack(fill="x")
-                        
-                        tk.Label(input_frame, text="Input Data (Positive Integers):").pack(side="left")
-                        self.input_entry = tk.Entry(input_frame, width=40)
-                        self.input_entry.pack(side="left", padx=(5, 20))
-                        
-                        self.metadata_frame = tk.Frame(self.root, padx=10, pady=10)
-                        self.metadata_frame.pack(fill="both", expand=True)
-                        
-                        self.metadata_label = tk.Label(self.metadata_frame, text="Metadata:", anchor="w")
-                        self.metadata_label.pack(fill="both")
-                        
-                        control_frame = tk.Frame(self.root, padx=10, pady=10)
-                        control_frame.pack(fill="x")
-                        
-                        self.forward_button = tk.Button(control_frame, text="Forward Propagation", command=self.forward_propagation)
-                        self.forward_button.pack(side="left", padx=5)
-                        
-                        self.backward_button = tk.Button(control_frame, text="Backpropagation", command=self.backpropagation)
-                        self.backward_button.pack(side="left", padx=5)
-                        
-                        self.reset_button = tk.Button(control_frame, text="Reset", command=self.reset_network)
-                        self.reset_button.pack(side="left", padx=5)
-                        
-                        nav_frame = tk.Frame(self.root, padx=10, pady=10)
-                        nav_frame.pack(fill="x")
-                        
-                        self.prev_layer_button = tk.Button(nav_frame, text="Previous Layer", command=self.show_previous_layer)
-                        self.prev_layer_button.pack(side="left", padx=5)
-                        
-                        self.next_layer_button = tk.Button(nav_frame, text="Next Layer", command=self.show_next_layer)
-                        self.next_layer_button.pack(side="left", padx=5)
-                        
-                        self.canvas = tk.Canvas(self.root, width=700, height=700, bg="white")
-                        self.canvas.pack(pady=10)
-                        self.canvas.bind("<Button-1>", self.on_canvas_click)  # Bind click event
-                    
-                    def load_session(self):
-                        filename = filedialog.askopenfilename()
-                        if filename:
-                            self.network = NeuralNetwork.load_session(filename)
-                            self.update_metadata("Session Loaded")
-                            self.current_layer = 0
-                            self.show_layer(self.current_layer)
-
-                    def save_session(self):
-                        filename = filedialog.asksaveasfilename(defaultextension=".pkl")
-                        if filename and self.network:
-                            self.network.save_session(filename)
-                            self.update_metadata("Session Saved")
-
-                    def set_network_structure(self):
-                        layer_string = simpledialog.askstring("Network Structure", 
-                                                              "Enter the number of nodes in each layer as a comma-separated list (e.g., 4,9,16):")
-                        if layer_string:
-                            try:
-                                layers = [int(x) for x in layer_string.split(",") if int(x) > 0 and math.isqrt(int(x))**2 == int(x)]
-                                if layers:
-                                    self.network = NeuralNetwork(layers)
-                                    self.update_metadata(f"Network Structure Set: {layers}")
-                                    self.current_layer = 0
-                                    self.show_layer(self.current_layer)
-                                else:
-                                    raise ValueError
-                            except ValueError:
-                                messagebox.showerror("Invalid Input", "Please enter a valid list of positive square integers (e.g., 4,9,16).")
-                    
-                    def forward_propagation(self):
-                        if not self.network:
-                            self.initialize_network()
-                        inputs = [int(i) for i in self.input_entry.get().split() if i.isdigit() and int(i) > 0]
-                        if inputs:
-                            outputs = self.network.forward_propagation(inputs)
-                            self.update_metadata(f"Forward Propagation Complete: {outputs}")
-                        else:
-                            self.update_metadata("Invalid Input: Please enter positive integers only.")
-
-                    def backpropagation(self):
-                        if not self.network:
-                            self.initialize_network()
-                        target = [int(e) for e in self.input_entry.get().split() if e.isdigit() and int(e) > 0]
-                        if target:
-                            self.network.backpropagation(target)
-                            self.update_metadata("Backpropagation Complete")
-                        else:
-                            self.update_metadata("Invalid Target: Please enter positive integers only.")
-
-                    def reset_network(self):
-                        if not self.network:
-                            self.initialize_network()
-                        self.network.reset_network()
-                        self.update_metadata("Network Reset")
-                        self.current_layer = 0
-                        self.show_layer(self.current_layer)
-
-                    def initialize_network(self):
-                        default_structure = [4, 9, 16]
-                        self.network = NeuralNetwork(default_structure)
-                        self.update_metadata(f"Default Network Initialized: {default_structure}")
-                        self.current_layer = 0
-                        self.show_layer(self.current_layer)
-
-                    def show_layer(self, layer_index):
-                        if self.network:
-                            layer_size = self.network.layers[layer_index]
-                            grid_size = math.isqrt(layer_size)
-                            self.canvas.delete("all")
-                            square_size = min(self.canvas.winfo_width(), self.canvas.winfo_height()) // grid_size
-                            for i in range(grid_size):
-                                for j in range(grid_size):
-                                    x0 = j * square_size
-                                    y0 = i * square_size
-                                    x1 = x0 + square_size
-                                    y1 = y0 + square_size
-                                    self.canvas.create_rectangle(x0, y0, x1, y1, fill="light gray", outline="black")
-                            self.update_metadata(f"Showing Layer {layer_index + 1}/{len(self.network.layers)} with {layer_size} nodes")
-
-                    def show_previous_layer(self):
-                        if self.network and self.current_layer > 0:
-                            self.current_layer -= 1
-                            self.show_layer(self.current_layer)
-
-                    def show_next_layer(self):
-                        if self.network and self.current_layer < len(self.network.layers) - 1:
-                            self.current_layer += 1
-                            self.show_layer(self.current_layer)
-
-                    def run_test(self):
-                        if not self.network:
-                            self.initialize_network()
-                        
-                        predefined_input = [1 for _ in range(self.network.layers[0])]
-                        outputs = self.network.forward_propagation(predefined_input)
-                        
-                        result_message = f"Test Run Completed:\nInput: {predefined_input}\nOutput: {outputs}"
-                        self.update_metadata(result_message)
-                        messagebox.showinfo("Test Result", result_message)
-
-                    def on_canvas_click(self, event):
-                        if not self.network:
-                            messagebox.showerror("Error", "Please set the network structure first.")
-                            return
-                        
-                        # Calculate which square was clicked
-                        layer_size = self.network.layers[self.current_layer]
-                        grid_size = math.isqrt(layer_size)
-                        square_size = min(self.canvas.winfo_width(), self.canvas.winfo_height()) // grid_size
-                        col = event.x // square_size
-                        row = event.y // square_size
-                        base_index = row * grid_size + col + 1
-                        
-                        # Adjust the index by considering previous layers' sizes
-                        # Here, we accumulate the total number of nodes in all previous layers
-                        previous_nodes_count = sum(self.network.layers[:self.current_layer])
-                        
-                        # Adjust the index for the current layer
-                        adjusted_index = previous_nodes_count + base_index
-                        
-                        # List of possible extensions to check
-                        extensions = ['rb', 'py', 'txt', 'cpp', 'c', 'js', 'php', 'html', 'css', 'wav']
-                        
-                        # Iterate over each extension and check if the file exists with the adjusted index
-                        for ext in extensions:
-                            filename = f"{adjusted_index}.{ext}"
-                            if os.path.exists(filename):
-                                self.run_file(filename)
-                                break
-                        else:
-                            messagebox.showerror("File Not Found", f"No file found for index {adjusted_index}.")
-
-
-                    def run_file(self, filename):
-                        extension = filename.split('.')[-1]
-                        
-                        if extension in ['rb', 'py', 'js', 'php', 'cpp', 'c']:
-                            # Run the script
-                            try:
-                                if extension == 'rb':
-                                    subprocess.run(["ruby", filename])
-                                elif extension == 'py':
-                                    subprocess.run(["python", filename])
-                                elif extension == 'js':
-                                    subprocess.run(["node", filename])
-                                elif extension == 'php':
-                                    subprocess.run(["php", filename])
-                                elif extension == 'cpp':
-                                    subprocess.run(["g++", filename, "-o", "program.out"])
-                                    subprocess.run(["./program.out"])
-                                elif extension == 'c':
-                                    subprocess.run(["gcc", filename, "-o", "program.out"])
-                                    subprocess.run(["./program.out"])
-                            except Exception as e:
-                                messagebox.showerror("Error", f"Failed to run {filename}: {e}")
-                        
-                        elif extension == 'txt':
-                            # Open in the default web browser or text editor
-                            try:
-                                os.startfile(filename)
-                            except Exception as e:
-                                messagebox.showerror("Error", f"Failed to open {filename}: {e}")
-                        
-                        elif extension in ['html', 'css']:
-                            # Open HTML/CSS files in the default browser
-                            try:
-                                os.startfile(filename)
-                            except Exception as e:
-                                messagebox.showerror("Error", f"Failed to open {filename}: {e}")
-                        
-                        elif extension == 'wav':
-                            # Play the WAV file
-                            try:
-                                os.startfile(filename)
-                            except Exception as e:
-                                messagebox.showerror("Error", f"Failed to play {filename}: {e}")
-                                
-                        else:
-                            messagebox.showerror("Unsupported File Type", f"Cannot run files with extension {extension}")
-
-                    def update_metadata(self, message):
-                        self.metadata_label.config(text=f"Metadata: {message}")
-
-                    def show_help(self):
-                        help_text = (
-                            "Neural Network Training Application\n\n"
-                            "1. Set Network Structure: Define the architecture of the neural network by specifying the number of "
-                            "nodes in each layer as a comma-separated list. Each layer must have a square number of nodes.\n"
-                            "2. Input Data: Enter a series of positive integers separated by spaces. These correspond to the "
-                            "nodes for forward propagation.\n"
-                            "3. Forward Propagation: Click this option or the corresponding button to propagate the input data "
-                            "through the network. The output is displayed as metadata.\n"
-                            "4. Backpropagation: Enter the target values as positive integers and click this option or the corresponding "
-                            "button to perform backpropagation, adjusting the network's weights.\n"
-                            "5. Reset: Reset the neural network to its initial state.\n"
-                            "6. Navigate Layers: Use the 'Previous Layer' and 'Next Layer' buttons to navigate through the layers "
-                            "of the network. The grid will update to show the nodes in the selected layer.\n"
-                            "7. Run Test: Automatically test the network with a predefined input to see how it processes data and "
-                            "what the outputs are. This helps demonstrate the practical use of the network.\n"
-                            "8. Execute File: Click on any sub-square to execute a corresponding file (e.g., .rb, .html, .cpp). "
-                            "If a .txt file is selected, it will be opened in the default web browser.\n"
-                            "9. Save/Load Session: Save the current state of the network or load a previously saved session.\n\n"
-                            "Ensure that all required libraries and compilers are installed on your local machine to execute the files."
-                        )
-                        messagebox.showinfo("Help Documentation", help_text)
-
-                #if __name__ == "__main__":
-                root = tk.Tk()
-                app = TrainingApp(root)
-                root.mainloop()
+                generate_cmp_multi()
