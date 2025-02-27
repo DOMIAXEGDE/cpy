@@ -24,6 +24,190 @@ using json = nlohmann::json;
 // Program by Dominic Alexander Cooper
 // Integrated C++23 version
 
+/*
+# Compilation Instructions for the Integrated C++23 Program
+
+## Prerequisites
+
+Before compiling the program, you'll need:
+
+1. **A C++23-compatible compiler**:
+   - Visual Studio 2022 (version 17.7 or newer)
+   - GCC 12 or newer
+   - Clang 16 or newer
+
+2. **Required external libraries**:
+   - `libzip` - For ZIP file handling
+   - `nlohmann/json` - For JSON processing
+
+## Compilation in Visual Studio 2022
+
+### 1. Create a new project
+
+1. Open Visual Studio 2022
+2. Select "Create a new project"
+3. Choose "Console App" for C++
+4. Name your project (e.g., "IntegratedMemoryManager")
+5. Click "Create"
+
+### 2. Install dependencies with vcpkg
+
+The easiest way to get the required libraries is with [vcpkg](https://github.com/microsoft/vcpkg):
+
+1. If you don't have vcpkg installed:
+   ```
+   git clone https://github.com/Microsoft/vcpkg.git
+   cd vcpkg
+   bootstrap-vcpkg.bat
+   ```
+
+2. Install the required packages:
+   ```
+   vcpkg install nlohmann-json:x64-windows
+   vcpkg install libzip:x64-windows
+   ```
+
+3. Integrate vcpkg with Visual Studio:
+   ```
+   vcpkg integrate install
+   ```
+
+### 3. Configure the project
+
+1. Right-click on your project in Solution Explorer
+2. Select "Properties"
+3. Navigate to Configuration Properties → C/C++ → Language
+4. Set "C++ Language Standard" to "ISO C++23 Standard (/std:c++23)" or "ISO C++Latest Standard (/std:c++latest)"
+5. Click "Apply"
+
+### 4. Add the source code
+
+1. Open the default CPP file in your project
+2. Replace all content with the integrated program code
+3. Save the file
+
+### 5. Build and run
+
+1. Press F7 or select Build → Build Solution
+2. Press F5 to run or Ctrl+F5 to run without debugging
+
+## Compilation with GCC or Clang (Linux/macOS)
+
+### 1. Install dependencies
+
+For Ubuntu/Debian:
+```bash
+sudo apt-get update
+sudo apt-get install libzip-dev
+```
+
+For macOS with Homebrew:
+```bash
+brew install libzip
+```
+
+### 2. Install nlohmann/json
+
+The easiest way is to download the single-header version:
+```bash
+mkdir -p include
+wget -O include/json.hpp https://github.com/nlohmann/json/releases/download/v3.11.2/json.hpp
+```
+
+### 3. Create a CMakeLists.txt file
+
+Create a file named `CMakeLists.txt` with the following content:
+
+```cmake
+cmake_minimum_required(VERSION 3.15)
+project(IntegratedMemoryManager CXX)
+
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# Find required packages
+find_package(LibZip REQUIRED)
+
+# Add include directories
+include_directories(${LIBZIP_INCLUDE_DIRS} include)
+
+# Add the executable
+add_executable(integrated_app main.cpp)
+
+# Link libraries
+target_link_libraries(integrated_app ${LIBZIP_LIBRARIES})
+```
+
+### 4. Compile and run
+
+```bash
+# Create a build directory
+mkdir build
+cd build
+
+# Configure CMake
+cmake ..
+
+# Build
+make
+
+# Run
+./integrated_app
+```
+
+## Compilation with GCC/Clang directly (manual approach)
+
+If you prefer not to use CMake, you can compile directly:
+
+```bash
+g++ -std=c++23 -o integrated_app main.cpp -I./include -lzip
+```
+
+Or with Clang:
+```bash
+clang++ -std=c++23 -o integrated_app main.cpp -I./include -lzip
+```
+
+## Troubleshooting Common Issues
+
+### 1. Missing headers or libraries
+
+If you encounter errors about missing headers or libraries:
+
+- **For libzip**: Make sure the library is installed and properly linked
+  - Windows (Visual Studio): Check that vcpkg integration is working
+  - Linux: Verify the package is installed with `ldconfig -p | grep zip`
+
+- **For nlohmann/json**: 
+  - If using the single-header approach, make sure the `include` directory is in your include path
+  - For vcpkg users, verify nlohmann-json is installed
+
+### 2. C++23 support issues
+
+If your compiler complains about C++23 features:
+
+- Update your compiler to a version that supports C++23
+- If updating isn't possible, consider adapting the code to C++20:
+  - Replace ranges with traditional algorithm approaches
+  - Replace `contains()` with other map lookup methods
+
+### 3. Compile-time errors
+
+If you encounter other compile errors:
+
+1. Ensure you're using C++23 mode with the correct compiler flag
+2. Try disabling specific optimizations with `-O0` if needed
+3. If you're using GCC, try adding `-fconcepts-diagnostics-depth=10` for better error messages
+
+## Notes on Cross-Platform Compatibility
+
+- This program uses `std::system("cls")` or `std::system("clear")` for clearing the screen, which is platform-dependent
+- File path handling may need adjustment between Windows and Unix-like systems
+- ZIP functionality may have subtle differences between platforms due to variations in libzip implementations
+
+By following these instructions, you should be able to compile and run the Integrated C++23 Memory Manager and Combination Generator program on your platform of choice.
+*/
+
 class MemorySlotManager {
 private:
     std::map<std::string, std::map<std::string, std::string>> memory_slots;
