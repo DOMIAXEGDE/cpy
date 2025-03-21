@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Operator System - Integrated CS Principles</title>
+    <link rel="stylesheet" href="operator.css">
+    <!-- Math.js library for expression evaluation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js"></script>
+    <!-- JSZip library for file compression -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Operator System</h1>
+        <p>Integrated Computer Science, Operating System, and CRUD Database Principles</p>
+    </header>
+
+    <nav id="main-nav">
+        <div class="nav-section">
+            <h3>Data Structures</h3>
+            <button data-section="array-operations">Arrays</button>
+            <button data-section="object-operations">Objects</button>
+            <button data-section="set-operations">Sets</button>
+            <button data-section="tree-operations">Trees (Quadtree)</button>
+        </div>
+        <div class="nav-section">
+            <h3>Algorithms</h3>
+            <button data-section="recursion-operations">Recursion</button>
+            <button data-section="iteration-operations">Iteration</button>
+            <button data-section="search-operations">Search</button>
+            <button data-section="binary-operations">Binary Operations</button>
+        </div>
+        <div class="nav-section">
+            <h3>System Operations</h3>
+            <button data-section="file-operations">File System</button>
+            <button data-section="memory-operations">Memory Management</button>
+            <button data-section="process-operations">Process Management</button>
+        </div>
+        <div class="nav-section">
+            <h3>CRUD Operations</h3>
+            <button data-section="create-operations">Create</button>
+            <button data-section="read-operations">Read</button>
+            <button data-section="update-operations">Update</button>
+            <button data-section="delete-operations">Delete</button>
+        </div>
+        <div class="nav-section">
+            <h3>Advanced Concepts</h3>
+            <button data-section="serialization-operations">Serialization</button>
+            <button data-section="compression-operations">Compression</button>
+            <button data-section="encoding-operations">Binary Encoding</button>
+            <button data-section="transactions-operations">Transactions</button>
+        </div>
+    </nav>
+
+    <main>
+        <!-- Section for Array Operations -->
+        <section id="array-operations" class="operation-section">
+            <h2>Array Operations</h2>
+            <div class="operation-container">
+                <div class="operation-controls">
+                    <h3>Create Array</h3>
+                    <textarea id="array-input" placeholder="Enter comma-separated values (e.g. 1,2,3,4,5)"></textarea>
+                    <div class="control-row">
+                        <button id="create-array">Create Array</button>
+                        <button id="sort-array">Sort</button>
+                        <button id="filter-array">Filter > 5</button>
+                        <button id="map-array">Map (x2)</button>
+                        <button id="reduce-array">Sum</button>
+                    </div>
+                </div>
+                <div class="operation-result">
+                    <h3>Result</h3>
+                    <div id="array-result" class="result-container"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section for Object Operations -->
+        <section id="object-operations" class="operation-section">
+            <h2>Object Operations</h2>
+            <div class="operation-container">
+                <div class="operation-controls">
+                    <h3>Create Object</h3>
+                    <div class="form-group">
+                        <label for="object-key">Key:</label>
+                        <input type="text" id="object-key" placeholder="Enter property name">
+                    </div>
+                    <div class="form-group">
+                        <label for="object-value">Value:</label>
+                        <input type="text" id="object-value" placeholder="Enter property value">
+                    </div>
+                    <div class="control-row">
+                        <button id="add-property">Add Property</button>
+                        <button id="remove-property">Remove Property</button>
+                        <button id="clear-object">Clear Object</button>
+                    </div>
+                </div>
+                <div class="operation-result">
+                    <h3>Object Contents</h3>
+                    <div id="object-result" class="result-container"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section for Set Operations -->
+        <section id="set-operations" class="operation-section">
+            <h2>Set Operations</h2>
+            <div class="operation-container">
+                <div class="operation-controls">
+                    <h3>Create Sets</h3>
+                    <div class="form-group">
+                        <label for="set-a-input">Set A:</label>
+                        <input type="text" id="set-a-input" placeholder="Enter comma-separated values">
+                    </div>
+                    <div class="form-group">
+                        <label for="set-b-input">Set B:</label>
+                        <input type="text" id="set-b-input" placeholder="Enter comma-separated values">
+                    </div>
+                    <div class="control-row">
+                        <button id="set-union">Union</button>
+                        <button id="set-intersection">Intersection</button>
+                        <button id="set-difference">Difference (A-B)</button>
+                    </div>
+                </div>
+                <div class="operation-result">
+                    <h3>Result</h3>
+                    <div id="set-result" class="result-container"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section for Tree (Quadtree) Operations -->
+        <section id="tree-operations" class="operation-section">
+            <h2>Quadtree Operations</h2>
+            <div class="operation-container">
+                <div class="operation-controls">
+                    <h3>Quadtree Settings</h3>
+                    <div class="form-group">
+                        <label for="max-depth">Max Depth:</label>
+                        <input type="number" id="max-depth" min="1" max="6" value="3">
+                    </div>
+                    <div class="form-group">
+                        <label for="quadtree-size">Size (px):</label>
+                        <input type="number" id="quadtree-size" min="200" max="800" value="400">
+                    </div>
+                    <div class="control-row">
+                        <button id="create-quadtree">Create Quadtree</button>
+                        <button id="reset-quadtree">Reset</button>
+                        <button id="export-quadtree">Export PNG</button>
+                    </div>
+                </div>
+                <div class="operation-result">
+                    <div id="quadtree-container"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section for Recursion Operations -->
+        <section id="recursion-operations" class="operation-section">
+            <h2>Recursion Operations</h2>
+            <div class="operation-container">
+                <div class="operation-controls">
+                    <h3>Recursive Functions</h3>
+                    <div class="form-group">
+                        <label for="recursion-n">Value (n):</label>
+                        <input type="number" id="recursion-n" min="1" max="40" value="5">
+                    </div>
+                    <div class="control-row">
+                        <button id="calc-factorial">Factorial</button>
+                        <button id="calc-fibonacci">Fibonacci</button>
+                        <button id="generate-tree">Generate Tree</button>
+                    </div>
+                </div>
+                <div class="operation-result">
+                    <h3>Result</h3>
+                    <div id="recursion-result" class="result-container"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section for Iteration Operations -->
+        <section id="iteration-operations" class="operation-section">
+            <h2>Iteration Operations</h2>
+            <div class="operation-container">
+                <div class="operation-controls">
+                    <h3>Generate Data</h3>
+                    <div class="form-group">
+                        <label for="iteration-n">Size (n):</label>
+                        <input type="number" id="iteration-n" min="1" max="10" value="3">
+                    </div>
+                    <div class="form-group">
+                        <label for="charset-input">Character Set:</label>
+                        <input type="text" id="charset-input" value="abcdefghij">
+                    </div>
+                    <div class="control-row">
+                        <button id="generate-combinations">Generate Combinations</button>
+                        <button id="stop-generation">Stop</button>
+                    </div>
+                </div>
+                <div class="operation-result">
+                    <h3>Generated Data</h3>
+                    <div id="iteration-progress" class="progress-bar">
+                        <div class="progress-fill"></div>
+                    </div>
+                    <div id="iteration-result" class="result-container">
+                        <p>Generated combinations will appear here</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section for Search Operations -->
+        <section id="search-operations" class="operation-section">
+            <h2>Search Operations</h2>
+            <div class="operation-container">
+                <div class="operation-controls">
+                    <h3>Search Data</h3>
+                    <div class="form-group">
+                        <label for="search-data">Dataset:</label>
+                        <textarea id="search-data" placeholder="Enter comma-separated values"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="search-query">Search For:</label>
+                        <input type="text" id="search-query" placeholder="Enter search term">
+                    </div>
+                    <div class="control-row">
+                        <button id="linear-search">Linear Search</button>
+                        <button id="binary-search">Binary Search</button>
+                        <button id="fuzzy-search">Fuzzy Search</button>
+                    </div>
+                </div>
+                <div class="operation-result">
+                    <h3>Search Results</h3>
+                    <div id="search-result" class="result-container"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section for Binary Operations -->
+        <section id="binary-operations" class="operation-section">
+            <h2>Binary Operations</h2>
+            <div class="operation-container">
+                <div class="operation-controls">
+                    <h3>Binary Manipulation</h3>
+                    <div class="form-group">
+                        <label for="binary-input-a">Value A:</label>
+                        <input type="number" id="binary-input-a" min="0" max="255" value="42">
+                    </div>
+                    <div class="form-group">
+                        <label for="binary-input-b">Value B:</label>
+                        <input type="number" id="binary-input-b" min="0" max="255" value="27">
+                    </div>
+                    <div class="control-row">
+                        <button id="binary-and">AND</button>
+                        <button id="binary-or">OR</button>
+                        <button id="binary-xor">XOR</button>
+                        <button id="binary-not">NOT (A)</button>
+                        <button id="binary-shift">Shift Left</button>
+                    </div>
+                </div>
+                <div class="operation-result">
+                    <h3>Binary Result</h3>
+                    <div id="binary-result" class="result-container"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section for File System Operations -->
+        <section id="file-operations" class="operation-section">
+            <h2>File System Operations</h2>
+            <div class="operation-container">
+                <div class="operation-controls">
+                    <h3>File Management</h3>
+                    <div class="form-group">
+                        <label for="file-content">File Content:</label>
+                        <textarea id="file-content" placeholder="Enter file content to save"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="file-name">File Name:</label>
+                        <input type="text" id="file-name" placeholder="Enter file name" value="data.txt">
+                    </div>
+                    <div class="control-row">
+                        <button id="save-file">Save to File</button>
+                        <button id="load-file">Load File</button>
+                        <input type="file" id="file-upload" style="display:none">
+                    </div>
+                    <div class="control-row">
+                        <button id="create-directory">Create Directory</button>
+                        <button id="create-zip">Create ZIP</button>
+                    </div>
+                </div>
+                <div class="operation-result">
+                    <h3>File System</h3>
+                    <div id="file-system" class="result-container">
+                        <ul id="file-tree"></ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section for Memory Operations -->
+        <section id="memory-operations" class="operation-section">
+            <h2>Memory Management</h2>
+            <div class="operation-container">
+                <div class="operation-controls">
+                    <h3>Memory Slots</h3>
+                    <div class="form-group">
+                        <label for="memory-file">File Number:</label>
+                        <input type="number" id="memory-file" min="1" value="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="memory-slot">Slot Number:</label>
+                        <input type="number" id="memory-slot" min="1" value="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="memory-content">Content:</label>
+                        <textarea id="memory-content" placeholder="Enter slot content"></textarea>
+                    </div>
+                    <div class="control-row">
+                        <button id="assign-slot">Assign Slot</button>
+                        <button id="read-slot">Read Slot</button>
+                        <button id="clear-all-slots">Clear All</button>
+                    </div>
+                </div>
+                <div class="operation-result">
+                    <h3>Memory Contents</h3>
+                    <div id="memory-display" class="result-container"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section for Process Operations -->
+        <section id="process-operations" class="operation-section">
+            <h2>Process Management</h2>
+            <div class="operation-container">
+                <div class="operation-controls">
+                    <h3>Processes</h3>
+                    <div class="form-group">
+                        <label for="process-name">Process Name:</label>
+                        <input type="text" id="process-name" placeholder="Enter process name">
+                    </div>
+                    <div class="form-group">
+                        <label for="process-duration">Duration (ms):</label>
+                        <input type="number" id="process-duration" min="100" max="10000" value="2000">
+                    </div>
+                    <div class="control-row">
+                        <button id="start-process">Start Process</button>
+                        <button id="stop-all-processes">Stop All</button>
+                    </div>
+                </div>
+                <div class="operation-result">
+                    <h3>Process Status</h3>
+                    <div id="process-list" class="result-container"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section for Create Operations -->
+        <section id="create-operations" class="operation-section">
+            <h2>CRUD - Create</h2>
+            <div class="operation-container">
+                <div class="operation-controls">
+                    <h3>Create Record</h3>
+                    <div class="form-group">
+                        <label for="record-id">ID:</label>
+                        <input type="text" id="record-id" placeholder="Enter record ID">
+                    </div>
+                    <div class="form-group">
+                        <label for="record-name">Name:</label>
+                        <input type="text" id="record-name" placeholder="Enter record name">
+                    </div>
+                    <div class="form-group">
+                        <label for="record-data">Data:</label>
+                        <textarea id="record-data" placeholder="Enter record data"></textarea>
+                    </div>
+                    <div class="control-row">
+                        <button id="create-record">Create Record</button>
+                    </div>
+                </div>
+                <div class="operation-result">
+                    <h3>Database Contents</h3>
+                    <div id="database-display" class="result-container"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section for Read Operations -->
+        <section id="read-operations" class="operation-section">
+            <h2>CRUD - Read</h2>
+            <div class="operation-container">
+                <div class="operation-controls">
+                    <h3>Read Record</h3>
+                    <div class="form-group">
+                        <label for="read-id">Record ID:</label>
+                        <input type="text" id="read-id" placeholder="Enter record ID to read">
+                    </div>
+                    <div class="control-row">
+                        <button id="read-record">Read Record</button>
+                        <button id="read-all-records">Read All Records</button>
+                        <button id="query-records">Query Records</button>
+                    </div>
+                </div>
+                <div class="operation-result">
+                    <h3>Read Results</h3>
+                    <div id="read-result" class="result-container"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section for Update Operations -->
+        <section id="update-operations" class="operation-section">
+            <h2>CRUD - Update</h2>
+            <div class="operation-container">
+                <div class="operation-controls">
+                    <h3>Update Record</h3>
+                    <div class="form-group">
+                        <label for="update-id">Record ID:</label>
+                        <input type="text" id="update-id" placeholder="Enter record ID to update">
+                    </div>
+                    <div class="form-group">
+                        <label for="update-field">Field:</label>
+                        <select id="update-field">
+                            <option value="name">Name</option>
+                            <option value="data">Data</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="update-value">New Value:</label>
+                        <textarea id="update-value" placeholder="Enter new value"></textarea>
+                    </div>
+                    <div class="control-row">
+                        <button id="update-record">Update Record</button>
+                    </div>
+                </div>
+                <div class="operation-result">
+                    <h3>Update Result</h3>
+                    <div id="update-result" class="result-container"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section for Delete Operations -->
+        <section id="delete-operations" class="operation-section">
+            <h2>CRUD - Delete</h2>
+            <div class="operation-container">
+                <div class="operation-controls">
+                    <h3>Delete Record</h3>
+                    <div class="form-group">
+                        <label for="delete-id">Record ID:</label>
+                        <input type="text" id="delete-id" placeholder="Enter record ID to delete">
+                    </div>
+                    <div class="control-row">
+                        <button id="delete-record">Delete Record</button>
+                        <button id="delete-all-records">Delete All Records</button>
+                    </div>
+                </div>
+                <div class="operation-result">
+                    <h3>Delete Result</h3>
+                    <div id="delete-result" class="result-container"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section for Serialization Operations -->
+        <section id="serialization-operations" class="operation-section">
+            <h2>Serialization & Deserialization</h2>
+            <div class="operation-container">
+                <div class="operation-controls">
+                    <h3>Serialize Data</h3>
+                    <div class="form-group">
+                        <label for="serialize-input">Input Object:</label>
+                        <textarea id="serialize-input" placeholder="Enter JSON object"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="serialization-format">Format:</label>
+                        <select id="serialization-format">
+                            <option value="json">JSON</option>
+                            <option value="xml">XML</option>
+                            <option value="csv">CSV</option>
+                        </select>
+                    </div>
+                    <div class="control-row">
+                        <button id="serialize-data">Serialize</button>
+                        <button id="deserialize-data">Deserialize</button>
+                    </div>
+                </div>
+                <div class="operation-result">
+                    <h3>Serialized Data</h3>
+                    <div id="serialization-result" class="result-container"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section for Compression Operations -->
+        <section id="compression-operations" class="operation-section">
+            <h2>Data Compression</h2>
+            <div class="operation-container">
+                <div class="operation-controls">
+                    <h3>Compress Data</h3>
+                    <div class="form-group">
+                        <label for="compression-input">Input Text:</label>
+                        <textarea id="compression-input" placeholder="Enter text to compress"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="compression-method">Method:</label>
+                        <select id="compression-method">
+                            <option value="rle">Run-Length Encoding</option>
+                            <option value="huffman">Huffman Coding</option>
+                            <option value="lz">LZ Compression</option>
+                        </select>
+                    </div>
+                    <div class="control-row">
+                        <button id="compress-data">Compress</button>
+                        <button id="decompress-data">Decompress</button>
+                    </div>
+                </div>
+                <div class="operation-result">
+                    <h3>Compression Result</h3>
+                    <div id="compression-result" class="result-container"></div>
+                    <div id="compression-stats"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section for Binary Encoding Operations -->
+        <section id="encoding-operations" class="operation-section">
+            <h2>Binary Encoding/Decoding</h2>
+            <div class="operation-container">
+                <div class="operation-controls">
+                    <h3>Encode/Decode</h3>
+                    <div class="form-group">
+                        <label for="encoding-input">Input:</label>
+                        <textarea id="encoding-input" placeholder="Enter text to encode"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="encoding-method">Method:</label>
+                        <select id="encoding-method">
+                            <option value="base64">Base64</option>
+                            <option value="hex">Hexadecimal</option>
+                            <option value="binary">Binary</option>
+                            <option value="custom">Custom ID</option>
+                        </select>
+                    </div>
+                    <div class="control-row">
+                        <button id="encode-data">Encode</button>
+                        <button id="decode-data">Decode</button>
+                    </div>
+                </div>
+                <div class="operation-result">
+                    <h3>Encoding Result</h3>
+                    <div id="encoding-result" class="result-container"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section for Transaction Operations -->
+        <section id="transactions-operations" class="operation-section">
+            <h2>Transactions & History</h2>
+            <div class="operation-container">
+                <div class="operation-controls">
+                    <h3>Canvas Operations</h3>
+                    <div class="form-group">
+                        <label for="drawing-color">Color:</label>
+                        <input type="color" id="drawing-color" value="#000000">
+                    </div>
+                    <div class="form-group">
+                        <label for="drawing-size">Size:</label>
+                        <input type="range" id="drawing-size" min="1" max="50" value="5">
+                    </div>
+                    <div class="control-row">
+                        <button id="transaction-undo">Undo</button>
+                        <button id="transaction-redo">Redo</button>
+                        <button id="transaction-clear">Clear</button>
+                    </div>
+                </div>
+                <div class="operation-result">
+                    <h3>Drawing Canvas</h3>
+                    <canvas id="drawing-canvas" width="400" height="300"></canvas>
+                    <div id="transaction-history"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <footer>
+        <p>Operator System - Comprehensive Computer Science Principles Implementation</p>
+        <p>&copy; 2025 - An educational tool demonstrating software engineering concepts</p>
+    </footer>
+    
+    <!-- Error modal for handling and displaying errors -->
+    <div id="error-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h2>Error</h2>
+            <p id="error-message"></p>
+        </div>
+    </div>
+
+    <!-- Result modal for displaying large results -->
+    <div id="result-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h2>Result</h2>
+            <div id="modal-result"></div>
+        </div>
+    </div>
+
+    <script src="operator.js"></script>
+</body>
+</html>
