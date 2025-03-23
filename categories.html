@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Category Diagram Generator with Alternating Colours</title>
+  <style>
+    :root {
+      --primary-color: #4a6fa5;
+      --secondary-color: #304c70;
+      --background-color: #f5f7fa;
+      --card-bg: #ffffff;
+      --text-color: #333333;
+      --border-color: #d0d9e6;
+      --success-color: #28a745;
+      --hover-color: #3a5a80;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      line-height: 1.6;
+    }
+    
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: var(--card-bg);
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      color: var(--primary-color);
+      font-weight: 600;
+      font-size: 2rem;
+    }
+    
+    .tabs {
+      display: flex;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    .tab {
+      padding: 10px 20px;
+      background-color: transparent;
+      border: none;
+      border-bottom: 3px solid transparent;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s;
+      color: var(--text-color);
+      font-size: 1rem;
+    }
+    
+    .tab.active {
+      border-bottom: 3px solid var(--primary-color);
+      color: var(--primary-color);
+    }
+    
+    .tab:hover:not(.active) {
+      border-bottom: 3px solid var(--border-color);
+    }
+    
+    .panel {
+      display: none;
+    }
+    
+    .panel.active {
+      display: block;
+    }
+    
+    .form-row {
+      margin-bottom: 20px;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: var(--text-color);
+    }
+    
+    input, textarea, select {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 5px;
+      font-size: 1rem;
+      font-family: inherit;
+      background-color: white;
+      box-sizing: border-box;
+      transition: border-color 0.3s;
+    }
+    
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.2);
+    }
+    
+    .color-inputs {
+      display: flex;
+      gap: 20px;
+    }
+    
+    .color-input {
+      flex: 1;
+    }
+    
+    .color-preview {
+      height: 30px;
+      border-radius: 5px;
+      margin-top: 8px;
+    }
+    
+    .btn {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 5px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    
+    .btn:hover {
+      background-color: var(--hover-color);
+    }
+    
+    .btn-secondary {
+      background-color: var(--background-color);
+      color: var(--text-color);
+      border: 1px solid var(--border-color);
+    }
+    
+    .btn-secondary:hover {
+      background-color: #e8ebef;
+    }
+    
+    .btn-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    
+    .warning {
+      color: #e74c3c;
+      font-size: 0.9rem;
+      margin-top: 5px;
+    }
+    
+    code {
+      background-color: #f1f1f1;
+      padding: 2px 5px;
+      border-radius: 3px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9rem;
+    }
+    
+    .preview-panel {
+      padding: 20px;
+      background-color: white;
+      border: 1px solid var(--border-color);
+      border-radius: 5px;
+      margin-top: 20px;
+      overflow: auto;
+      max-height: 500px;
+    }
+    
+    .diagram {
+      margin-bottom: 20px;
+      border-radius: 5px;
+      overflow: hidden;
+    }
+    
+    .export-options {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #f9f9f9;
+      border-radius: 5px;
+      border: 1px solid var(--border-color);
+    }
+    
+    .dimension-inputs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    
+    .dimension-input {
+      flex: 1;
+    }
+    
+    /* Label positioning UI */
+    .label-position-container {
+      margin-top: 20px;
+    }
+    
+    .object-position-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      gap: 5px;
+      width: 150px;
+      height: 150px;
+      margin: 0 auto;
+      background-color: #f1f1f1;
+      border-radius: 5px;
+      padding: 5px;
+    }
+    
+    .position-cell {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .position-cell:nth-child(5) {
+      background-color: #ddd;
+      border-radius: 50%;
+    }
+    
+    .position-option {
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--border-color);
+      border-radius: 50%;
+      margin: 0;
+      cursor: pointer;
+      position: relative;
+    }
+    
+    .position-option:checked {
+      border-color: var(--primary-color);
+      background-color: var(--primary-color);
+    }
+    
+    .position-option:checked::after {
+      content: '';
+      position: absolute;
+      top: 5px;
+      left: 5px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background-color: white;
+    }
+    
+    .position-table-container {
+      max-height: 300px;
+      overflow-y: auto;
+      border: 1px solid var(--border-color);
+      border-radius: 5px;
+      margin-top: 10px;
+    }
+    
+    .position-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    .position-table th,
+    .position-table td {
+      padding: 10px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    .position-table th {
+      background-color: #f1f1f1;
+      position: sticky;
+      top: 0;
+    }
+    
+    .position-select {
+      width: 100%;
+      padding: 5px;
+    }
+    
+    .arrow-position-options {
+      display: flex;
+      gap: 15px;
+    }
+    
+    .arrow-position-option {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    /* Loading indicator */
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s, visibility 0.3s;
+    }
+    
+    .loading-overlay.show {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    .loading-spinner {
+      width: 50px;
+      height: 50px;
+      border: 5px solid #f3f3f3;
+      border-top: 5px solid var(--primary-color);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    @media (max-width: 768px) {
+      .color-inputs,
+      .dimension-inputs {
+        flex-direction: column;
+        gap: 10px;
+      }
+      
+      .btn-group {
+        flex-direction: column;
+      }
+      
+      .container {
+        padding: 15px;
+      }
+      
+      .arrow-position-options {
+        flex-direction: column;
+      }
+    }
+    
+    /* Toast notification */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: var(--success-color);
+      color: white;
+      padding: 12px 20px;
+      border-radius: 5px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s;
+      z-index: 1000;
+    }
+    
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Category Diagram Generator</h1>
+    
+    <div class="tabs">
+      <button class="tab active" data-panel="editor">Editor</button>
+      <button class="tab" data-panel="positions">Label Positions</button>
+      <button class="tab" data-panel="preview">Preview</button>
+      <button class="tab" data-panel="export">Export</button>
+    </div>
+    
+    <div class="panel active" id="editor">
+      <form id="generatorForm">
+        <div class="form-row">
+          <label for="numRows">Number of Rows:</label>
+          <input type="number" id="numRows" value="2" min="1" onchange="updateLabelPositionsPanel()">
+        </div>
+        
+        <div class="form-row">
+          <label for="numColumns">Number of Columns:</label>
+          <input type="number" id="numColumns" value="2" min="1" onchange="updateLabelPositionsPanel()">
+        </div>
+        
+        <div class="form-row">
+          <label for="objectLabels">Object Labels (comma-separated):</label>
+          <textarea id="objectLabels" rows="2" onchange="updateLabelPositionsPanel()">A, B</textarea>
+        </div>
+        
+        <div class="form-row">
+          <label for="morphismLabels">Morphism Labels (comma-separated):</label>
+          <textarea id="morphismLabels" rows="2" onchange="updateLabelPositionsPanel()">a, b</textarea>
+        </div>
+        
+        <div class="form-row">
+          <label for="arrowDefs">
+            Arrow Definitions (one per line, format: <code>sourceIndex to targetIndex</code>):
+          </label>
+          <textarea id="arrowDefs" rows="3" onchange="updateLabelPositionsPanel()">1 to 2
+2 to 4</textarea>
+          <div class="warning">Indices are 1-indexed and refer to positions in the grid (row-major order).</div>
+        </div>
+        
+        <div class="form-row">
+          <div class="color-inputs">
+            <div class="color-input">
+              <label for="color1">Category Colour 1:</label>
+              <input type="color" id="color1" value="#eeeeee" oninput="updateColorPreview('color1Preview', this.value)">
+              <div class="color-preview" id="color1Preview" style="background-color: #eeeeee;"></div>
+            </div>
+            
+            <div class="color-input">
+              <label for="color2">Category Colour 2:</label>
+              <input type="color" id="color2" value="#dddddd" oninput="updateColorPreview('color2Preview', this.value)">
+              <div class="color-preview" id="color2Preview" style="background-color: #dddddd;"></div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="btn-group">
+          <button type="button" class="btn" onclick="generatePreview()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+              <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/>
+              <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/>
+            </svg>
+            Generate Preview
+          </button>
+          <button type="button" class="btn btn-secondary" onclick="generateLatex()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+              <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
+              <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
+            </svg>
+            Download LaTeX
+          </button>
+        </div>
+      </form>
+    </div>
+    
+    <div class="panel" id="positions">
+      <h2>Label Positions</h2>
+      
+      <div class="form-row">
+        <h3>Object Label Positions</h3>
+        <p>Select the position for each object label relative to its node:</p>
+        
+        <div class="position-table-container">
+          <table class="position-table" id="objectPositionTable">
+            <thead>
+              <tr>
+                <th>Node</th>
+                <th>Label</th>
+                <th>Position</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- This will be populated dynamically -->
+            </tbody>
+          </table>
+        </div>
+        
+        <div style="margin-top: 20px;">
+          <div class="object-position-grid">
+            <div class="position-cell">
+              <input type="radio" name="object-position-demo" value="top-left" disabled>
+            </div>
+            <div class="position-cell">
+              <input type="radio" name="object-position-demo" value="top" checked disabled>
+            </div>
+            <div class="position-cell">
+              <input type="radio" name="object-position-demo" value="top-right" disabled>
+            </div>
+            <div class="position-cell">
+              <input type="radio" name="object-position-demo" value="left" disabled>
+            </div>
+            <div class="position-cell">
+              <!-- center cell (node) -->
+            </div>
+            <div class="position-cell">
+              <input type="radio" name="object-position-demo" value="right" disabled>
+            </div>
+            <div class="position-cell">
+              <input type="radio" name="object-position-demo" value="bottom-left" disabled>
+            </div>
+            <div class="position-cell">
+              <input type="radio" name="object-position-demo" value="bottom" disabled>
+            </div>
+            <div class="position-cell">
+              <input type="radio" name="object-position-demo" value="bottom-right" disabled>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="form-row">
+        <h3>Morphism Label Positions</h3>
+        <p>Select the position for each morphism label relative to its arrow:</p>
+        
+        <div class="position-table-container">
+          <table class="position-table" id="morphismPositionTable">
+            <thead>
+              <tr>
+                <th>Arrow</th>
+                <th>Label</th>
+                <th>Position</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- This will be populated dynamically -->
+            </tbody>
+          </table>
+        </div>
+        
+        <div style="margin-top: 20px;">
+          <div class="arrow-position-options">
+            <div class="arrow-position-option">
+              <input type="radio" name="arrow-position-demo" value="above" checked disabled>
+              <label>Above Arrow</label>
+            </div>
+            <div class="arrow-position-option">
+              <input type="radio" name="arrow-position-demo" value="below" disabled>
+              <label>Below Arrow</label>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="btn-group">
+        <button type="button" class="btn" onclick="generatePreview()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/>
+            <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/>
+          </svg>
+          Update Preview
+        </button>
+      </div>
+    </div>
+    
+    <div class="panel" id="preview">
+      <div class="preview-panel" id="diagramPreview">
+        <p>Click "Generate Preview" to see your diagrams here.</p>
+      </div>
+    </div>
+    
+    <div class="panel" id="export">
+      <div class="export-options">
+        <h3>Export Diagrams as PNG</h3>
+        <p>Set the export dimensions for PNG images:</p>
+        
+        <div class="form-row">
+          <div class="dimension-inputs">
+            <div class="dimension-input">
+              <label for="exportWidth">Width (px):</label>
+              <input type="number" id="exportWidth" value="800" min="100">
+            </div>
+            
+            <div class="dimension-input">
+              <label for="exportHeight">Height (px):</label>
+              <input type="number" id="exportHeight" value="600" min="100">
+            </div>
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <label for="diagramIndex">Select Diagram to Export:</label>
+          <select id="diagramIndex">
+            <option value="all">All Diagrams (ZIP Archive)</option>
+          </select>
+        </div>
+        
+        <button type="button" class="btn" onclick="exportPNG()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
+            <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
+          </svg>
+          Export PNG
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner"></div>
+  </div>
+  
+  <div class="toast" id="toast">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+      <path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"/>
+    </svg>
+    <span id="toast-message">Success!</span>
+  </div>
+
+  <!-- JSZip library for creating ZIP files -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  
+  <script>
+    // Define object position options
+    const objectPositions = [
+      { value: "top-left", label: "Top Left" },
+      { value: "top", label: "Top" },
+      { value: "top-right", label: "Top Right" },
+      { value: "left", label: "Left" },
+      { value: "right", label: "Right" },
+      { value: "bottom-left", label: "Bottom Left" },
+      { value: "bottom", label: "Bottom (Default)" },
+      { value: "bottom-right", label: "Bottom Right" }
+    ];
+    
+    // Define morphism position options
+    const morphismPositions = [
+      { value: "above", label: "Above (Default)" },
+      { value: "below", label: "Below" }
+    ];
+    
+    // Generate Cartesian product of array "arr" repeated "repeat" times.
+    function cartesianProduct(arr, repeat) {
+      if (repeat === 0) return [[]];
+      let result = [];
+      let sub = cartesianProduct(arr, repeat - 1);
+      for (let x of arr) {
+        for (let s of sub) {
+          result.push(s.concat(x));
+        }
+      }
+      return result;
+    }
+    
+    // Parse a comma-separated string into an array of trimmed tokens.
+    function parseCommaSeparated(str) {
+      return str.split(',')
+                .map(s => s.trim())
+                .filter(s => s.length > 0);
+    }
+    
+    // Parse arrow definitions.
+    // Expected format per line: "X to Y" where X and Y are integers.
+    function parseArrowDefs(str) {
+      let lines = str.split('\n')
+                     .map(s => s.trim())
+                     .filter(s => s.length > 0);
+      let defs = [];
+      for (let line of lines) {
+        let parts = line.split('to').map(s => s.trim());
+        if (parts.length === 2) {
+          let source = parseInt(parts[0], 10);
+          let target = parseInt(parts[1], 10);
+          if (!isNaN(source) && !isNaN(target)) {
+            defs.push({source: source, target: target});
+          }
+        }
+      }
+      return defs;
+    }
+    
+    function updateColorPreview(previewId, color) {
+      document.getElementById(previewId).style.backgroundColor = color;
+    }
+    
+    // Show/hide loading overlay
+    function showLoading() {
+      document.getElementById('loadingOverlay').classList.add('show');
+    }
+    
+    function hideLoading() {
+      document.getElementById('loadingOverlay').classList.remove('show');
+    }
+    
+    // Tab switching
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        const panelId = tab.getAttribute('data-panel');
+        
+        // Update active tab
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        
+        // Show selected panel
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+        document.getElementById(panelId).classList.add('active');
+        
+        // Update label positions panel if necessary
+        if (panelId === 'positions') {
+          updateLabelPositionsPanel();
+        }
+      });
+    });
+    
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toast-message').textContent = message;
+      toast.classList.add('show');
+      
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+    
+    // Create position select for an element
+    function createPositionSelect(id, options, defaultValue) {
+      const select = document.createElement('select');
+      select.className = 'position-select';
+      select.id = id;
+      
+      options.forEach(option => {
+        const optionEl = document.createElement('option');
+        optionEl.value = option.value;
+        optionEl.textContent = option.label;
+        select.appendChild(optionEl);
+      });
+      
+      select.value = defaultValue;
+      return select;
+    }
+    
+    // Update the label positions panel based on current grid settings
+    function updateLabelPositionsPanel() {
+      const numRows = parseInt(document.getElementById('numRows').value, 10);
+      const numColumns = parseInt(document.getElementById('numColumns').value, 10);
+      const numObjects = numRows * numColumns;
+      const objectLabels = parseCommaSeparated(document.getElementById('objectLabels').value);
+      const morphismLabels = parseCommaSeparated(document.getElementById('morphismLabels').value);
+      const arrowDefs = parseArrowDefs(document.getElementById('arrowDefs').value);
+      
+      // Update object positions table
+      const objectPositionTable = document.getElementById('objectPositionTable').querySelector('tbody');
+      objectPositionTable.innerHTML = '';
+      
+      for (let i = 0; i < numObjects; i++) {
+        const row = objectPositionTable.insertRow();
+        
+        const nodeCell = row.insertCell();
+        nodeCell.textContent = i + 1;
+        
+        const labelCell = row.insertCell();
+        labelCell.textContent = objectLabels[i % objectLabels.length] || `Object ${i + 1}`;
+        
+        const positionCell = row.insertCell();
+        const selectId = `objectPosition_${i}`;
+        positionCell.appendChild(createPositionSelect(selectId, objectPositions, "bottom"));
+      }
+      
+      // Update morphism positions table
+      const morphismPositionTable = document.getElementById('morphismPositionTable').querySelector('tbody');
+      morphismPositionTable.innerHTML = '';
+      
+      for (let i = 0; i < arrowDefs.length; i++) {
+        const row = morphismPositionTable.insertRow();
+        
+        const arrowCell = row.insertCell();
+        arrowCell.textContent = `${arrowDefs[i].source} to ${arrowDefs[i].target}`;
+        
+        const labelCell = row.insertCell();
+        labelCell.textContent = morphismLabels[i % morphismLabels.length] || `Morphism ${i + 1}`;
+        
+        const positionCell = row.insertCell();
+        const selectId = `morphismPosition_${i}`;
+        positionCell.appendChild(createPositionSelect(selectId, morphismPositions, "above"));
+      }
+    }
+    
+    // Calculate position for object label based on selected position
+    function getObjectLabelPosition(x, y, position, labelWidth, labelHeight) {
+      const offset = 25; // Distance from node center
+      
+      switch (position) {
+        case "top-left":
+          return { x: x - offset - labelWidth/2, y: y - offset };
+        case "top":
+          return { x: x, y: y - offset };
+        case "top-right":
+          return { x: x + offset + labelWidth/2, y: y - offset };
+        case "left":
+          return { x: x - offset - labelWidth/2, y: y };
+        case "right":
+          return { x: x + offset + labelWidth/2, y: y };
+        case "bottom-left":
+          return { x: x - offset - labelWidth/2, y: y + offset };
+        case "bottom":
+          return { x: x, y: y + offset };
+        case "bottom-right":
+          return { x: x + offset + labelWidth/2, y: y + offset };
+        default:
+          return { x: x, y: y + offset };
+      }
+    }
+    
+    // Calculate label position based on selected position for morphism
+    function getMorphismLabelPosition(sourceX, sourceY, targetX, targetY, position, angle) {
+      const midX = (sourceX + targetX) / 2;
+      const midY = (sourceY + targetY) / 2;
+      const offset = 20; // Distance from arrow
+      
+      if (Math.abs(sourceX - targetX) < 10) {
+        // Vertical arrow
+        const xOffset = position === "above" ? -offset : offset;
+        return { x: midX + xOffset, y: midY };
+      } else if (Math.abs(sourceY - targetY) < 10) {
+        // Horizontal arrow
+        const yOffset = position === "above" ? -offset : offset;
+        return { x: midX, y: midY + yOffset };
+      } else {
+        // Diagonal arrow
+        const perpAngle = angle + Math.PI/2;
+        const offsetSign = position === "above" ? -1 : 1;
+        return {
+          x: midX + offsetSign * offset * Math.cos(perpAngle),
+          y: midY + offsetSign * offset * Math.sin(perpAngle)
+        };
+      }
+    }
+    
+    function generateLatex() {
+      let numRows = parseInt(document.getElementById('numRows').value, 10);
+      let numColumns = parseInt(document.getElementById('numColumns').value, 10);
+      let numObjects = numRows * numColumns;
+      let objectLabels = parseCommaSeparated(document.getElementById('objectLabels').value);
+      let morphismLabels = parseCommaSeparated(document.getElementById('morphismLabels').value);
+      let arrowDefs = parseArrowDefs(document.getElementById('arrowDefs').value);
+      
+      // Get the two colours and remove the '#' for LaTeX.
+      let color1 = document.getElementById('color1').value;
+      let color2 = document.getElementById('color2').value;
+      let colorOneHTML = color1.startsWith('#') ? color1.slice(1) : color1;
+      let colorTwoHTML = color2.startsWith('#') ? color2.slice(1) : color2;
+      
+      // Compute combinations.
+      let objectCombinations = cartesianProduct(objectLabels, numObjects);
+      let arrowCombinations = cartesianProduct(morphismLabels, arrowDefs.length);
+      
+      // Assemble LaTeX document.
+      let latexLines = [];
+      latexLines.push("\\documentclass{article}");
+      // Load xcolor, tikz-cd, and mdframed.
+      latexLines.push("\\usepackage{xcolor}");
+      latexLines.push("\\usepackage{tikz-cd}");
+      latexLines.push("\\usepackage{mdframed}");
+      // Define colours using HTML option.
+      latexLines.push("\\definecolor{colorOne}{HTML}{" + colorOneHTML + "}");
+      latexLines.push("\\definecolor{colorTwo}{HTML}{" + colorTwoHTML + "}");
+      latexLines.push("\\begin{document}");
+      latexLines.push("\\section*{Generated Categories}");
+      
+      let diagramIndex = 0;
+      // For each combination, generate a diagram.
+      for (let objCombo of objectCombinations) {
+        for (let arrowCombo of arrowCombinations) {
+          // Build grid (row-major order).
+          let grid = [];
+          for (let r = 0; r < numRows; r++) {
+            let row = [];
+            for (let c = 0; c < numColumns; c++) {
+              let index = r * numColumns + c;
+              // Each object is a bullet with label as subscript.
+              row.push("{\\bullet}_{" + objCombo[index] + "}");
+            }
+            grid.push(row.join(" & "));
+          }
+          let gridString = grid.join(" \\\\ ");
+          
+          // Build arrow commands.
+          let arrowCommands = "";
+          for (let i = 0; i < arrowDefs.length; i++) {
+            let sourceIndex = arrowDefs[i].source;
+            let targetIndex = arrowDefs[i].target;
+            let sourceRow = Math.floor((sourceIndex - 1) / numColumns) + 1;
+            let sourceCol = ((sourceIndex - 1) % numColumns) + 1;
+            let targetRow = Math.floor((targetIndex - 1) / numColumns) + 1;
+            let targetCol = ((targetIndex - 1) % numColumns) + 1;
+            arrowCommands += "\\arrow[\"" + arrowCombo[i] + "\", from=" + sourceRow + "-" + sourceCol +
+                             ", to=" + targetRow + "-" + targetCol + "]";
+          }
+          
+          // Assemble the tikz-cd diagram in display math.
+          let diagram = "\\[\n\\begin{tikzcd} " + gridString + " " +
+                        arrowCommands + " \\end{tikzcd}\n\\]";
+          
+          // Wrap the diagram in an mdframed block with alternating background colours.
+          let chosenColor = (diagramIndex % 2 === 0) ? "colorOne" : "colorTwo";
+          let coloredDiagram = "\\begin{mdframed}[backgroundcolor=" + chosenColor + "]\n" +
+                                diagram + "\n\\end{mdframed}";
+          latexLines.push(coloredDiagram);
+          diagramIndex++;
+        }
+      }
+      
+      latexLines.push("\\end{document}");
+      
+      // Remove extra blank lines.
+      let finalLatex = latexLines.join("\n").replace(/^\s*[\r\n]/gm, "");
+      
+      // Create Blob and download file.
+      let blob = new Blob([finalLatex], {type: "text/plain;charset=utf-8"});
+      let url = URL.createObjectURL(blob);
+      let link = document.createElement("a");
+      link.href = url;
+      link.download = "categories.tex";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      showToast("LaTeX file downloaded successfully!");
+    }
+    
+    function generatePreview() {
+      let numRows = parseInt(document.getElementById('numRows').value, 10);
+      let numColumns = parseInt(document.getElementById('numColumns').value, 10);
+      let numObjects = numRows * numColumns;
+      let objectLabels = parseCommaSeparated(document.getElementById('objectLabels').value);
+      let morphismLabels = parseCommaSeparated(document.getElementById('morphismLabels').value);
+      let arrowDefs = parseArrowDefs(document.getElementById('arrowDefs').value);
+      
+      // Get the two colours
+      let color1 = document.getElementById('color1').value;
+      let color2 = document.getElementById('color2').value;
+      
+      // Compute combinations.
+      let objectCombinations = cartesianProduct(objectLabels, numObjects);
+      let arrowCombinations = cartesianProduct(morphismLabels, arrowDefs.length);
+      
+      // Clear the diagram preview
+      const diagramPreview = document.getElementById('diagramPreview');
+      diagramPreview.innerHTML = '';
+      
+      // Clear diagram selection dropdown
+      const diagramIndexSelect = document.getElementById('diagramIndex');
+      diagramIndexSelect.innerHTML = '<option value="all">All Diagrams (ZIP Archive)</option>';
+      
+      // Get label positions
+      const objectPositionSelections = {};
+      for (let i = 0; i < numObjects; i++) {
+        const select = document.getElementById(`objectPosition_${i}`);
+        objectPositionSelections[i] = select ? select.value : "bottom";
+      }
+      
+      const morphismPositionSelections = {};
+      for (let i = 0; i < arrowDefs.length; i++) {
+        const select = document.getElementById(`morphismPosition_${i}`);
+        morphismPositionSelections[i] = select ? select.value : "above";
+      }
+      
+      let diagramIndex = 0;
+      // For each combination, generate a diagram.
+      for (let objCombo of objectCombinations) {
+        for (let arrowCombo of arrowCombinations) {
+          // Create diagram container
+          const diagramDiv = document.createElement('div');
+          diagramDiv.className = 'diagram';
+          diagramDiv.id = `diagram-${diagramIndex}`;
+          diagramDiv.style.backgroundColor = (diagramIndex % 2 === 0) ? color1 : color2;
+          diagramDiv.style.padding = '20px';
+          
+          // Create SVG for diagram
+          const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+          svg.setAttribute("width", "100%");
+          svg.setAttribute("height", `${numRows * 120}px`);
+          svg.setAttribute("viewBox", `0 0 ${numColumns * 120} ${numRows * 120}`);
+          
+          // Set cell size based on grid dimensions
+          const cellWidth = 120;
+          const cellHeight = 120;
+          const nodeRadius = 20;
+          
+          // Track node positions for arrows
+          const nodePositions = [];
+          
+          // Draw nodes and object labels
+          for (let r = 0; r < numRows; r++) {
+            for (let c = 0; c < numColumns; c++) {
+              const index = r * numColumns + c;
+              const x = c * cellWidth + cellWidth / 2;
+              const y = r * cellHeight + cellHeight / 2;
+              
+              // Store node position
+              nodePositions[index] = { x, y };
+              
+              // Draw node
+              const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+              circle.setAttribute("cx", x);
+              circle.setAttribute("cy", y);
+              circle.setAttribute("r", nodeRadius);
+              circle.setAttribute("fill", "#333");
+              svg.appendChild(circle);
+              
+              // Get label position
+              const label = objCombo[index];
+              const labelWidth = label.length * 14;
+              const labelHeight = 22;
+              const labelPosition = getObjectLabelPosition(
+                x, y, 
+                objectPositionSelections[index], 
+                labelWidth, 
+                labelHeight
+              );
+              
+              // Draw label
+              const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+              text.setAttribute("x", labelPosition.x);
+              text.setAttribute("y", labelPosition.y);
+              text.setAttribute("text-anchor", "middle");
+              text.setAttribute("font-family", "serif");
+              text.setAttribute("font-size", "22");
+              text.setAttribute("font-weight", "bold");
+              text.textContent = label;
+              svg.appendChild(text);
+            }
+          }
+          
+          // Draw arrows
+          for (let i = 0; i < arrowDefs.length; i++) {
+            const sourceIndex = arrowDefs[i].source - 1;
+            const targetIndex = arrowDefs[i].target - 1;
+            
+            const sourceX = nodePositions[sourceIndex].x;
+            const sourceY = nodePositions[sourceIndex].y;
+            const targetX = nodePositions[targetIndex].x;
+            const targetY = nodePositions[targetIndex].y;
+            
+            // Calculate arrow path
+            const dx = targetX - sourceX;
+            const dy = targetY - sourceY;
+            const angle = Math.atan2(dy, dx);
+            
+            // Start and end points (adjusted for node radius)
+            const startX = sourceX + (nodeRadius + 2) * Math.cos(angle);
+            const startY = sourceY + (nodeRadius + 2) * Math.sin(angle);
+            const endX = targetX - (nodeRadius + 2) * Math.cos(angle);
+            const endY = targetY - (nodeRadius + 2) * Math.sin(angle);
+            
+            // Draw line
+            const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            line.setAttribute("x1", startX);
+            line.setAttribute("y1", startY);
+            line.setAttribute("x2", endX);
+            line.setAttribute("y2", endY);
+            line.setAttribute("stroke", "#333");
+            line.setAttribute("stroke-width", "3");
+            svg.appendChild(line);
+            
+            // Draw arrowhead
+            const arrowHead = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+            const arrowSize = 12;
+            const arrowPoints = [
+              endX, endY,
+              endX - arrowSize * Math.cos(angle - Math.PI/6), endY - arrowSize * Math.sin(angle - Math.PI/6),
+              endX - arrowSize * Math.cos(angle + Math.PI/6), endY - arrowSize * Math.sin(angle + Math.PI/6)
+            ].join(",");
+            arrowHead.setAttribute("points", arrowPoints);
+            arrowHead.setAttribute("fill", "#333");
+            svg.appendChild(arrowHead);
+            
+            // Get label position based on user selection
+            const labelPos = getMorphismLabelPosition(
+              startX, startY, endX, endY, 
+              morphismPositionSelections[i], 
+              angle
+            );
+            
+            // Add white background for label
+            const labelBg = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+            const textWidth = arrowCombo[i].length * 14;
+            const textHeight = 22;
+            labelBg.setAttribute("x", labelPos.x - textWidth/2 - 4);
+            labelBg.setAttribute("y", labelPos.y - textHeight/2 - 4);
+            labelBg.setAttribute("width", textWidth + 8);
+            labelBg.setAttribute("height", textHeight + 8);
+            labelBg.setAttribute("fill", "white");
+            labelBg.setAttribute("rx", "4");
+            labelBg.setAttribute("opacity", "0.9");
+            svg.appendChild(labelBg);
+            
+            // Draw label
+            const labelText = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            labelText.setAttribute("x", labelPos.x);
+            labelText.setAttribute("y", labelPos.y + textHeight/4);
+            labelText.setAttribute("text-anchor", "middle");
+            labelText.setAttribute("font-family", "serif");
+            labelText.setAttribute("font-size", "18");
+            labelText.setAttribute("fill", "#333");
+            labelText.textContent = arrowCombo[i];
+            svg.appendChild(labelText);
+          }
+          
+          diagramDiv.appendChild(svg);
+          diagramPreview.appendChild(diagramDiv);
+          
+          // Add option to select dropdown
+          const option = document.createElement('option');
+          option.value = diagramIndex;
+          option.textContent = `Diagram ${diagramIndex + 1}`;
+          diagramIndexSelect.appendChild(option);
+          
+          diagramIndex++;
+        }
+      }
+      
+      // Switch to preview tab
+      document.querySelector('.tab[data-panel="preview"]').click();
+      
+      showToast("Diagrams generated successfully!");
+    }
+    
+    function exportPNG() {
+      const selectedIndex = document.getElementById('diagramIndex').value;
+      const width = parseInt(document.getElementById('exportWidth').value);
+      const height = parseInt(document.getElementById('exportHeight').value);
+      
+      if (selectedIndex === 'all') {
+        // Export all diagrams as ZIP
+        exportAllDiagramsAsZip(width, height);
+      } else {
+        // Export selected diagram
+        const diagram = document.getElementById(`diagram-${selectedIndex}`);
+        if (diagram) {
+          exportSingleDiagramAsPNG(diagram, width, height, parseInt(selectedIndex));
+        }
+      }
+    }
+    
+    function exportSingleDiagramAsPNG(diagramElement, width, height, index) {
+      // Create a canvas element
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      
+      // Set background color
+      ctx.fillStyle = window.getComputedStyle(diagramElement).backgroundColor;
+      ctx.fillRect(0, 0, width, height);
+      
+      // Convert SVG to data URL
+      const svg = diagramElement.querySelector('svg');
+      const svgData = new XMLSerializer().serializeToString(svg);
+      const svgBlob = new Blob([svgData], {type: 'image/svg+xml;charset=utf-8'});
+      const url = URL.createObjectURL(svgBlob);
+      
+      // Draw SVG on canvas
+      const img = new Image();
+      img.onload = function() {
+        ctx.drawImage(img, 0, 0, width, height);
+        URL.revokeObjectURL(url);
+        
+        // Convert canvas to PNG and download
+        const pngUrl = canvas.toDataURL('image/png');
+        const link = document.createElement('a');
+        link.download = `category-diagram-${index+1}.png`;
+        link.href = pngUrl;
+        link.click();
+        
+        showToast(`Diagram ${index+1} exported as PNG`);
+      };
+      img.src = url;
+    }
+    
+    // Export all diagrams as a ZIP file
+    async function exportAllDiagramsAsZip(width, height) {
+      showLoading();
+      try {
+        const diagrams = document.querySelectorAll('.diagram');
+        if (diagrams.length === 0) {
+          showToast("No diagrams to export. Generate diagrams first.");
+          hideLoading();
+          return;
+        }
+        
+        // Create a new JSZip instance
+        const zip = new JSZip();
+        const promises = [];
+        
+        // Process each diagram
+        for (let i = 0; i < diagrams.length; i++) {
+          const diagram = diagrams[i];
+          const promise = createPNGFromDiagram(diagram, width, height, i)
+            .then(pngData => {
+              // Remove the data URL prefix to get just the base64 data
+              const base64Data = pngData.split(',')[1];
+              zip.file(`category-diagram-${i+1}.png`, base64Data, {base64: true});
+            });
+          promises.push(promise);
+        }
+        
+        // Wait for all PNG conversions to complete
+        await Promise.all(promises);
+        
+        // Generate the ZIP file
+        const zipBlob = await zip.generateAsync({type: 'blob'});
+        
+        // Download the ZIP file
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(zipBlob);
+        link.download = 'category-diagrams.zip';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        showToast(`All diagrams exported as ZIP file`);
+      } catch (error) {
+        console.error("Error creating ZIP file:", error);
+        showToast("Error creating ZIP file. See console for details.");
+      } finally {
+        hideLoading();
+      }
+    }
+    
+    // Create a PNG data URL from a diagram element
+    function createPNGFromDiagram(diagramElement, width, height, index) {
+      return new Promise((resolve, reject) => {
+        // Create a canvas element
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        
+        // Set background color
+        ctx.fillStyle = window.getComputedStyle(diagramElement).backgroundColor;
+        ctx.fillRect(0, 0, width, height);
+        
+        // Convert SVG to data URL
+        const svg = diagramElement.querySelector('svg');
+        const svgData = new XMLSerializer().serializeToString(svg);
+        const svgBlob = new Blob([svgData], {type: 'image/svg+xml;charset=utf-8'});
+        const url = URL.createObjectURL(svgBlob);
+        
+        // Draw SVG on canvas
+        const img = new Image();
+        img.onload = function() {
+          ctx.drawImage(img, 0, 0, width, height);
+          URL.revokeObjectURL(url);
+          
+          // Convert canvas to PNG data URL
+          const pngUrl = canvas.toDataURL('image/png');
+          resolve(pngUrl);
+        };
+        img.onerror = function(error) {
+          URL.revokeObjectURL(url);
+          reject(error);
+        };
+        img.src = url;
+      });
+    }
+    
+    // Initialize label positions panel
+    document.addEventListener('DOMContentLoaded', function() {
+      updateLabelPositionsPanel();
+    });
+  </script>
+</body>
+</html>
