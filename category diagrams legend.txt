@@ -1,0 +1,3 @@
+object = executable structured algorithm
+morphism a = object input
+morphism t = object transform
