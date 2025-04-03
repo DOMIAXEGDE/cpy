@@ -1,0 +1,36 @@
+{
+  "patterns": [
+    {
+      "pattern": "0",
+      "response": "0[\n\n1{\nuse 0.2 from 0.3 to construct your .json training file, 0.5\n}\n\n2{\nsmall-llm-congfig\n}\n\n3{\nmain menu of 0.4\n}\n\n4{\nhttps://www.domalec.com\n}\n\n5{\ninteract with the 0.6, via 0.3\n}\n\n6{\nsmall-llm\n}\n\n]",
+      "factIds": [
+        "1"
+      ],
+      "constraints": {
+        "exactMatch": true,
+        "substringMatch": false,
+        "caseSensitive": false
+      },
+      "id": "pattern_1743693344117_744"
+    }
+  ],
+  "facts": {
+    "1": {
+      "text": "h",
+      "source": "DAC",
+      "domain": "general",
+      "trusted": true,
+      "timestamp": 1743693334653,
+      "id": 1
+    },
+    "2": {
+      "text": "s",
+      "source": "DAC",
+      "domain": "general",
+      "trusted": true,
+      "timestamp": 1743693605605,
+      "id": 2
+    }
+  },
+  "factIdCounter": 3
+}

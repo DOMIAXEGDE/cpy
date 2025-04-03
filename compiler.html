@@ -1,0 +1,1734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuantMatrix Encoder/Decoder Suite</title>
+    <style>
+        :root {
+            /* Color scheme */
+            --bg-dark: #121218;
+            --bg-main: #1a1a24;
+            --bg-light: #222233;
+            --accent-blue: #0088cc;
+            --accent-purple: #6a5acd;
+            --accent-green: #00cc88;
+            --accent-red: #ff3366;
+            --text-bright: #ffffff;
+            --text-normal: #ccccdd;
+            --text-dim: #9999aa;
+            --border: #333344;
+            --highlight: #3355bb;
+            --digit-color: #33ccff;
+            --keyword-color: #ff6688;
+            --grid-line: #333344;
+            
+            /* Spacing */
+            --spacing-xs: 4px;
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', 'Arial', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-normal);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Header */
+        .matrix-header {
+            height: 60px;
+            background-color: var(--bg-dark);
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            border-bottom: 1px solid var(--border);
+            overflow: hidden;
+        }
+        
+        .grid-lines {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+        
+        .vline {
+            position: absolute;
+            top: 0;
+            width: 1px;
+            height: 100%;
+            background-color: var(--grid-line);
+        }
+        
+        .hline {
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background-color: var(--grid-line);
+        }
+        
+        .header-title {
+            color: var(--accent-blue);
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+            z-index: 1;
+        }
+        
+        .math-symbols {
+            display: flex;
+            justify-content: center;
+            z-index: 1;
+        }
+        
+        .math-symbol {
+            color: var(--accent-purple);
+            font-size: 16px;
+            margin: 0 20px;
+        }
+        
+        /* Main container */
+        .container {
+            flex: 1;
+            padding: var(--spacing-md);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Tabs */
+        .tabs {
+            display: flex;
+            background-color: var(--bg-dark);
+            border-bottom: 1px solid var(--border);
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .tab {
+            padding: var(--spacing-md) var(--spacing-lg);
+            background-color: var(--bg-light);
+            color: var(--text-normal);
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            outline: none;
+        }
+        
+        .tab.active {
+            background-color: var(--accent-blue);
+            color: var(--text-bright);
+        }
+        
+        /* Tab content */
+        .tab-content {
+            display: none;
+            flex: 1;
+        }
+        
+        .tab-content.active {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Binary labels */
+        .binary-label {
+            color: var(--text-dim);
+            font-family: monospace;
+            font-size: 8px;
+            margin-bottom: var(--spacing-xs);
+        }
+        
+        /* Frames */
+        .frame {
+            border: 1px solid var(--border);
+            padding: var(--spacing-md);
+            margin-bottom: var(--spacing-md);
+            background-color: var(--bg-main);
+            border-radius: 4px;
+        }
+        
+        .frame-title {
+            color: var(--accent-blue);
+            font-weight: bold;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .frame-subtitle {
+            color: var(--accent-purple);
+            font-weight: bold;
+            margin-top: var(--spacing-md);
+            margin-bottom: var(--spacing-xs);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: var(--spacing-xs);
+        }
+        
+        /* Input controls */
+        .input-row {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .input-label {
+            color: var(--text-normal);
+            margin-right: var(--spacing-xs);
+        }
+        
+        .input-field {
+            background-color: var(--bg-light);
+            border: 1px solid var(--border);
+            color: var(--text-bright);
+            padding: var(--spacing-sm);
+            font-family: inherit;
+            border-radius: 4px;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        /* Buttons */
+        .btn {
+            background-color: var(--accent-blue);
+            color: var(--text-bright);
+            border: none;
+            padding: var(--spacing-sm) var(--spacing-md);
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        
+        .btn:hover {
+            background-color: var(--highlight);
+        }
+        
+        .btn-green {
+            background-color: var(--accent-green);
+        }
+        
+        .btn-green:hover {
+            background-color: #00bb77;
+        }
+        
+        .btn-purple {
+            background-color: var(--accent-purple);
+        }
+        
+        .btn-purple:hover {
+            background-color: #5949b8;
+        }
+        
+        /* Text displays */
+        .text-display {
+            flex: 1;
+            background-color: var(--bg-light);
+            border: 1px solid var(--border);
+            color: var(--text-bright);
+            font-family: 'Consolas', monospace;
+            padding: var(--spacing-md);
+            overflow: auto;
+            white-space: pre-wrap;
+            border-radius: 4px;
+            min-height: 300px;
+        }
+        
+        .text-display-small {
+            flex: 0 0 auto;
+            background-color: var(--bg-light);
+            border: 1px solid var(--border);
+            color: var(--text-bright);
+            font-family: 'Consolas', monospace;
+            padding: var(--spacing-md);
+            overflow: auto;
+            white-space: pre-wrap;
+            border-radius: 4px;
+            min-height: 150px;
+            max-height: 200px;
+            margin-bottom: var(--spacing-md);
+        }
+        
+        /* Split view */
+        .split-view {
+            display: flex;
+            gap: var(--spacing-md);
+            flex: 1;
+        }
+        
+        .split-pane {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Status bar */
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--bg-dark);
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-top: 1px solid var(--border);
+        }
+        
+        .status-message {
+            color: var(--accent-green);
+        }
+        
+        /* Progress bar */
+        .progress-container {
+            width: 200px;
+            height: 10px;
+            background-color: var(--bg-light);
+            border: 1px solid var(--border);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background-color: var(--accent-green);
+            width: 100%;
+            transition: width 0.3s;
+        }
+        
+        /* Dialog */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background-color: var(--bg-main);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: var(--spacing-md);
+            width: 400px;
+            max-width: 90%;
+        }
+        
+        .modal-title {
+            color: var(--text-bright);
+            margin-bottom: var(--spacing-md);
+            font-weight: bold;
+        }
+        
+        .modal-body {
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+        }
+        
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--bg-main);
+            color: var(--text-bright);
+            padding: var(--spacing-md);
+            border-radius: 4px;
+            border-left: 4px solid var(--accent-green);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: transform 0.3s, opacity 0.3s;
+        }
+        
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        /* Syntax highlighting */
+        .blue { color: var(--accent-blue); }
+        .green { color: var(--accent-green); }
+        .red { color: var(--accent-red); }
+        .purple { color: var(--accent-purple); }
+        .digit { color: var(--digit-color); }
+        .keyword { color: var(--keyword-color); }
+        .preprocessor { color: var(--accent-purple); }
+        .comment { color: var(--text-dim); }
+        .string { color: var(--accent-green); }
+        .number { color: var(--digit-color); }
+        
+        /* Corner accent */
+        .corner-accent {
+            color: var(--accent-blue);
+            margin-right: var(--spacing-md);
+        }
+        
+        /* Section headers */
+        .section-header {
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        /* Character frequency table */
+        .freq-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: var(--spacing-sm);
+            margin-bottom: var(--spacing-md);
+            background-color: var(--bg-light);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .freq-table th, 
+        .freq-table td {
+            padding: var(--spacing-xs) var(--spacing-sm);
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .freq-table th {
+            background-color: var(--bg-dark);
+            color: var(--accent-blue);
+            font-weight: bold;
+        }
+        
+        .freq-table tr:hover {
+            background-color: var(--bg-dark);
+        }
+        
+        .freq-table td.char-cell {
+            font-family: 'Consolas', monospace;
+            color: var(--accent-green);
+        }
+        
+        .freq-table td.count-cell {
+            font-family: 'Consolas', monospace;
+            color: var(--digit-color);
+            text-align: right;
+        }
+        
+        .freq-table td.percent-cell {
+            font-family: 'Consolas', monospace;
+            color: var(--accent-purple);
+            text-align: right;
+        }
+        
+        /* Base conversion controls */
+        .base-conversion {
+            background-color: var(--bg-light);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: var(--spacing-md);
+            margin-top: var(--spacing-md);
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .base-chars {
+            font-family: 'Consolas', monospace;
+            letter-spacing: 1px;
+        }
+        
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .split-view {
+                flex-direction: column;
+            }
+            
+            .input-row {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .input-row > * {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Matrix-style header -->
+    <div class="matrix-header">
+        <div class="grid-lines" id="grid-lines"></div>
+        <div class="header-title">QUANTMATRIX ENCODER/DECODER</div>
+        <div class="math-symbols">
+            <span class="math-symbol">∑</span>
+            <span class="math-symbol">∫</span>
+            <span class="math-symbol">∂</span>
+            <span class="math-symbol">√</span>
+            <span class="math-symbol">π</span>
+            <span class="math-symbol">Δ</span>
+            <span class="math-symbol">Ω</span>
+        </div>
+    </div>
+    
+    <!-- Main container -->
+    <div class="container">
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active" data-tab="charmap-tab">CHARACTER MAP</button>
+            <button class="tab" data-tab="encode-tab">ENCODE</button>
+            <button class="tab" data-tab="decode-tab">DECODE</button>
+        </div>
+        
+        <!-- Character Map Tab -->
+        <div class="tab-content active" id="charmap-tab">
+            <div class="binary-label">01001010110100101010010101</div>
+            
+            <div class="frame">
+                <div class="input-row">
+                    <span class="corner-accent">■</span>
+                    <span class="input-label">CHARACTER MAP FILE NUMBER:</span>
+                    <input type="text" id="charmap-file-entry" class="input-field" maxlength="20">
+                    <button id="browse-charmap-btn" class="btn">BROWSE FILES</button>
+                    <input type="file" id="charmap-file-input" class="file-input" accept=".txt">
+                    <button id="load-charmap-btn" class="btn">LOAD MAP</button>
+                </div>
+            </div>
+            
+            <!-- Base Conversion Section -->
+            <div class="frame">
+                <div class="frame-title">BASE CONVERSION SETTINGS</div>
+                <p class="frame-subtitle">REMAP BASE 10 INDICES TO CUSTOM BASE</p>
+                
+                <div class="input-row">
+                    <span class="input-label">ENABLE BASE CONVERSION:</span>
+                    <input type="checkbox" id="enable-base-conversion">
+                </div>
+                
+                <div class="input-row">
+                    <span class="input-label">TARGET BASE:</span>
+                    <input type="number" id="target-base" class="input-field" min="2" max="36" value="16">
+                    <span class="input-label">CHARACTERS:</span>
+                    <input type="text" id="base-chars" class="input-field base-chars" value="0123456789ABCDEF">
+                </div>
+                
+                <div class="input-row">
+                    <button id="update-base-btn" class="btn btn-purple">UPDATE BASE SETTINGS</button>
+                    <button id="reset-base-btn" class="btn">RESET TO DECIMAL</button>
+                </div>
+                
+                <div id="base-conversion-preview" class="text-display-small">
+                    Base conversion preview will appear here...
+                </div>
+            </div>
+            
+            <div class="frame">
+                <div class="frame-title">CHARACTER MATRIX VISUALIZATION</div>
+                <div class="text-display" id="charmap-display">
+                    &lt; Character mapping will be displayed here &gt;
+                    Load a character map file to begin...
+                </div>
+            </div>
+        </div>
+        
+        <!-- Encode Tab -->
+        <div class="tab-content" id="encode-tab">
+            <div class="section-header blue">▶▶▶ ENCODING MATRIX ▶▶▶</div>
+            <div class="binary-label" style="text-align: right;">0x01 0x02 0x03 0x04</div>
+            
+            <div class="frame">
+                <div class="input-row">
+                    <span class="input-label">SOURCE CODE FILE:</span>
+                    <input type="text" id="encode-input-entry" class="input-field" style="flex: 1;">
+                    <button id="browse-encode-btn" class="btn">BROWSE</button>
+                    <input type="file" id="encode-file-input" class="file-input">
+                    
+                    <span style="margin: 0 10px;">|</span>
+                    
+                    <span class="input-label">OUTPUT FILE ID:</span>
+                    <input type="text" id="encode-output-entry" class="input-field" maxlength="10">
+                    <button id="encode-btn" class="btn">▶ ENCODE</button>
+                </div>
+            </div>
+            
+            <!-- Character Frequency Report -->
+            <div class="frame" id="char-freq-section" style="display: none;">
+                <div class="frame-title">CHARACTER FREQUENCY REPORT</div>
+                <div class="input-row">
+                    <button id="copy-freq-report-btn" class="btn btn-green">COPY REPORT</button>
+                    <button id="download-freq-report-btn" class="btn">DOWNLOAD REPORT</button>
+                </div>
+                <div class="freq-container">
+                    <table class="freq-table" id="char-freq-table">
+                        <thead>
+                            <tr>
+                                <th>Character</th>
+                                <th>Index</th>
+                                <th>Count</th>
+                                <th>Percentage</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Frequency data will be added here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="frame" style="flex: 1; display: flex; flex-direction: column;">
+                <div class="frame-title">CODE TRANSFORMATION MATRIX</div>
+                <div class="split-view">
+                    <div class="split-pane">
+                        <div class="frame-title">SOURCE CODE</div>
+                        <div class="text-display" id="encode-input-preview"></div>
+                    </div>
+                    <div class="split-pane">
+                        <div class="frame-title">ENCODED OUTPUT</div>
+                        <div class="text-display" id="encode-output-preview"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Decode Tab -->
+        <div class="tab-content" id="decode-tab">
+            <div class="section-header purple">◀◀◀ DECODING MATRIX ◀◀◀</div>
+            <div class="binary-label" style="text-align: right;">MATRIX TRANSLATION ACTIVE</div>
+            
+            <div class="frame">
+                <div class="input-row">
+                    <span class="input-label">ENCODED FILE ID:</span>
+                    <input type="text" id="decode-input-entry" class="input-field" maxlength="20">
+                    <button id="browse-decode-btn" class="btn">BROWSE</button>
+                    <input type="file" id="decode-file-input" class="file-input">
+                    
+                    <span style="margin: 0 10px;">|</span>
+                    
+                    <span class="input-label">OUTPUT FILE ID:</span>
+                    <input type="text" id="decode-output-entry" class="input-field" maxlength="10">
+                    <button id="decode-btn" class="btn btn-purple">◀ DECODE</button>
+                </div>
+            </div>
+            
+            <div class="frame" style="flex: 1; display: flex; flex-direction: column;">
+                <div class="frame-title">REVERSE ENGINEERING MATRIX</div>
+                <div class="split-view">
+                    <div class="split-pane">
+                        <div class="frame-title">ENCODED INPUT</div>
+                        <div class="text-display" id="decode-input-preview"></div>
+                    </div>
+                    <div class="split-pane">
+                        <div class="frame-title">DECODED SOURCE CODE</div>
+                        <div class="text-display" id="decode-output-preview"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Status bar -->
+    <div class="status-bar">
+        <div class="status-message" id="status-bar">SYSTEM READY • AWAITING OPERATION</div>
+        <div class="progress-container">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
+    </div>
+    
+    <!-- Dialog for messages -->
+    <div class="modal" id="message-dialog">
+        <div class="modal-content">
+            <div class="modal-title" id="dialog-title">MESSAGE</div>
+            <div class="modal-body" id="dialog-message"></div>
+            <div class="modal-footer">
+                <button class="btn" id="dialog-ok-btn">OK</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Toast notification -->
+    <div class="toast" id="toast-notification"></div>
+    
+    <script>
+        /**
+         * QuantMatrix Encoder/Decoder Suite - JavaScript Implementation
+         * A web application for encoding and decoding text files
+         * using character mapping with optional base conversion
+         */
+        
+        // Application state
+        const app = {
+            // Character mapping data
+            charMap: [],
+            charMapSize: 0,
+            isMapLoaded: false,
+            
+            // Base conversion settings
+            useBaseConversion: false,
+            targetBase: 16,
+            baseChars: "0123456789ABCDEF",
+            
+            // Character frequency data
+            charFrequency: {},
+            totalCharCount: 0,
+            
+            // Syntax highlighting patterns
+            cKeywords: [
+                "int", "char", "void", "if", "else", "for", "while", "return",
+                "break", "continue", "switch", "case", "default", "struct",
+                "typedef", "union", "extern", "static", "const", "enum", "sizeof"
+            ]
+        };
+        
+        // Initialize the application
+        function initApp() {
+            // Create grid lines for the matrix header
+            createGridLines();
+            
+            // Set up tab switching
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    
+                    tab.classList.add('active');
+                    const tabId = tab.getAttribute('data-tab');
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+            
+            // Set up file browsing
+            document.getElementById('browse-charmap-btn').addEventListener('click', () => {
+                document.getElementById('charmap-file-input').click();
+            });
+            
+            document.getElementById('charmap-file-input').addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    const file = e.target.files[0];
+                    // Extract file number if possible
+                    let fileName = file.name;
+                    let fileNumber = fileName.split('.')[0];
+                    
+                    // Check if fileNumber is numeric
+                    if (/^\d+$/.test(fileNumber)) {
+                        document.getElementById('charmap-file-entry').value = fileNumber;
+                    } else {
+                        document.getElementById('charmap-file-entry').value = file.name;
+                    }
+                }
+            });
+            
+            document.getElementById('browse-encode-btn').addEventListener('click', () => {
+                document.getElementById('encode-file-input').click();
+            });
+            
+            document.getElementById('encode-file-input').addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    const file = e.target.files[0];
+                    document.getElementById('encode-input-entry').value = file.name;
+                    
+                    // Load file for preview
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        const content = event.target.result;
+                        document.getElementById('encode-input-preview').textContent = content;
+                        
+                        // Syntax highlighting for C files
+                        if (file.name.endsWith('.c') || file.name.endsWith('.h')) {
+                            highlightCCode('encode-input-preview');
+                        }
+                        
+                        setProgressValue(0.5);
+                        setStatusMessage('SOURCE CODE LOADED • READY FOR ENCODING');
+                    };
+                    reader.readAsText(file);
+                }
+            });
+            
+            document.getElementById('browse-decode-btn').addEventListener('click', () => {
+                document.getElementById('decode-file-input').click();
+            });
+            
+            document.getElementById('decode-file-input').addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    const file = e.target.files[0];
+                    
+                    // Extract file number if possible
+                    let fileName = file.name;
+                    let fileNumber = fileName.split('.')[0];
+                    
+                    // Check if fileNumber is numeric
+                    if (/^\d+$/.test(fileNumber)) {
+                        document.getElementById('decode-input-entry').value = fileNumber;
+                    } else {
+                        document.getElementById('decode-input-entry').value = file.name;
+                    }
+                    
+                    // Load file for preview
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        const content = event.target.result;
+                        const previewElement = document.getElementById('decode-input-preview');
+                        previewElement.textContent = content;
+                        previewElement.innerHTML = `<span class="digit">${previewElement.innerHTML}</span>`;
+                        
+                        setProgressValue(0.5);
+                        setStatusMessage('ENCODED FILE LOADED • READY FOR DECODING');
+                    };
+                    reader.readAsText(file);
+                }
+            });
+            
+            // Set up operation buttons
+            document.getElementById('load-charmap-btn').addEventListener('click', loadCharMap);
+            document.getElementById('encode-btn').addEventListener('click', encodeFile);
+            document.getElementById('decode-btn').addEventListener('click', decodeFile);
+            
+            // Set up base conversion controls
+            document.getElementById('update-base-btn').addEventListener('click', updateBaseSettings);
+            document.getElementById('reset-base-btn').addEventListener('click', resetBaseSettings);
+            
+            // Set up character frequency report buttons
+            document.getElementById('copy-freq-report-btn').addEventListener('click', copyFrequencyReport);
+            document.getElementById('download-freq-report-btn').addEventListener('click', downloadFrequencyReport);
+            
+            // Set up dialog
+            document.getElementById('dialog-ok-btn').addEventListener('click', () => {
+                document.getElementById('message-dialog').style.display = 'none';
+            });
+            
+            // Initialize base conversion preview
+            updateBaseConversionPreview();
+        }
+        
+        // Create grid lines for the matrix header
+        function createGridLines() {
+            const gridLinesContainer = document.getElementById('grid-lines');
+            
+            // Create vertical lines
+            for (let i = 0; i < 20; i++) {
+                const vline = document.createElement('div');
+                vline.className = 'vline';
+                vline.style.left = `${i * 55}px`;
+                gridLinesContainer.appendChild(vline);
+            }
+            
+            // Create horizontal lines
+            for (let i = 0; i < 3; i++) {
+                const hline = document.createElement('div');
+                hline.className = 'hline';
+                hline.style.top = `${i * 20}px`;
+                gridLinesContainer.appendChild(hline);
+            }
+        }
+        
+        // Update base conversion settings
+        function updateBaseSettings() {
+            const enableCheckbox = document.getElementById('enable-base-conversion');
+            const baseInput = document.getElementById('target-base');
+            const charsInput = document.getElementById('base-chars');
+            
+            // Get values
+            app.useBaseConversion = enableCheckbox.checked;
+            app.targetBase = parseInt(baseInput.value, 10);
+            app.baseChars = charsInput.value;
+            
+            // Validate base
+            if (app.targetBase < 2) {
+                app.targetBase = 2;
+                baseInput.value = 2;
+                showToast("Base must be at least 2, adjusted automatically.");
+            }
+            
+            // Validate base chars
+            if (app.baseChars.length < app.targetBase) {
+                showDialog('ERROR', `You must provide at least ${app.targetBase} unique characters for base ${app.targetBase}.`);
+                return;
+            }
+            
+            // Check for duplicate characters
+            const charSet = new Set(app.baseChars);
+            if (charSet.size < app.targetBase) {
+                showDialog('ERROR', `All characters for base ${app.targetBase} must be unique.`);
+                return;
+            }
+            
+            // Update the preview
+            updateBaseConversionPreview();
+            
+            showToast(`Base conversion settings updated: ${app.useBaseConversion ? 'Enabled' : 'Disabled'}, Base ${app.targetBase}`);
+        }
+        
+        // Reset base conversion settings
+        function resetBaseSettings() {
+            document.getElementById('enable-base-conversion').checked = false;
+            document.getElementById('target-base').value = 16;
+            document.getElementById('base-chars').value = "0123456789ABCDEF";
+            
+            app.useBaseConversion = false;
+            app.targetBase = 16;
+            app.baseChars = "0123456789ABCDEF";
+            
+            updateBaseConversionPreview();
+            
+            showToast("Base conversion settings reset to default (decimal)");
+        }
+        
+        // Update base conversion preview
+        function updateBaseConversionPreview() {
+            const previewElement = document.getElementById('base-conversion-preview');
+            
+            if (!app.useBaseConversion) {
+                previewElement.innerHTML = "<span class='red'>Base conversion is currently disabled.</span>\n\n" +
+                                          "Encoded output will use space-delimited decimal indices (base 10).\n" +
+                                          "Example: 1 2 3 4 represents indices 1, 2, 3, 4";
+                return;
+            }
+            
+            // Create a preview with sample conversions
+            let preview = `<span class='green'>Base conversion is enabled: Converting to base ${app.targetBase}</span>\n\n`;
+            preview += `Using characters: <span class='purple'>${app.baseChars.substring(0, app.targetBase)}</span>\n\n`;
+            preview += "Example conversions:\n";
+            
+            // Show some example conversions
+            for (let i = 1; i <= 20; i++) {
+                const converted = convertToBase(i, app.targetBase, app.baseChars);
+                preview += `Decimal ${i} → <span class='digit'>${converted}</span>\n`;
+            }
+            
+            previewElement.innerHTML = preview;
+        }
+        
+        // Convert a decimal number to the target base
+        function convertToBase(decimalNum, base, chars) {
+            if (base === 10) return decimalNum.toString();
+            
+            let result = "";
+            let num = decimalNum;
+            
+            while (num > 0) {
+                result = chars[num % base] + result;
+                num = Math.floor(num / base);
+            }
+            
+            return result || chars[0]; // Return at least the zero character if number is 0
+        }
+        
+        // Convert from custom base back to decimal
+        function convertFromBase(baseNum, base, chars) {
+            if (base === 10) return parseInt(baseNum, 10);
+            
+            let result = 0;
+            let power = 1;
+            
+            // Process the string from right to left
+            for (let i = baseNum.length - 1; i >= 0; i--) {
+                const char = baseNum[i];
+                const digitValue = chars.indexOf(char);
+                
+                if (digitValue === -1 || digitValue >= base) {
+                    // Invalid character for this base
+                    return NaN;
+                }
+                
+                result += digitValue * power;
+                power *= base;
+            }
+            
+            return result;
+        }
+        
+        // Load character map
+        function loadCharMap() {
+            const fileInput = document.getElementById('charmap-file-entry').value.trim();
+            
+            if (!fileInput) {
+                showDialog('WARNING', 'Please enter a character map file number or path.');
+                return;
+            }
+            
+            // Animation effect
+            setProgressValue(0);
+            
+            // Process file input - could be a number or a path
+            let filename;
+            if (/^\d+$/.test(fileInput)) {
+                filename = fileInput + '.txt';
+            } else {
+                filename = fileInput;
+            }
+            
+            setStatusMessage('LOADING CHARACTER MAP...');
+            
+            // Try to load the file from an input element if we have one
+            const fileInputElement = document.getElementById('charmap-file-input');
+            if (fileInputElement.files.length > 0) {
+                const file = fileInputElement.files[0];
+                const reader = new FileReader();
+                
+                reader.onload = (e) => processCharMapContent(e.target.result, filename);
+                reader.onerror = () => {
+                    showDialog('ERROR', 'Failed to read the character map file.');
+                    setProgressValue(0);
+                    setStatusMessage('ERROR: Failed to read file');
+                };
+                
+                reader.readAsText(file);
+            } else {
+                // Simulate loading from the local file in our example - in a real app
+                // you would fetch this from your server
+                simulateFileLoad(filename);
+            }
+        }
+        
+        // Simulate loading a file (for the demo)
+        function simulateFileLoad(filename) {
+            // Simulate a delay
+            setProgressValue(0.2);
+            
+            setTimeout(() => {
+                // Generate a simple map for demo purposes
+                const demoMap = 
+                    "1\ta\n" +
+                    "2\tb\n" +
+                    "3\tc\n" +
+                    "4\td\n" +
+                    "5\te\n" +
+                    "6\tf\n" +
+                    "7\tg\n" +
+                    "8\th\n" +
+                    "9\ti\n" +
+                    "10\tj\n" +
+                    "11\tk\n" +
+                    "12\tl\n" +
+                    "13\tm\n" +
+                    "14\tn\n" +
+                    "15\to\n" +
+                    "16\tp\n" +
+                    "17\tq\n" +
+                    "18\tr\n" +
+                    "19\ts\n" +
+                    "20\tt\n" +
+                    "21\tu\n" +
+                    "22\tv\n" +
+                    "23\tw\n" +
+                    "24\tx\n" +
+                    "25\ty\n" +
+                    "26\tz\n" +
+                    "27\tA\n" +
+                    "28\tB\n" +
+                    "29\tC\n" +
+                    "30\tD\n" +
+                    "31\tE\n" +
+                    "32\tF\n" +
+                    "33\tG\n" +
+                    "34\tH\n" +
+                    "35\tI\n" +
+                    "36\tJ\n" +
+                    "37\tK\n" +
+                    "38\tL\n" +
+                    "39\tM\n" +
+                    "40\tN\n" +
+                    "41\tO\n" +
+                    "42\tP\n" +
+                    "43\tQ\n" +
+                    "44\tR\n" +
+                    "45\tS\n" +
+                    "46\tT\n" +
+                    "47\tU\n" +
+                    "48\tV\n" +
+                    "49\tW\n" +
+                    "50\tX\n" +
+                    "51\tY\n" +
+                    "52\tZ\n" +
+                    "53\t0\n" +
+                    "54\t1\n" +
+                    "55\t2\n" +
+                    "56\t3\n" +
+                    "57\t4\n" +
+                    "58\t5\n" +
+                    "59\t6\n" +
+                    "60\t7\n" +
+                    "61\t8\n" +
+                    "62\t9\n" +
+                    "63\t+\n" +
+                    "64\t-\n" +
+                    "65\t*\n" +
+                    "66\t/\n" +
+                    "67\t%\n" +
+                    "68\t=\n" +
+                    "69\t!\n" +
+                    "70\t<\n" +
+                    "71\t>\n" +
+                    "72\t&\n" +
+                    "73\t|\n" +
+                    "74\t^\n" +
+                    "75\t~\n" +
+                    "76\t?\n" +
+                    "77\t:\n" +
+                    "78\t;\n" +
+                    "79\t,\n" +
+                    "80\t.\n" +
+                    "81\t(\n" +
+                    "82\t)\n" +
+                    "83\t[\n" +
+                    "84\t]\n" +
+                    "85\t{\n" +
+                    "86\t}\n" +
+                    "87\t#\n" +
+                    "88\t\"\n" +
+                    "89\t'\n" +
+                    "90\t\\\n" +
+                    "91\t_\n" +
+                    "92\t@\n" +
+                    "93\t$\n" +
+                    "94\t`\n" +
+                    "95\t\\t\n" +
+                    "96\tSpace\n" +
+                    "97\t\\n\n" +
+                    "98\t\\0\n";
+                    
+                processCharMapContent(demoMap, filename);
+            }, 500);
+        }
+        
+        // Process character map content
+        function processCharMapContent(content, filename) {
+            setProgressValue(0.4);
+            
+            // Reset the character map
+            app.charMap = [];
+            app.charMapSize = 0;
+            app.isMapLoaded = false;
+            
+            // Buffer for the character map text display
+            let charMapText = '';
+            
+            // Parse the content line by line
+            const lines = content.split('\n');
+            let lineNum = 0;
+            
+            for (const line of lines) {
+                lineNum++;
+                
+                // Skip empty lines
+                if (!line.trim()) continue;
+                
+                // Parse the line: index<tab>character
+                const parts = line.split('\t');
+                if (parts.length !== 2) {
+                    charMapText += `WARNING: Line ${lineNum} is not in the expected format (index<tab>character), skipping\n`;
+                    continue;
+                }
+                
+                // Convert the index part to an integer
+                const index = parseInt(parts[0].trim(), 10);
+                if (isNaN(index)) {
+                    charMapText += `WARNING: Line ${lineNum} has an invalid index, skipping\n`;
+                    continue;
+                }
+                
+                // Process the character part
+                const charPart = parts[1].trim();
+                
+                // Ensure the array is big enough
+                if (index > app.charMapSize) {
+                    app.charMapSize = index;
+                }
+                
+                // Handle special cases
+                if (charPart === 'Space') {
+                    app.charMap[index - 1] = ' ';
+                } else if (charPart === 'Tab') {
+                    app.charMap[index - 1] = '\t';
+                } else if (charPart === '') {
+                    // Empty character treated as space
+                    app.charMap[index - 1] = ' ';
+                    charMapText += `Note: Empty character at line ${lineNum} interpreted as space\n`;
+                } else if (charPart.length === 1) {
+                    // Regular single character
+                    app.charMap[index - 1] = charPart;
+                } else if (charPart.length === 2 && charPart[0] === '\\') {
+                    // Escape sequences
+                    let escapeChar = '';
+                    
+                    switch (charPart[1]) {
+                        case 'n': escapeChar = '\n'; break;
+                        case 't': escapeChar = '\t'; break;
+                        case 'r': escapeChar = '\r'; break;
+                        case '0': escapeChar = '\0'; break;
+                        case '\\': escapeChar = '\\'; break;
+                        case '\'': escapeChar = '\''; break;
+                        case '\"': escapeChar = '\"'; break;
+                        default:
+                            charMapText += `WARNING: Unknown escape sequence ${charPart}, ignoring\n`;
+                            continue;
+                    }
+                    
+                    app.charMap[index - 1] = escapeChar;
+                } else if (charPart.length > 0) {
+                    // More complex representation - just take the first character
+                    charMapText += `WARNING: Character part '${charPart}' contains multiple characters, using first one: '${charPart[0]}'\n`;
+                    app.charMap[index - 1] = charPart[0];
+                }
+            }
+            
+            setProgressValue(0.6);
+            
+            app.isMapLoaded = true;
+            charMapText += `\n✓ CHARACTER MAPPING LOADED SUCCESSFULLY WITH ${app.charMapSize} CHARACTERS.\n\n`;
+            charMapText += "== LOADED CHARACTER MAP ==\n";
+            
+            // Display the character map
+            for (let i = 0; i < app.charMapSize; i++) {
+                if (app.charMap[i] === undefined) {
+                    continue;
+                }
+                
+                // Check if the character is printable
+                const c = app.charMap[i];
+                if (c !== '\t' && c !== '\n' && c !== '\r' && c !== '\0') {
+                    charMapText += `MAP[${i+1}] = '${c}'\n`;
+                } else {
+                    let hexCode;
+                    switch (c) {
+                        case '\t': hexCode = '\\t'; break;
+                        case '\n': hexCode = '\\n'; break;
+                        case '\r': hexCode = '\\r'; break;
+                        case '\0': hexCode = '\\0'; break;
+                        default: hexCode = `\\x${c.charCodeAt(0).toString(16).padStart(2, '0')}`;
+                    }
+                    charMapText += `MAP[${i+1}] = '${hexCode}'\n`;
+                }
+            }
+            
+            setProgressValue(0.9);
+            
+            // Update the display
+            const display = document.getElementById('charmap-display');
+            display.textContent = charMapText;
+            
+            // Apply color tags
+            applyColorTagsToCharMap();
+            
+            // Update status and complete progress
+            setProgressValue(1.0);
+            
+            const statusMsg = `CHARACTER MAP LOADED FROM ${filename} • ${app.charMapSize} CHARACTERS`;
+            setStatusMessage(statusMsg);
+            
+            showToast(`Character map loaded with ${app.charMapSize} characters`);
+        }
+        
+        // Apply color tags to character map display
+        function applyColorTagsToCharMap() {
+            const display = document.getElementById('charmap-display');
+            const content = display.textContent;
+            
+            // Apply highlighting
+            let html = content.replace(/MAP\[\d+\]/g, match => `<span class="blue">${match}</span>`);
+            html = html.replace(/'.*'/g, match => `<span class="green">${match}</span>`);
+            html = html.replace(/WARNING:.*/g, match => `<span class="red">${match}</span>`);
+            html = html.replace(/✓.*CHARACTERS\./g, match => `<span class="green">${match}</span>`);
+            html = html.replace(/==.*==/g, match => `<span class="purple">${match}</span>`);
+            
+            display.innerHTML = html;
+        }
+        
+        // Find the index of a character in the char_map array
+        function findCharIndex(c) {
+            for (let i = 0; i < app.charMapSize; i++) {
+                if (app.charMap[i] === c) {
+                    return i + 1; // +1 because our list is 1-indexed
+                }
+            }
+            return -1; // Character not found
+        }
+        
+        // Encode a source file with optional base conversion
+        function encodeFile() {
+            if (!app.isMapLoaded) {
+                showDialog('WARNING', 'Please load a character map first.');
+                return;
+            }
+            
+            const inputFilename = document.getElementById('encode-input-entry').value.trim();
+            const outputFileNumber = document.getElementById('encode-output-entry').value.trim();
+            
+            if (!inputFilename) {
+                showDialog('WARNING', 'Please enter an input filename.');
+                return;
+            }
+            
+            if (!outputFileNumber) {
+                showDialog('WARNING', 'Please enter an output file number.');
+                return;
+            }
+            
+            // Check if output file number is valid
+            if (!/^\d+$/.test(outputFileNumber)) {
+                showDialog('WARNING', 'Output file number must be a number.');
+                return;
+            }
+            
+            // Animation effect
+            setProgressValue(0);
+            setStatusMessage('INITIALIZING ENCODING PROCESS...');
+            
+            const outputFilename = `${outputFileNumber}.txt`;
+            
+            // Get the source content
+            const sourceContent = document.getElementById('encode-input-preview').textContent;
+            if (!sourceContent) {
+                showDialog('ERROR', 'No source content to encode.');
+                setProgressValue(0);
+                setStatusMessage('ERROR: No source content');
+                return;
+            }
+            
+            setProgressValue(0.3);
+            setStatusMessage('ANALYZING SOURCE CODE...');
+            
+            setTimeout(() => {
+                setProgressValue(0.5);
+                setStatusMessage('APPLYING CHARACTER MAPPING...');
+                
+                // Reset character frequency data
+                app.charFrequency = {};
+                app.totalCharCount = 0;
+                
+                // Buffer for encoded output
+                let encodedContent = '';
+                
+                // Encode each character
+                for (let i = 0; i < sourceContent.length; i++) {
+                    const c = sourceContent[i];
+                    const index = findCharIndex(c);
+                    
+                    if (index !== -1) {
+                        // Track character frequency
+                        app.charFrequency[index] = (app.charFrequency[index] || 0) + 1;
+                        app.totalCharCount++;
+                        
+                        // Apply base conversion if enabled
+                        if (app.useBaseConversion) {
+                            encodedContent += convertToBase(index, app.targetBase, app.baseChars) + ' ';
+                        } else {
+                            encodedContent += index + ' ';
+                        }
+                    } else {
+                        // For characters not in our mapping, use a special token or skip
+                        // Here we use 0 but you could customize this behavior
+                        encodedContent += (app.useBaseConversion ? app.baseChars[0] : '0') + ' ';
+                    }
+                }
+                
+                // Trim trailing spaces
+                encodedContent = encodedContent.trim();
+                
+                setProgressValue(0.8);
+                setStatusMessage('FINALIZING ENCODED OUTPUT...');
+                
+                // Update output preview
+                const outputPreview = document.getElementById('encode-output-preview');
+                outputPreview.innerHTML = `<span class="digit">${encodedContent}</span>`;
+                
+                // Create a download for the encoded file
+                triggerDownload(encodedContent, outputFilename);
+                
+                // Show character frequency report
+                generateCharFrequencyReport();
+                
+                setProgressValue(1.0);
+                const statusMsg = `ENCODING COMPLETE: ${inputFilename} → ${outputFilename}`;
+                setStatusMessage(statusMsg);
+                
+                showToast(`File encoded and downloaded as ${outputFilename}`);
+            }, 800);
+        }
+        
+        // Generate character frequency report
+        function generateCharFrequencyReport() {
+            // Sort characters by frequency (descending)
+            const sortedFreq = Object.entries(app.charFrequency)
+                .sort((a, b) => b[1] - a[1])
+                .map(([index, count]) => ({
+                    index: parseInt(index, 10),
+                    char: app.charMap[parseInt(index, 10) - 1],
+                    count,
+                    percent: (count / app.totalCharCount * 100).toFixed(2)
+                }));
+            
+            // Generate the HTML table
+            const tableBody = document.getElementById('char-freq-table').querySelector('tbody');
+            tableBody.innerHTML = '';
+            
+            for (const item of sortedFreq) {
+                const row = document.createElement('tr');
+                
+                // Character cell
+                const charCell = document.createElement('td');
+                charCell.className = 'char-cell';
+                
+                // Handle special characters
+                if (item.char === '\n') {
+                    charCell.textContent = '\\n';
+                } else if (item.char === '\t') {
+                    charCell.textContent = '\\t';
+                } else if (item.char === '\r') {
+                    charCell.textContent = '\\r';
+                } else if (item.char === '\0') {
+                    charCell.textContent = '\\0';
+                } else if (item.char === ' ') {
+                    charCell.textContent = '⎵'; // Space symbol
+                } else {
+                    charCell.textContent = item.char;
+                }
+                
+                // Index cell
+                const indexCell = document.createElement('td');
+                if (app.useBaseConversion) {
+                    indexCell.innerHTML = `${item.index} <span class="purple">(${convertToBase(item.index, app.targetBase, app.baseChars)})</span>`;
+                } else {
+                    indexCell.textContent = item.index;
+                }
+                
+                // Count cell
+                const countCell = document.createElement('td');
+                countCell.className = 'count-cell';
+                countCell.textContent = item.count;
+                
+                // Percent cell
+                const percentCell = document.createElement('td');
+                percentCell.className = 'percent-cell';
+                percentCell.textContent = item.percent + '%';
+                
+                row.appendChild(charCell);
+                row.appendChild(indexCell);
+                row.appendChild(countCell);
+                row.appendChild(percentCell);
+                
+                tableBody.appendChild(row);
+            }
+            
+            // Show the report section
+            document.getElementById('char-freq-section').style.display = 'block';
+        }
+        
+        // Copy frequency report to clipboard
+        function copyFrequencyReport() {
+            // Create a text representation of the frequency report
+            const sortedFreq = Object.entries(app.charFrequency)
+                .sort((a, b) => b[1] - a[1])
+                .map(([index, count]) => ({
+                    index: parseInt(index, 10),
+                    char: app.charMap[parseInt(index, 10) - 1],
+                    count,
+                    percent: (count / app.totalCharCount * 100).toFixed(2)
+                }));
+            
+            let reportText = "CHARACTER FREQUENCY REPORT\n";
+            reportText += "==========================\n\n";
+            reportText += "Total characters: " + app.totalCharCount + "\n\n";
+            reportText += "Character | Index";
+            
+            if (app.useBaseConversion) {
+                reportText += ` | Base ${app.targetBase}`;
+            }
+            
+            reportText += " | Count | Percentage\n";
+            reportText += "-".repeat(50) + "\n";
+            
+            for (const item of sortedFreq) {
+                // Handle special characters
+                let charDisplay;
+                if (item.char === '\n') charDisplay = '\\n';
+                else if (item.char === '\t') charDisplay = '\\t';
+                else if (item.char === '\r') charDisplay = '\\r';
+                else if (item.char === '\0') charDisplay = '\\0';
+                else if (item.char === ' ') charDisplay = '⎵';
+                else charDisplay = item.char;
+                
+                reportText += `${charDisplay.padEnd(9)} | ${item.index.toString().padEnd(5)}`;
+                
+                if (app.useBaseConversion) {
+                    reportText += ` | ${convertToBase(item.index, app.targetBase, app.baseChars).padEnd(8)}`;
+                }
+                
+                reportText += ` | ${item.count.toString().padEnd(5)} | ${item.percent}%\n`;
+            }
+            
+            // Copy to clipboard
+            navigator.clipboard.writeText(reportText).then(() => {
+                showToast('Frequency report copied to clipboard');
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+                showToast('Failed to copy report to clipboard');
+            });
+        }
+        
+        // Download frequency report
+        function downloadFrequencyReport() {
+            // Create a text representation of the frequency report (same as copy function)
+            const sortedFreq = Object.entries(app.charFrequency)
+                .sort((a, b) => b[1] - a[1])
+                .map(([index, count]) => ({
+                    index: parseInt(index, 10),
+                    char: app.charMap[parseInt(index, 10) - 1],
+                    count,
+                    percent: (count / app.totalCharCount * 100).toFixed(2)
+                }));
+            
+            let reportText = "CHARACTER FREQUENCY REPORT\n";
+            reportText += "==========================\n\n";
+            reportText += "Total characters: " + app.totalCharCount + "\n\n";
+            reportText += "Character | Index";
+            
+            if (app.useBaseConversion) {
+                reportText += ` | Base ${app.targetBase}`;
+            }
+            
+            reportText += " | Count | Percentage\n";
+            reportText += "-".repeat(50) + "\n";
+            
+            for (const item of sortedFreq) {
+                // Handle special characters
+                let charDisplay;
+                if (item.char === '\n') charDisplay = '\\n';
+                else if (item.char === '\t') charDisplay = '\\t';
+                else if (item.char === '\r') charDisplay = '\\r';
+                else if (item.char === '\0') charDisplay = '\\0';
+                else if (item.char === ' ') charDisplay = '⎵';
+                else charDisplay = item.char;
+                
+                reportText += `${charDisplay.padEnd(9)} | ${item.index.toString().padEnd(5)}`;
+                
+                if (app.useBaseConversion) {
+                    reportText += ` | ${convertToBase(item.index, app.targetBase, app.baseChars).padEnd(8)}`;
+                }
+                
+                reportText += ` | ${item.count.toString().padEnd(5)} | ${item.percent}%\n`;
+            }
+            
+            // Trigger download
+            const blob = new Blob([reportText], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            
+            const downloadLink = document.createElement('a');
+            downloadLink.href = url;
+            downloadLink.download = 'frequency_report.txt';
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+            
+            setTimeout(() => {
+                URL.revokeObjectURL(url);
+            }, 100);
+            
+            showToast('Frequency report downloaded');
+        }
+        
+        // Decode a file with optional base conversion
+        function decodeFile() {
+            if (!app.isMapLoaded) {
+                showDialog('WARNING', 'Please load a character map first.');
+                return;
+            }
+            
+            const inputFileNumber = document.getElementById('decode-input-entry').value.trim();
+            const outputFileNumber = document.getElementById('decode-output-entry').value.trim();
+            
+            if (!inputFileNumber) {
+                showDialog('WARNING', 'Please enter an input file number.');
+                return;
+            }
+            
+            if (!outputFileNumber) {
+                showDialog('WARNING', 'Please enter an output file number.');
+                return;
+            }
+            
+            // Animation effect
+            setProgressValue(0);
+            setStatusMessage('INITIALIZING DECODING PROCESS...');
+            
+            // Determine input filename
+            let inputFilename;
+            if (/^\d+$/.test(inputFileNumber)) {
+                inputFilename = `${inputFileNumber}.txt`;
+            } else {
+                inputFilename = inputFileNumber;
+            }
+            
+            const outputFilename = `${outputFileNumber}.txt`;
+            
+            // Get the encoded content
+            const encodedContent = document.getElementById('decode-input-preview').textContent;
+            if (!encodedContent) {
+                showDialog('ERROR', 'No encoded content to decode.');
+                setProgressValue(0);
+                setStatusMessage('ERROR: No encoded content');
+                return;
+            }
+            
+            setProgressValue(0.4);
+            setStatusMessage('REVERSING CHARACTER MAPPING...');
+            
+            setTimeout(() => {
+                setProgressValue(0.6);
+                setStatusMessage('GENERATING SOURCE CODE...');
+                
+                // Clean up the content - normalize whitespace and trim
+                const cleanContent = encodedContent.replace(/\s+/g, ' ').trim();
+                
+                // Split by space to get all indices or base-converted values
+                const encodedIndices = cleanContent.split(' ').filter(str => str.length > 0);
+                
+                // Buffer for decoded output
+                let decodedContent = '';
+                
+                // Process each index
+                for (const encodedIndex of encodedIndices) {
+                    let charIndex;
+                    
+                    // Convert from the custom base if needed
+                    if (app.useBaseConversion) {
+                        charIndex = convertFromBase(encodedIndex, app.targetBase, app.baseChars);
+                    } else {
+                        charIndex = parseInt(encodedIndex, 10);
+                    }
+                    
+                    // Only add valid characters
+                    if (!isNaN(charIndex) && charIndex > 0 && charIndex <= app.charMapSize && app.charMap[charIndex - 1] !== undefined) {
+                        decodedContent += app.charMap[charIndex - 1];
+                    }
+                    // Skip unmapped characters
+                }
+                
+                setProgressValue(0.8);
+                setStatusMessage('FINALIZING DECODED OUTPUT...');
+                
+                // Update output preview
+                const outputPreview = document.getElementById('decode-output-preview');
+                outputPreview.textContent = decodedContent;
+                
+                // Apply syntax highlighting if it looks like C code
+                if (decodedContent.includes('#include') || 
+                    decodedContent.includes('int ') || 
+                    decodedContent.includes('void ')) {
+                    highlightCCode('decode-output-preview');
+                }
+                
+                // Create a download for the decoded file
+                triggerDownload(decodedContent, outputFilename);
+                
+                setProgressValue(1.0);
+                const statusMsg = `DECODING COMPLETE: ${inputFilename} → ${outputFilename}`;
+                setStatusMessage(statusMsg);
+                
+                showToast(`File decoded and downloaded as ${outputFilename}`);
+            }, 800);
+        }
+        
+        // Trigger file download
+        function triggerDownload(content, filename) {
+            // Create a blob and download link
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            
+            const downloadLink = document.createElement('a');
+            downloadLink.href = url;
+            downloadLink.download = filename;
+            downloadLink.style.display = 'none';
+            
+            // Add to document, trigger click, then remove
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            
+            // Clean up after a short delay
+            setTimeout(() => {
+                document.body.removeChild(downloadLink);
+                URL.revokeObjectURL(url);
+            }, 100);
+        }
+        
+        // Highlight C syntax in a text element
+        function highlightCCode(elementId) {
+            const element = document.getElementById(elementId);
+            let content = element.textContent;
+            
+            // Create a temporary div to work with HTML
+            const tempDiv = document.createElement('div');
+            
+            // Escape HTML
+            tempDiv.textContent = content;
+            content = tempDiv.innerHTML;
+            
+            // Highlight keywords
+            for (const keyword of app.cKeywords) {
+                const regex = new RegExp(`\\b${keyword}\\b`, 'g');
+                content = content.replace(regex, `<span class="keyword">${keyword}</span>`);
+            }
+            
+            // Highlight preprocessor directives
+            content = content.replace(/(^|\n)(\s*#\s*\w+.*)/g, '$1<span class="preprocessor">$2</span>');
+            
+            // Highlight comments
+            content = content.replace(/\/\/.*?(\n|$)/g, '<span class="comment">$&</span>');
+            content = content.replace(/\/\*[\s\S]*?\*\//g, '<span class="comment">$&</span>');
+            
+            // Highlight strings
+            content = content.replace(/".*?"/g, '<span class="string">$&</span>');
+            content = content.replace(/'.*?'/g, '<span class="string">$&</span>');
+            
+            // Highlight numbers
+            content = content.replace(/\b(\d+)\b/g, '<span class="number">$1</span>');
+            
+            element.innerHTML = content;
+        }
+        
+        // Set the status message
+        function setStatusMessage(message) {
+            document.getElementById('status-bar').textContent = message;
+        }
+        
+        // Set the progress bar value
+        function setProgressValue(progress) {
+            document.getElementById('progress-bar').style.width = `${progress * 100}%`;
+        }
+        
+        // Show a message dialog
+        function showDialog(title, message) {
+            document.getElementById('dialog-title').textContent = title;
+            document.getElementById('dialog-message').textContent = message;
+            document.getElementById('message-dialog').style.display = 'flex';
+        }
+        
+        // Show a toast notification
+        function showToast(message) {
+            const toast = document.getElementById('toast-notification');
+            toast.textContent = message;
+            toast.classList.add('show');
+            
+            // Hide after 3 seconds
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Initialize everything when the page loads
+        window.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>

@@ -1,0 +1,3037 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmallLLM Training File Manager</title>
+    <style>
+        :root {
+            /* Color scheme */
+            --bg-main: #1a1a24;
+            --bg-light: #222230;
+            --bg-lighter: #2d2d3a;
+            --bg-dark: #12121a;
+            --primary-color: #0088cc;
+            --accent-color: #00cc88;
+            --accent-blue: #3498db;
+            --accent-purple: #9b59b6;
+            --accent-orange: #e67e22;
+            --accent-red: #e74c3c;
+            --warning-color: #f39c12;
+            --error-color: #e74c3c;
+            --text-bright: #ffffff;
+            --text-normal: #ccccdd;
+            --text-dim: #a0a0b0;
+            --border: #333344;
+
+            /* Spacing */
+            --spacing-xs: 4px;
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+            --spacing-xl: 32px;
+
+            /* Border radius */
+            --border-radius-sm: 4px;
+            --border-radius-md: 8px;
+            --border-radius-lg: 12px;
+
+            /* Typography */
+            --font-size-xs: 0.75rem;
+            --font-size-sm: 0.875rem;
+            --font-size-md: 1rem;
+            --font-size-lg: 1.125rem;
+            --font-size-xl: 1.25rem;
+
+            /* Transitions */
+            --transition-fast: 0.15s ease;
+            --transition-normal: 0.3s ease;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-normal);
+            line-height: 1.6;
+            padding-bottom: 5rem;
+        }
+
+        header {
+            background-color: var(--bg-dark);
+            padding: var(--spacing-md);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .app-title {
+            font-size: var(--font-size-xl);
+            color: var(--text-bright);
+            font-weight: 600;
+        }
+
+        .app-subtitle {
+            font-size: var(--font-size-xs);
+            color: var(--text-dim);
+            font-family: monospace;
+            margin-top: 2px;
+        }
+
+        main {
+            padding: var(--spacing-md);
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        nav {
+            background-color: var(--bg-dark);
+            padding: var(--spacing-xs) var(--spacing-md);
+            border-bottom: 1px solid var(--border);
+            margin-bottom: var(--spacing-md);
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+
+        nav a {
+            color: var(--text-dim);
+            text-decoration: none;
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: var(--border-radius-sm);
+            margin-right: var(--spacing-sm);
+            transition: background-color var(--transition-fast);
+        }
+
+        nav a:hover {
+            background-color: var(--bg-lighter);
+            color: var(--text-bright);
+        }
+
+        nav a.active {
+            background-color: var(--primary-color);
+            color: var(--text-bright);
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .dashboard-card {
+            background-color: var(--bg-light);
+            border-radius: var(--border-radius-md);
+            padding: var(--spacing-md);
+            border: 1px solid var(--border);
+        }
+
+        .dashboard-card-title {
+            color: var(--text-bright);
+            margin-bottom: var(--spacing-sm);
+            font-size: var(--font-size-lg);
+        }
+
+        .dashboard-card-value {
+            color: var(--accent-color);
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        .dashboard-card-subtitle {
+            color: var(--text-dim);
+            font-size: var(--font-size-sm);
+            margin-top: var(--spacing-xs);
+        }
+
+        .dashboard-card.patterns {
+            border-left: 4px solid var(--accent-blue);
+        }
+
+        .dashboard-card.facts {
+            border-left: 4px solid var(--accent-purple);
+        }
+
+        .dashboard-card.domains {
+            border-left: 4px solid var(--accent-orange);
+        }
+
+        .dashboard-card.file-size {
+            border-left: 4px solid var(--accent-color);
+        }
+
+        .section-title {
+            color: var(--text-bright);
+            margin-bottom: var(--spacing-md);
+            padding-bottom: var(--spacing-xs);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .file-controls {
+            display: flex;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-md);
+            flex-wrap: wrap;
+        }
+
+        .content-tabs {
+            display: flex;
+            margin-bottom: var(--spacing-md);
+            border-bottom: 1px solid var(--border);
+            overflow-x: auto;
+            scrollbar-width: thin;
+        }
+
+        .content-tabs::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .content-tabs::-webkit-scrollbar-track {
+            background: var(--bg-dark);
+        }
+
+        .content-tabs::-webkit-scrollbar-thumb {
+            background-color: var(--border);
+            border-radius: 3px;
+        }
+
+        .content-tab {
+            padding: var(--spacing-sm) var(--spacing-md);
+            cursor: pointer;
+            color: var(--text-dim);
+            border-bottom: 2px solid transparent;
+            white-space: nowrap;
+        }
+
+        .content-tab:hover {
+            color: var(--text-bright);
+            background-color: var(--bg-lighter);
+        }
+
+        .content-tab.active {
+            color: var(--accent-color);
+            border-bottom: 2px solid var(--accent-color);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: var(--spacing-md);
+        }
+
+        label {
+            display: block;
+            margin-bottom: var(--spacing-xs);
+            color: var(--text-bright);
+        }
+
+        .form-help {
+            color: var(--text-dim);
+            font-size: var(--font-size-sm);
+            margin-top: var(--spacing-xs);
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select,
+        textarea {
+            width: 100%;
+            padding: var(--spacing-sm);
+            background-color: var(--bg-lighter);
+            border: 1px solid var(--border);
+            border-radius: var(--border-radius-sm);
+            color: var(--text-bright);
+            font-family: inherit;
+            font-size: var(--font-size-md);
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        textarea.pattern-response {
+            min-height: 300px;
+            font-family: monospace;
+        }
+
+        textarea.code-editor {
+            min-height: 500px;
+            font-family: monospace;
+            white-space: pre;
+            overflow-wrap: normal;
+            overflow-x: auto;
+        }
+
+        button {
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-radius: var(--border-radius-sm);
+            font-size: var(--font-size-md);
+            cursor: pointer;
+            transition: background-color var(--transition-fast);
+        }
+
+        .primary-button {
+            background-color: var(--primary-color);
+            color: var(--text-bright);
+            border: none;
+        }
+
+        .primary-button:hover {
+            background-color: #0099ee;
+        }
+
+        .secondary-button {
+            background-color: var(--bg-lighter);
+            color: var(--text-normal);
+            border: 1px solid var(--border);
+        }
+
+        .secondary-button:hover {
+            background-color: var(--bg-dark);
+            color: var(--text-bright);
+        }
+
+        .accent-button {
+            background-color: var(--accent-color);
+            color: var(--text-bright);
+            border: none;
+        }
+
+        .accent-button:hover {
+            background-color: #00dda0;
+        }
+
+        .warning-button {
+            background-color: var(--bg-lighter);
+            color: var(--warning-color);
+            border: 1px solid var(--warning-color);
+        }
+
+        .warning-button:hover {
+            background-color: var(--warning-color);
+            color: var(--text-bright);
+        }
+
+        .danger-button {
+            background-color: var(--bg-lighter);
+            color: var(--error-color);
+            border: 1px solid var(--error-color);
+        }
+
+        .danger-button:hover {
+            background-color: var(--error-color);
+            color: var(--text-bright);
+        }
+
+        .button-group {
+            display: flex;
+            gap: var(--spacing-sm);
+            margin-top: var(--spacing-lg);
+        }
+
+        .search-box {
+            display: flex;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .search-input {
+            flex-grow: 1;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .card-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: var(--spacing-md);
+        }
+
+        .item-card {
+            background-color: var(--bg-light);
+            border-radius: var(--border-radius-md);
+            padding: var(--spacing-md);
+            border: 1px solid var(--border);
+            position: relative;
+            transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+        }
+
+        .item-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .item-card-title {
+            color: var(--text-bright);
+            margin-bottom: var(--spacing-sm);
+            font-weight: bold;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .item-card-content {
+            color: var(--text-normal);
+            margin-bottom: var(--spacing-md);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+        }
+
+        .item-card-meta {
+            font-size: var(--font-size-sm);
+            color: var(--text-dim);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .item-card-actions {
+            display: flex;
+            gap: var(--spacing-xs);
+        }
+
+        .action-button {
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: var(--border-radius-sm);
+            font-size: var(--font-size-sm);
+            cursor: pointer;
+        }
+
+        .pattern-card {
+            border-left: 3px solid var(--accent-blue);
+        }
+
+        .fact-card {
+            border-left: 3px solid var(--accent-purple);
+        }
+
+        .check-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .check-container input[type="checkbox"] {
+            margin-right: var(--spacing-sm);
+        }
+
+        .fact-selector {
+            max-height: 200px;
+            overflow-y: auto;
+            background-color: var(--bg-lighter);
+            border: 1px solid var(--border);
+            border-radius: var(--border-radius-sm);
+            padding: var(--spacing-sm);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .fact-item {
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: var(--border-radius-sm);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .fact-item:hover {
+            background-color: var(--bg-light);
+        }
+
+        .fact-text {
+            margin-left: var(--spacing-sm);
+            color: var(--text-normal);
+        }
+
+        .section-loading {
+            text-align: center;
+            padding: var(--spacing-lg);
+            color: var(--text-dim);
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: var(--spacing-sm);
+            margin-top: var(--spacing-lg);
+        }
+
+        .pagination-button {
+            padding: var(--spacing-xs) var(--spacing-sm);
+            background-color: var(--bg-lighter);
+            color: var(--text-normal);
+            border: 1px solid var(--border);
+            border-radius: var(--border-radius-sm);
+            cursor: pointer;
+        }
+
+        .pagination-button:hover {
+            background-color: var(--bg-dark);
+            color: var(--text-bright);
+        }
+
+        .pagination-button.active {
+            background-color: var(--primary-color);
+            color: var(--text-bright);
+            border-color: var(--primary-color);
+        }
+
+        .pagination-button.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 12px;
+            font-size: var(--font-size-xs);
+            margin-right: var(--spacing-xs);
+        }
+
+        .badge.blue {
+            background-color: rgba(52, 152, 219, 0.2);
+            color: var(--accent-blue);
+        }
+
+        .badge.purple {
+            background-color: rgba(155, 89, 182, 0.2);
+            color: var(--accent-purple);
+        }
+
+        .badge.orange {
+            background-color: rgba(230, 126, 34, 0.2);
+            color: var(--accent-orange);
+        }
+
+        .badge.green {
+            background-color: rgba(0, 204, 136, 0.2);
+            color: var(--accent-color);
+        }
+
+        .badge.red {
+            background-color: rgba(231, 76, 60, 0.2);
+            color: var(--error-color);
+        }
+
+        .file-drop-area {
+            border: 2px dashed var(--border);
+            border-radius: var(--border-radius-md);
+            padding: var(--spacing-lg);
+            text-align: center;
+            color: var(--text-dim);
+            transition: all var(--transition-fast);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .file-drop-area.drag-over {
+            border-color: var(--primary-color);
+            background-color: rgba(0, 136, 204, 0.1);
+        }
+
+        .file-drop-icon {
+            font-size: 48px;
+            margin-bottom: var(--spacing-md);
+        }
+
+        #file-input {
+            display: none;
+        }
+
+        .validation-error {
+            color: var(--error-color);
+            font-size: var(--font-size-sm);
+            margin-top: var(--spacing-xs);
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--bg-dark);
+            color: var(--text-normal);
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-radius: var(--border-radius-sm);
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16);
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.3s, transform 0.3s;
+            z-index: 1000;
+            max-width: 300px;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .toast.success {
+            border-left: 4px solid var(--accent-color);
+        }
+
+        .toast.error {
+            border-left: 4px solid var(--error-color);
+        }
+
+        .toast.warning {
+            border-left: 4px solid var(--warning-color);
+        }
+
+        .toast.info {
+            border-left: 4px solid var(--primary-color);
+        }
+
+        /* Modal dialog */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            overflow-y: auto;
+        }
+
+        .modal-content {
+            background-color: var(--bg-main);
+            margin: auto;
+            padding: 0;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            position: relative;
+        }
+
+        .modal-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            margin: 0;
+            font-size: 20px;
+            color: var(--text-bright);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--text-dim);
+            cursor: pointer;
+        }
+
+        .modal-close:hover {
+            color: var(--text-bright);
+        }
+
+        .modal-body {
+            padding: 20px;
+            max-height: calc(90vh - 140px);
+            overflow-y: auto;
+        }
+
+        .modal-footer {
+            padding: 16px 20px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+
+            .card-container {
+                grid-template-columns: 1fr;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .modal-content {
+                width: 95%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div>
+            <div class="app-title">SmallLLM Training File Manager</div>
+            <div class="app-subtitle">CRUD SYSTEM FOR BUILDING KNOWLEDGE BASES</div>
+        </div>
+        <div id="file-info">No file loaded</div>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="#" id="nav-dashboard" class="active">Dashboard</a></li>
+            <li><a href="#" id="nav-patterns">Patterns</a></li>
+            <li><a href="#" id="nav-facts">Facts</a></li>
+            <li><a href="#" id="nav-editor">JSON Editor</a></li>
+            <li><a href="#" id="nav-templates">Templates</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <!-- Dashboard Section -->
+        <section id="section-dashboard" class="active-section">
+            <h2 class="section-title">Dashboard</h2>
+            
+            <div class="file-drop-area" id="file-drop-area">
+                <div class="file-drop-icon">📄</div>
+                <p>Drag & drop your SmallLLM training file here, or click to browse</p>
+                <button id="browse-button" class="primary-button">Browse Files</button>
+                <input type="file" id="file-input" accept=".json">
+            </div>
+
+            <div class="file-controls">
+                <button id="create-new-file" class="accent-button">Create New File</button>
+                <button id="save-file" class="primary-button" disabled>Save File</button>
+                <button id="download-file" class="secondary-button" disabled>Download File</button>
+            </div>
+
+            <div class="dashboard" id="dashboard-stats">
+                <div class="dashboard-card patterns">
+                    <div class="dashboard-card-title">Patterns</div>
+                    <div class="dashboard-card-value" id="pattern-count">0</div>
+                    <div class="dashboard-card-subtitle">Training patterns</div>
+                </div>
+
+                <div class="dashboard-card facts">
+                    <div class="dashboard-card-title">Facts</div>
+                    <div class="dashboard-card-value" id="fact-count">0</div>
+                    <div class="dashboard-card-subtitle">Knowledge base facts</div>
+                </div>
+
+                <div class="dashboard-card domains">
+                    <div class="dashboard-card-title">Domains</div>
+                    <div class="dashboard-card-value" id="domain-count">0</div>
+                    <div class="dashboard-card-subtitle">Knowledge domains</div>
+                </div>
+
+                <div class="dashboard-card file-size">
+                    <div class="dashboard-card-title">File Size</div>
+                    <div class="dashboard-card-value" id="file-size">0 KB</div>
+                    <div class="dashboard-card-subtitle">Training file size</div>
+                </div>
+            </div>
+
+            <div class="content-tabs">
+                <div class="content-tab active" data-tab="recent-patterns">Recent Patterns</div>
+                <div class="content-tab" data-tab="recent-facts">Recent Facts</div>
+                <div class="content-tab" data-tab="validation">Validation Results</div>
+            </div>
+
+            <div class="tab-content active" id="tab-recent-patterns">
+                <div class="card-container" id="recent-patterns-container">
+                    <p class="section-loading">No patterns available. Load a file or create new patterns.</p>
+                </div>
+            </div>
+
+            <div class="tab-content" id="tab-recent-facts">
+                <div class="card-container" id="recent-facts-container">
+                    <p class="section-loading">No facts available. Load a file or create new facts.</p>
+                </div>
+            </div>
+
+            <div class="tab-content" id="tab-validation">
+                <div id="validation-results">
+                    <p class="section-loading">No validation results available. Load a file to validate.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Patterns Section -->
+        <section id="section-patterns" class="hidden-section">
+            <h2 class="section-title">
+                <span>Patterns</span>
+                <button id="create-pattern-button" class="primary-button">Create New Pattern</button>
+            </h2>
+
+            <div class="search-box">
+                <input type="text" id="pattern-search" placeholder="Search patterns..." class="search-input">
+                <button id="search-patterns-button" class="secondary-button">Search</button>
+            </div>
+
+            <div class="filter-group">
+                <select id="pattern-domain-filter">
+                    <option value="all">All Domains</option>
+                </select>
+                <button id="clear-pattern-filters" class="secondary-button">Clear Filters</button>
+            </div>
+
+            <div class="card-container" id="patterns-container">
+                <p class="section-loading">No patterns available. Load a file or create new patterns.</p>
+            </div>
+
+            <div class="pagination" id="patterns-pagination">
+                <!-- Pagination buttons will be added dynamically -->
+            </div>
+        </section>
+
+        <!-- Facts Section -->
+        <section id="section-facts" class="hidden-section">
+            <h2 class="section-title">
+                <span>Facts</span>
+                <button id="create-fact-button" class="primary-button">Create New Fact</button>
+            </h2>
+
+            <div class="search-box">
+                <input type="text" id="fact-search" placeholder="Search facts..." class="search-input">
+                <button id="search-facts-button" class="secondary-button">Search</button>
+            </div>
+
+            <div class="filter-group">
+                <select id="fact-domain-filter">
+                    <option value="all">All Domains</option>
+                </select>
+                <select id="fact-trusted-filter">
+                    <option value="all">All Facts</option>
+                    <option value="trusted">Trusted Only</option>
+                    <option value="untrusted">Untrusted Only</option>
+                </select>
+                <button id="clear-fact-filters" class="secondary-button">Clear Filters</button>
+            </div>
+
+            <div class="card-container" id="facts-container">
+                <p class="section-loading">No facts available. Load a file or create new facts.</p>
+            </div>
+
+            <div class="pagination" id="facts-pagination">
+                <!-- Pagination buttons will be added dynamically -->
+            </div>
+        </section>
+
+        <!-- JSON Editor Section -->
+        <section id="section-editor" class="hidden-section">
+            <h2 class="section-title">JSON Editor</h2>
+
+            <div class="form-group">
+                <label for="json-editor">Edit Training File JSON</label>
+                <textarea id="json-editor" class="code-editor"></textarea>
+                <div class="form-help">
+                    Warning: Manual editing can lead to JSON syntax errors. Use with caution.
+                </div>
+                <div id="json-validation-error" class="validation-error"></div>
+            </div>
+
+            <div class="button-group">
+                <button id="format-json" class="secondary-button">Format JSON</button>
+                <button id="validate-json" class="secondary-button">Validate JSON</button>
+                <button id="save-json" class="primary-button">Apply Changes</button>
+            </div>
+        </section>
+
+        <!-- Templates Section -->
+        <section id="section-templates" class="hidden-section">
+            <h2 class="section-title">Templates</h2>
+
+            <div class="content-tabs">
+                <div class="content-tab active" data-tab="pattern-templates">Pattern Templates</div>
+                <div class="content-tab" data-tab="fact-templates">Fact Templates</div>
+                <div class="content-tab" data-tab="file-templates">File Templates</div>
+            </div>
+
+            <div class="tab-content active" id="tab-pattern-templates">
+                <div class="card-container" id="pattern-templates-container">
+                    <!-- Pattern templates will be added here -->
+                    <div class="item-card pattern-card">
+                        <div class="item-card-title">Basic Q&A Pattern</div>
+                        <div class="item-card-content">
+                            A simple question and answer pattern with basic constraints.
+                        </div>
+                        <div class="item-card-meta">
+                            <span class="badge blue">Question</span>
+                            <span class="badge blue">Answer</span>
+                            <span class="badge orange">Exact Match</span>
+                        </div>
+                        <div class="item-card-actions">
+                            <button class="action-button primary-button" onclick="usePatternTemplate('basic')">Use Template</button>
+                        </div>
+                    </div>
+
+                    <div class="item-card pattern-card">
+                        <div class="item-card-title">Case Study Pattern</div>
+                        <div class="item-card-content">
+                            A pattern with definition and real-world case study structure.
+                        </div>
+                        <div class="item-card-meta">
+                            <span class="badge blue">Definition</span>
+                            <span class="badge purple">Case Study</span>
+                            <span class="badge orange">Substring Match</span>
+                        </div>
+                        <div class="item-card-actions">
+                            <button class="action-button primary-button" onclick="usePatternTemplate('casestudy')">Use Template</button>
+                        </div>
+                    </div>
+
+                    <div class="item-card pattern-card">
+                        <div class="item-card-title">List Pattern</div>
+                        <div class="item-card-content">
+                            A pattern that presents a categorized list of items.
+                        </div>
+                        <div class="item-card-meta">
+                            <span class="badge blue">List</span>
+                            <span class="badge purple">Categories</span>
+                            <span class="badge orange">Substring Match</span>
+                        </div>
+                        <div class="item-card-actions">
+                            <button class="action-button primary-button" onclick="usePatternTemplate('list')">Use Template</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-content" id="tab-fact-templates">
+                <div class="card-container" id="fact-templates-container">
+                    <!-- Fact templates will be added here -->
+                    <div class="item-card fact-card">
+                        <div class="item-card-title">Definition Fact</div>
+                        <div class="item-card-content">
+                            A factual definition with source and domain classification.
+                        </div>
+                        <div class="item-card-meta">
+                            <span class="badge purple">Definition</span>
+                            <span class="badge green">Trusted</span>
+                        </div>
+                        <div class="item-card-actions">
+                            <button class="action-button primary-button" onclick="useFactTemplate('definition')">Use Template</button>
+                        </div>
+                    </div>
+
+                    <div class="item-card fact-card">
+                        <div class="item-card-title">Application Fact</div>
+                        <div class="item-card-content">
+                            A fact describing real-world application of a concept.
+                        </div>
+                        <div class="item-card-meta">
+                            <span class="badge purple">Application</span>
+                            <span class="badge green">Trusted</span>
+                        </div>
+                        <div class="item-card-actions">
+                            <button class="action-button primary-button" onclick="useFactTemplate('application')">Use Template</button>
+                        </div>
+                    </div>
+
+                    <div class="item-card fact-card">
+                        <div class="item-card-title">Historical Fact</div>
+                        <div class="item-card-content">
+                            A historical context or origin fact for a concept.
+                        </div>
+                        <div class="item-card-meta">
+                            <span class="badge purple">History</span>
+                            <span class="badge green">Trusted</span>
+                        </div>
+                        <div class="item-card-actions">
+                            <button class="action-button primary-button" onclick="useFactTemplate('historical')">Use Template</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-content" id="tab-file-templates">
+                <div class="card-container" id="file-templates-container">
+                    <!-- File templates will be added here -->
+                    <div class="item-card">
+                        <div class="item-card-title">Empty Training File</div>
+                        <div class="item-card-content">
+                            Start with a minimal valid training file structure with no patterns or facts.
+                        </div>
+                        <div class="item-card-meta">
+                            <span class="badge blue">Basic</span>
+                            <span class="badge orange">Empty</span>
+                        </div>
+                        <div class="item-card-actions">
+                            <button class="action-button primary-button" onclick="useFileTemplate('empty')">Use Template</button>
+                        </div>
+                    </div>
+
+                    <div class="item-card">
+                        <div class="item-card-title">Mathematics Example</div>
+                        <div class="item-card-content">
+                            A starter template with mathematical concepts structure.
+                        </div>
+                        <div class="item-card-meta">
+                            <span class="badge blue">Mathematics</span>
+                            <span class="badge purple">Education</span>
+                        </div>
+                        <div class="item-card-actions">
+                            <button class="action-button primary-button" onclick="useFileTemplate('mathematics')">Use Template</button>
+                        </div>
+                    </div>
+
+                    <div class="item-card">
+                        <div class="item-card-title">FAQ Template</div>
+                        <div class="item-card-content">
+                            A template for building a frequently asked questions knowledge base.
+                        </div>
+                        <div class="item-card-meta">
+                            <span class="badge blue">FAQ</span>
+                            <span class="badge purple">Q&A Format</span>
+                        </div>
+                        <div class="item-card-actions">
+                            <button class="action-button primary-button" onclick="useFileTemplate('faq')">Use Template</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Pattern Modal -->
+    <div id="pattern-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="pattern-modal-title" class="modal-title">Create New Pattern</h2>
+                <button class="modal-close" data-dismiss="pattern-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="pattern-form">
+                    <input type="hidden" id="pattern-id">
+                    
+                    <div class="form-group">
+                        <label for="pattern-text">Pattern</label>
+                        <input type="text" id="pattern-text" placeholder="Enter pattern text (e.g., 'What is a vector space?')">
+                        <div class="form-help">
+                            This is the text that SmallLLM will try to match against user input.
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="pattern-response">Response</label>
+                        <textarea id="pattern-response" class="pattern-response" placeholder="Enter the response text..."></textarea>
+                        <div class="form-help">
+                            The response that will be returned when this pattern is matched.
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Pattern Constraints</label>
+                        <div class="check-container">
+                            <input type="checkbox" id="exact-match" checked>
+                            <label for="exact-match">Exact Match</label>
+                        </div>
+                        <div class="check-container">
+                            <input type="checkbox" id="substring-match">
+                            <label for="substring-match">Substring Match</label>
+                        </div>
+                        <div class="check-container">
+                            <input type="checkbox" id="case-sensitive">
+                            <label for="case-sensitive">Case Sensitive</label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Associated Facts</label>
+                        <div class="fact-selector" id="fact-selector">
+                            <!-- Facts will be added here dynamically -->
+                            <p>No facts available. Create facts first.</p>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="secondary-button" data-dismiss="pattern-modal">Cancel</button>
+                <button id="save-pattern-button" class="primary-button">Save Pattern</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fact Modal -->
+    <div id="fact-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="fact-modal-title" class="modal-title">Create New Fact</h2>
+                <button class="modal-close" data-dismiss="fact-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="fact-form">
+                    <input type="hidden" id="fact-id">
+                    
+                    <div class="form-group">
+                        <label for="fact-text">Fact Text</label>
+                        <textarea id="fact-text" placeholder="Enter fact text..."></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="fact-source">Source</label>
+                        <input type="text" id="fact-source" placeholder="Enter source (e.g., 'Linear Algebra by Gilbert Strang')">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="fact-domain">Domain</label>
+                        <select id="fact-domain">
+                            <option value="general">General Knowledge</option>
+                            <option value="science">Science</option>
+                            <option value="history">History</option>
+                            <option value="technology">Technology</option>
+                            <option value="mathematics">Mathematics</option>
+                            <option value="arts">Arts</option>
+                            <option value="literature">Literature</option>
+                            <option value="philosophy">Philosophy</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="check-container">
+                            <input type="checkbox" id="fact-trusted" checked>
+                            <label for="fact-trusted">Trusted Fact</label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="secondary-button" data-dismiss="fact-modal">Cancel</button>
+                <button id="save-fact-button" class="primary-button">Save Fact</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirm-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="confirm-modal-title" class="modal-title">Confirm Action</h2>
+                <button class="modal-close" data-dismiss="confirm-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="confirm-modal-message">Are you sure you want to proceed?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="secondary-button" data-dismiss="confirm-modal">Cancel</button>
+                <button id="confirm-action-button" class="danger-button">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+
+    <script>
+        /**
+         * SmallLLM Training File Manager
+         * A CRUD system for creating and editing SmallLLM training files
+         */
+        class SmallLLMManager {
+            constructor() {
+                // Application state
+                this.trainingData = null;
+                this.currentSection = 'section-dashboard';
+                this.isModified = false;
+                this.currentPatternPage = 1;
+                this.currentFactPage = 1;
+                this.itemsPerPage = 12;
+                this.domains = new Set();
+                
+                // Initialize the application
+                this.initializeApp();
+            }
+            
+            /**
+             * Initialize the application
+             */
+            initializeApp() {
+                // Set up navigation event listeners
+                document.getElementById('nav-dashboard').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.switchSection('section-dashboard');
+                });
+                
+                document.getElementById('nav-patterns').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.switchSection('section-patterns');
+                });
+                
+                document.getElementById('nav-facts').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.switchSection('section-facts');
+                });
+                
+                document.getElementById('nav-editor').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.switchSection('section-editor');
+                    this.updateJsonEditor();
+                });
+                
+                document.getElementById('nav-templates').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.switchSection('section-templates');
+                });
+                
+                // Set up file drop area
+                const dropArea = document.getElementById('file-drop-area');
+                const fileInput = document.getElementById('file-input');
+                
+                dropArea.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    dropArea.classList.add('drag-over');
+                });
+                
+                dropArea.addEventListener('dragleave', () => {
+                    dropArea.classList.remove('drag-over');
+                });
+                
+                dropArea.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    dropArea.classList.remove('drag-over');
+                    
+                    if (e.dataTransfer.files.length) {
+                        this.loadTrainingFile(e.dataTransfer.files[0]);
+                    }
+                });
+                
+                document.getElementById('browse-button').addEventListener('click', () => {
+                    fileInput.click();
+                });
+                
+                fileInput.addEventListener('change', (e) => {
+                    if (e.target.files.length) {
+                        this.loadTrainingFile(e.target.files[0]);
+                    }
+                });
+                
+                // Set up file control buttons
+                document.getElementById('create-new-file').addEventListener('click', () => {
+                    this.createNewFile();
+                });
+                
+                document.getElementById('save-file').addEventListener('click', () => {
+                    this.saveTrainingData();
+                });
+                
+                document.getElementById('download-file').addEventListener('click', () => {
+                    this.downloadTrainingFile();
+                });
+                
+                // Set up content tabs
+                document.querySelectorAll('.content-tab').forEach(tab => {
+                    tab.addEventListener('click', () => {
+                        const tabId = tab.getAttribute('data-tab');
+                        this.switchTab(tabId, tab.parentElement);
+                    });
+                });
+                
+                // Set up pattern section events
+                document.getElementById('create-pattern-button').addEventListener('click', () => {
+                    this.showPatternModal();
+                });
+                
+                document.getElementById('save-pattern-button').addEventListener('click', () => {
+                    this.savePattern();
+                });
+                
+                document.getElementById('search-patterns-button').addEventListener('click', () => {
+                    this.currentPatternPage = 1;
+                    this.updatePatternsDisplay();
+                });
+                
+                document.getElementById('pattern-search').addEventListener('keyup', (e) => {
+                    if (e.key === 'Enter') {
+                        this.currentPatternPage = 1;
+                        this.updatePatternsDisplay();
+                    }
+                });
+                
+                document.getElementById('pattern-domain-filter').addEventListener('change', () => {
+                    this.currentPatternPage = 1;
+                    this.updatePatternsDisplay();
+                });
+                
+                document.getElementById('clear-pattern-filters').addEventListener('click', () => {
+                    document.getElementById('pattern-search').value = '';
+                    document.getElementById('pattern-domain-filter').value = 'all';
+                    this.currentPatternPage = 1;
+                    this.updatePatternsDisplay();
+                });
+                
+                // Set up fact section events
+                document.getElementById('create-fact-button').addEventListener('click', () => {
+                    this.showFactModal();
+                });
+                
+                document.getElementById('save-fact-button').addEventListener('click', () => {
+                    this.saveFact();
+                });
+                
+                document.getElementById('search-facts-button').addEventListener('click', () => {
+                    this.currentFactPage = 1;
+                    this.updateFactsDisplay();
+                });
+                
+                document.getElementById('fact-search').addEventListener('keyup', (e) => {
+                    if (e.key === 'Enter') {
+                        this.currentFactPage = 1;
+                        this.updateFactsDisplay();
+                    }
+                });
+                
+                document.getElementById('fact-domain-filter').addEventListener('change', () => {
+                    this.currentFactPage = 1;
+                    this.updateFactsDisplay();
+                });
+                
+                document.getElementById('fact-trusted-filter').addEventListener('change', () => {
+                    this.currentFactPage = 1;
+                    this.updateFactsDisplay();
+                });
+                
+                document.getElementById('clear-fact-filters').addEventListener('click', () => {
+                    document.getElementById('fact-search').value = '';
+                    document.getElementById('fact-domain-filter').value = 'all';
+                    document.getElementById('fact-trusted-filter').value = 'all';
+                    this.currentFactPage = 1;
+                    this.updateFactsDisplay();
+                });
+                
+                // Set up modal close buttons
+                document.querySelectorAll('.modal-close, [data-dismiss]').forEach(button => {
+                    button.addEventListener('click', () => {
+                        const modalId = button.getAttribute('data-dismiss') || button.closest('.modal').id;
+                        this.hideModal(modalId);
+                    });
+                });
+                
+                // Set up JSON editor events
+                document.getElementById('format-json').addEventListener('click', () => {
+                    this.formatJson();
+                });
+                
+                document.getElementById('validate-json').addEventListener('click', () => {
+                    this.validateJson();
+                });
+                
+                document.getElementById('save-json').addEventListener('click', () => {
+                    this.saveJsonEdits();
+                });
+                
+                // Set up window beforeunload event
+                window.addEventListener('beforeunload', (e) => {
+                    if (this.isModified) {
+                        e.preventDefault();
+                        e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+                        return e.returnValue;
+                    }
+                });
+                
+                // Add exact/substring mutual exclusivity
+                document.getElementById('exact-match').addEventListener('change', (e) => {
+                    if (e.target.checked) {
+                        document.getElementById('substring-match').checked = false;
+                    }
+                });
+                
+                document.getElementById('substring-match').addEventListener('change', (e) => {
+                    if (e.target.checked) {
+                        document.getElementById('exact-match').checked = false;
+                    }
+                });
+                
+                // Expose template functions to global scope
+                window.usePatternTemplate = (type) => this.usePatternTemplate(type);
+                window.useFactTemplate = (type) => this.useFactTemplate(type);
+                window.useFileTemplate = (type) => this.useFileTemplate(type);
+                
+                // Load empty training file
+                this.createNewFile();
+            }
+            
+            /**
+             * Switch between main sections
+             */
+            switchSection(sectionId) {
+                // Hide all sections
+                document.querySelectorAll('main > section').forEach(section => {
+                    section.classList.add('hidden-section');
+                    section.classList.remove('active-section');
+                });
+                
+                // Show selected section
+                document.getElementById(sectionId).classList.remove('hidden-section');
+                document.getElementById(sectionId).classList.add('active-section');
+                
+                // Update navigation
+                document.querySelectorAll('nav a').forEach(link => {
+                    link.classList.remove('active');
+                });
+                
+                // Determine which nav item to activate
+                let navId = null;
+                switch (sectionId) {
+                    case 'section-dashboard': navId = 'nav-dashboard'; break;
+                    case 'section-patterns': navId = 'nav-patterns'; break;
+                    case 'section-facts': navId = 'nav-facts'; break;
+                    case 'section-editor': navId = 'nav-editor'; break;
+                    case 'section-templates': navId = 'nav-templates'; break;
+                }
+                
+                if (navId) {
+                    document.getElementById(navId).classList.add('active');
+                }
+                
+                this.currentSection = sectionId;
+                
+                // Special handling for some sections
+                if (sectionId === 'section-editor') {
+                    this.updateJsonEditor();
+                } else if (sectionId === 'section-patterns') {
+                    this.updatePatternsDisplay();
+                } else if (sectionId === 'section-facts') {
+                    this.updateFactsDisplay();
+                }
+            }
+            
+            /**
+             * Switch between tabs within a section
+             */
+            switchTab(tabId, tabContainer) {
+                // Update tab buttons
+                tabContainer.querySelectorAll('.content-tab').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+                
+                tabContainer.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
+                
+                // Update tab content
+                const tabContainerId = tabContainer.closest('section').id;
+                const tabContentsSelector = tabContainerId === 'section-dashboard' 
+                    ? '.tab-content' 
+                    : `#${tabContainerId} .tab-content`;
+                
+                document.querySelectorAll(tabContentsSelector).forEach(content => {
+                    content.classList.remove('active');
+                });
+                
+                document.getElementById(`tab-${tabId}`).classList.add('active');
+            }
+            
+            /**
+             * Create a new empty training file
+             */
+            createNewFile() {
+                // Check if there are unsaved changes
+                if (this.isModified) {
+                    this.showConfirmModal(
+                        'Unsaved Changes',
+                        'You have unsaved changes. Are you sure you want to create a new file?',
+                        () => this.initializeNewFile()
+                    );
+                } else {
+                    this.initializeNewFile();
+                }
+            }
+            
+            /**
+             * Initialize a new training file
+             */
+            initializeNewFile() {
+                this.trainingData = {
+                    patterns: [],
+                    facts: {},
+                    factIdCounter: 1
+                };
+                
+                this.isModified = false;
+                this.domains = new Set();
+                
+                // Update UI
+                this.updateDashboard();
+                this.updatePatternsDisplay();
+                this.updateFactsDisplay();
+                this.updateJsonEditor();
+                
+                // Enable save buttons
+                document.getElementById('save-file').disabled = false;
+                document.getElementById('download-file').disabled = false;
+                
+                // Update file info
+                document.getElementById('file-info').textContent = 'New File';
+                
+                // Show success message
+                this.showToast('New training file created', 'success');
+            }
+            
+            /**
+             * Load a training file from disk
+             */
+            loadTrainingFile(file) {
+                // Check if there are unsaved changes
+                if (this.isModified) {
+                    this.showConfirmModal(
+                        'Unsaved Changes',
+                        'You have unsaved changes. Are you sure you want to load a new file?',
+                        () => this.processTrainingFile(file)
+                    );
+                } else {
+                    this.processTrainingFile(file);
+                }
+            }
+            
+            /**
+             * Process the uploaded training file
+             */
+            processTrainingFile(file) {
+                const reader = new FileReader();
+                
+                reader.onload = (e) => {
+                    try {
+                        // Parse the JSON file
+                        const fileData = JSON.parse(e.target.result);
+                        
+                        // Validate file structure
+                        if (!this.validateTrainingFileStructure(fileData)) {
+                            this.showToast('Invalid training file structure', 'error');
+                            return;
+                        }
+                        
+                        // Set the training data
+                        this.trainingData = fileData;
+                        
+                        // Update domains set
+                        this.updateDomains();
+                        
+                        // Reset modification flag
+                        this.isModified = false;
+                        
+                        // Update UI
+                        this.updateDashboard();
+                        this.updatePatternsDisplay();
+                        this.updateFactsDisplay();
+                        this.updateJsonEditor();
+                        
+                        // Enable save buttons
+                        document.getElementById('save-file').disabled = false;
+                        document.getElementById('download-file').disabled = false;
+                        
+                        // Update file info
+                        document.getElementById('file-info').textContent = file.name;
+                        
+                        // Show success message
+                        this.showToast(`Loaded ${file.name} successfully`, 'success');
+                    } catch (error) {
+                        console.error('Error loading file:', error);
+                        this.showToast('Error loading file: ' + error.message, 'error');
+                    }
+                };
+                
+                reader.onerror = () => {
+                    this.showToast('Error reading file', 'error');
+                };
+                
+                reader.readAsText(file);
+            }
+            
+            /**
+             * Validate the structure of the training file
+             */
+            validateTrainingFileStructure(data) {
+                // Check if patterns is an array
+                if (!Array.isArray(data.patterns)) {
+                    return false;
+                }
+                
+                // Check if facts is an object
+                if (typeof data.facts !== 'object' || data.facts === null) {
+                    return false;
+                }
+                
+                // Check if factIdCounter is a number
+                if (typeof data.factIdCounter !== 'number') {
+                    // Try to recover by setting a default
+                    const factIds = Object.keys(data.facts).map(id => parseInt(id));
+                    data.factIdCounter = factIds.length > 0 ? Math.max(...factIds) + 1 : 1;
+                }
+                
+                return true;
+            }
+            
+            /**
+             * Update the domains set from the facts
+             */
+            updateDomains() {
+                this.domains = new Set();
+                
+                // Extract unique domains from facts
+                for (const factId in this.trainingData.facts) {
+                    const fact = this.trainingData.facts[factId];
+                    if (fact.domain) {
+                        this.domains.add(fact.domain);
+                    }
+                }
+                
+                // Update domain filters
+                this.updateDomainFilters();
+            }
+            
+            /**
+             * Update domain filter dropdowns
+             */
+            updateDomainFilters() {
+                const patternDomainFilter = document.getElementById('pattern-domain-filter');
+                const factDomainFilter = document.getElementById('fact-domain-filter');
+                
+                // Save current selections
+                const patternDomainValue = patternDomainFilter.value;
+                const factDomainValue = factDomainFilter.value;
+                
+                // Clear options except 'all'
+                while (patternDomainFilter.options.length > 1) {
+                    patternDomainFilter.remove(1);
+                }
+                
+                while (factDomainFilter.options.length > 1) {
+                    factDomainFilter.remove(1);
+                }
+                
+                // Add domains as options
+                this.domains.forEach(domain => {
+                    const patternOption = document.createElement('option');
+                    patternOption.value = domain;
+                    patternOption.textContent = domain.charAt(0).toUpperCase() + domain.slice(1);
+                    patternDomainFilter.appendChild(patternOption);
+                    
+                    const factOption = document.createElement('option');
+                    factOption.value = domain;
+                    factOption.textContent = domain.charAt(0).toUpperCase() + domain.slice(1);
+                    factDomainFilter.appendChild(factOption);
+                });
+                
+                // Restore selected values if they still exist
+                if (Array.from(patternDomainFilter.options).some(opt => opt.value === patternDomainValue)) {
+                    patternDomainFilter.value = patternDomainValue;
+                }
+                
+                if (Array.from(factDomainFilter.options).some(opt => opt.value === factDomainValue)) {
+                    factDomainFilter.value = factDomainValue;
+                }
+            }
+            
+            /**
+             * Save the training data (in-memory only)
+             */
+            saveTrainingData() {
+                this.isModified = false;
+                this.showToast('Changes saved', 'success');
+            }
+            
+            /**
+             * Download the training file
+             */
+            downloadTrainingFile() {
+                try {
+                    // Create JSON string
+                    const jsonString = JSON.stringify(this.trainingData, null, 2);
+                    
+                    // Create download link
+                    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(jsonString);
+                    const downloadAnchorNode = document.createElement('a');
+                    downloadAnchorNode.setAttribute("href", dataStr);
+                    downloadAnchorNode.setAttribute("download", "smallllm-training.json");
+                    document.body.appendChild(downloadAnchorNode);
+                    downloadAnchorNode.click();
+                    downloadAnchorNode.remove();
+                    
+                    // Mark as not modified after download
+                    this.isModified = false;
+                    
+                    this.showToast('Training file downloaded', 'success');
+                } catch (error) {
+                    console.error('Error downloading file:', error);
+                    this.showToast('Error downloading file: ' + error.message, 'error');
+                }
+            }
+            
+            /**
+             * Update the dashboard
+             */
+            updateDashboard() {
+                if (!this.trainingData) return;
+                
+                // Update stats
+                document.getElementById('pattern-count').textContent = this.trainingData.patterns.length;
+                document.getElementById('fact-count').textContent = Object.keys(this.trainingData.facts).length;
+                document.getElementById('domain-count').textContent = this.domains.size;
+                
+                // Calculate file size
+                const jsonSize = JSON.stringify(this.trainingData).length;
+                let fileSizeText = '';
+                
+                if (jsonSize < 1024) {
+                    fileSizeText = `${jsonSize} B`;
+                } else if (jsonSize < 1024 * 1024) {
+                    fileSizeText = `${(jsonSize / 1024).toFixed(1)} KB`;
+                } else {
+                    fileSizeText = `${(jsonSize / (1024 * 1024)).toFixed(1)} MB`;
+                }
+                
+                document.getElementById('file-size').textContent = fileSizeText;
+                
+                // Update recent patterns
+                this.updateRecentPatterns();
+                
+                // Update recent facts
+                this.updateRecentFacts();
+                
+                // Update validation results
+                this.updateValidationResults();
+            }
+            
+            /**
+             * Update recent patterns in dashboard
+             */
+            updateRecentPatterns() {
+                const container = document.getElementById('recent-patterns-container');
+                
+                if (!this.trainingData || this.trainingData.patterns.length === 0) {
+                    container.innerHTML = '<p class="section-loading">No patterns available. Create new patterns.</p>';
+                    return;
+                }
+                
+                container.innerHTML = '';
+                
+                // Get the 6 most recent patterns (or all if less than 6)
+                const recentPatterns = this.trainingData.patterns.slice(-6).reverse();
+                
+                recentPatterns.forEach(pattern => {
+                    const card = document.createElement('div');
+                    card.className = 'item-card pattern-card';
+                    
+                    // Get associated facts for display
+                    const factCount = pattern.factIds ? pattern.factIds.length : 0;
+                    
+                    card.innerHTML = `
+                        <div class="item-card-title">${this.escapeHtml(pattern.pattern || 'Unnamed Pattern')}</div>
+                        <div class="item-card-content">${this.escapeHtml(pattern.response ? pattern.response.substring(0, 100) + (pattern.response.length > 100 ? '...' : '') : 'No response')}</div>
+                        <div class="item-card-meta">
+                            <span class="badge blue">${pattern.id || 'No ID'}</span>
+                            <span class="badge purple">${factCount} Facts</span>
+                            ${pattern.constraints?.exactMatch ? '<span class="badge orange">Exact</span>' : ''}
+                            ${pattern.constraints?.substringMatch ? '<span class="badge orange">Substring</span>' : ''}
+                        </div>
+                        <div class="item-card-actions">
+                            <button class="action-button secondary-button pattern-edit" data-id="${pattern.id}">Edit</button>
+                        </div>
+                    `;
+                    
+                    container.appendChild(card);
+                    
+                    // Add event listener to edit button
+                    card.querySelector('.pattern-edit').addEventListener('click', () => {
+                        this.editPattern(pattern.id);
+                    });
+                });
+            }
+            
+            /**
+             * Update recent facts in dashboard
+             */
+            updateRecentFacts() {
+                const container = document.getElementById('recent-facts-container');
+                
+                if (!this.trainingData || Object.keys(this.trainingData.facts).length === 0) {
+                    container.innerHTML = '<p class="section-loading">No facts available. Create new facts.</p>';
+                    return;
+                }
+                
+                container.innerHTML = '';
+                
+                // Get the 6 most recent facts by id (assuming higher id = more recent)
+                const factIds = Object.keys(this.trainingData.facts).map(id => parseInt(id));
+                factIds.sort((a, b) => b - a);
+                const recentFactIds = factIds.slice(0, 6);
+                
+                recentFactIds.forEach(factId => {
+                    const fact = this.trainingData.facts[factId];
+                    
+                    const card = document.createElement('div');
+                    card.className = 'item-card fact-card';
+                    
+                    card.innerHTML = `
+                        <div class="item-card-title">Fact #${factId}</div>
+                        <div class="item-card-content">${this.escapeHtml(fact.text || 'No text')}</div>
+                        <div class="item-card-meta">
+                            <span class="badge blue">${this.escapeHtml(fact.domain || 'No domain')}</span>
+                            <span class="badge ${fact.trusted ? 'green' : 'red'}">${fact.trusted ? 'Trusted' : 'Untrusted'}</span>
+                        </div>
+                        <div class="item-card-actions">
+                            <button class="action-button secondary-button fact-edit" data-id="${factId}">Edit</button>
+                        </div>
+                    `;
+                    
+                    container.appendChild(card);
+                    
+                    // Add event listener to edit button
+                    card.querySelector('.fact-edit').addEventListener('click', () => {
+                        this.editFact(factId);
+                    });
+                });
+            }
+            
+            /**
+             * Update validation results in dashboard
+             */
+            updateValidationResults() {
+                const container = document.getElementById('validation-results');
+                
+                if (!this.trainingData) {
+                    container.innerHTML = '<p class="section-loading">No validation results available. Load a file to validate.</p>';
+                    return;
+                }
+                
+                // Perform validation checks
+                const validationIssues = this.validateTrainingData();
+                
+                if (validationIssues.length === 0) {
+                    container.innerHTML = `
+                        <div style="padding: var(--spacing-md); background-color: rgba(0, 204, 136, 0.1); border-radius: var(--border-radius-sm); border-left: 3px solid var(--accent-color);">
+                            <h3 style="color: var(--accent-color); margin-bottom: var(--spacing-sm);">Validation Passed ✓</h3>
+                            <p>Your training file is correctly formatted and doesn't have any obvious issues.</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                let html = `
+                    <div style="padding: var(--spacing-md); background-color: rgba(243, 156, 18, 0.1); border-radius: var(--border-radius-sm); border-left: 3px solid var(--warning-color);">
+                        <h3 style="color: var(--warning-color); margin-bottom: var(--spacing-sm);">Validation Issues Found ⚠</h3>
+                        <p>Your training file has the following potential issues:</p>
+                        <ul style="margin-top: var(--spacing-sm); margin-left: var(--spacing-md);">
+                `;
+                
+                validationIssues.forEach(issue => {
+                    html += `<li style="margin-bottom: var(--spacing-xs);">${issue}</li>`;
+                });
+                
+                html += `
+                        </ul>
+                    </div>
+                `;
+                
+                container.innerHTML = html;
+            }
+            
+            /**
+             * Validate the training data
+             */
+            validateTrainingData() {
+                const issues = [];
+                
+                if (!this.trainingData) {
+                    issues.push('No training data loaded.');
+                    return issues;
+                }
+                
+                // Check patterns
+                if (!Array.isArray(this.trainingData.patterns)) {
+                    issues.push('Patterns is not an array.');
+                } else {
+                    if (this.trainingData.patterns.length === 0) {
+                        issues.push('No patterns defined.');
+                    }
+                    
+                    this.trainingData.patterns.forEach((pattern, index) => {
+                        if (!pattern.id) {
+                            issues.push(`Pattern at index ${index} has no ID.`);
+                        }
+                        
+                        if (!pattern.pattern) {
+                            issues.push(`Pattern with ID ${pattern.id || index} has no pattern text.`);
+                        }
+                        
+                        if (!pattern.response) {
+                            issues.push(`Pattern with ID ${pattern.id || index} has no response.`);
+                        }
+                        
+                        if (!pattern.constraints) {
+                            issues.push(`Pattern with ID ${pattern.id || index} has no constraints.`);
+                        } else {
+                            if (pattern.constraints.exactMatch === undefined && pattern.constraints.substringMatch === undefined) {
+                                issues.push(`Pattern with ID ${pattern.id || index} has invalid constraints.`);
+                            }
+                        }
+                        
+                        if (!pattern.factIds || !Array.isArray(pattern.factIds)) {
+                            issues.push(`Pattern with ID ${pattern.id || index} has invalid factIds.`);
+                        } else {
+                            // Check if all factIds exist
+                            pattern.factIds.forEach(factId => {
+                                if (!this.trainingData.facts[factId]) {
+                                    issues.push(`Pattern with ID ${pattern.id || index} references non-existent fact ID ${factId}.`);
+                                }
+                            });
+                        }
+                    });
+                }
+                
+                // Check facts
+                if (typeof this.trainingData.facts !== 'object' || this.trainingData.facts === null) {
+                    issues.push('Facts is not an object.');
+                } else {
+                    if (Object.keys(this.trainingData.facts).length === 0) {
+                        issues.push('No facts defined.');
+                    }
+                    
+                    for (const factId in this.trainingData.facts) {
+                        const fact = this.trainingData.facts[factId];
+                        
+                        if (!fact.text) {
+                            issues.push(`Fact with ID ${factId} has no text.`);
+                        }
+                        
+                        if (!fact.source) {
+                            issues.push(`Fact with ID ${factId} has no source.`);
+                        }
+                        
+                        if (!fact.domain) {
+                            issues.push(`Fact with ID ${factId} has no domain.`);
+                        }
+                        
+                        if (fact.trusted === undefined) {
+                            issues.push(`Fact with ID ${factId} has no trusted flag.`);
+                        }
+                    }
+                }
+                
+                // Check factIdCounter
+                if (typeof this.trainingData.factIdCounter !== 'number') {
+                    issues.push('factIdCounter is not a number.');
+                } else {
+                    const maxFactId = Math.max(...Object.keys(this.trainingData.facts).map(id => parseInt(id)), 0);
+                    if (this.trainingData.factIdCounter <= maxFactId) {
+                        issues.push(`factIdCounter (${this.trainingData.factIdCounter}) is not greater than the highest fact ID (${maxFactId}).`);
+                    }
+                }
+                
+                return issues;
+            }
+            
+            /**
+             * Update the patterns display
+             */
+            updatePatternsDisplay() {
+                const container = document.getElementById('patterns-container');
+                const paginationContainer = document.getElementById('patterns-pagination');
+                
+                if (!this.trainingData || this.trainingData.patterns.length === 0) {
+                    container.innerHTML = '<p class="section-loading">No patterns available. Load a file or create new patterns.</p>';
+                    paginationContainer.innerHTML = '';
+                    return;
+                }
+                
+                // Apply search filter
+                const searchText = document.getElementById('pattern-search').value.toLowerCase();
+                const domainFilter = document.getElementById('pattern-domain-filter').value;
+                
+                let filteredPatterns = this.trainingData.patterns;
+                
+                if (searchText) {
+                    filteredPatterns = filteredPatterns.filter(pattern => 
+                        (pattern.pattern && pattern.pattern.toLowerCase().includes(searchText)) ||
+                        (pattern.response && pattern.response.toLowerCase().includes(searchText)) ||
+                        (pattern.id && pattern.id.toLowerCase().includes(searchText))
+                    );
+                }
+                
+                if (domainFilter !== 'all') {
+                    filteredPatterns = filteredPatterns.filter(pattern => {
+                        // Check if pattern has facts in the selected domain
+                        if (!pattern.factIds || !Array.isArray(pattern.factIds)) return false;
+                        
+                        return pattern.factIds.some(factId => {
+                            const fact = this.trainingData.facts[factId];
+                            return fact && fact.domain === domainFilter;
+                        });
+                    });
+                }
+                
+                // Calculate pagination
+                const totalPatterns = filteredPatterns.length;
+                const totalPages = Math.ceil(totalPatterns / this.itemsPerPage);
+                const startIndex = (this.currentPatternPage - 1) * this.itemsPerPage;
+                const endIndex = Math.min(startIndex + this.itemsPerPage, totalPatterns);
+                
+                const displayPatterns = filteredPatterns.slice(startIndex, endIndex);
+                
+                // Clear container
+                container.innerHTML = '';
+                
+                if (displayPatterns.length === 0) {
+                    container.innerHTML = '<p class="section-loading">No patterns match your search criteria.</p>';
+                    paginationContainer.innerHTML = '';
+                    return;
+                }
+                
+                // Render patterns
+                displayPatterns.forEach(pattern => {
+                    const factCount = pattern.factIds ? pattern.factIds.length : 0;
+                    
+                    const card = document.createElement('div');
+                    card.className = 'item-card pattern-card';
+                    
+                    card.innerHTML = `
+                        <div class="item-card-title">${this.escapeHtml(pattern.pattern || 'Unnamed Pattern')}</div>
+                        <div class="item-card-content">${this.escapeHtml(pattern.response ? pattern.response.substring(0, 100) + (pattern.response.length > 100 ? '...' : '') : 'No response')}</div>
+                        <div class="item-card-meta">
+                            <span class="badge blue">${pattern.id || 'No ID'}</span>
+                            <span class="badge purple">${factCount} Facts</span>
+                            ${pattern.constraints?.exactMatch ? '<span class="badge orange">Exact</span>' : ''}
+                            ${pattern.constraints?.substringMatch ? '<span class="badge orange">Substring</span>' : ''}
+                            ${pattern.constraints?.caseSensitive ? '<span class="badge orange">Case Sensitive</span>' : ''}
+                        </div>
+                        <div class="item-card-actions">
+                            <button class="action-button secondary-button pattern-edit" data-id="${pattern.id}">Edit</button>
+                            <button class="action-button danger-button pattern-delete" data-id="${pattern.id}">Delete</button>
+                        </div>
+                    `;
+                    
+                    container.appendChild(card);
+                    
+                    // Add event listeners
+                    card.querySelector('.pattern-edit').addEventListener('click', () => {
+                        this.editPattern(pattern.id);
+                    });
+                    
+                    card.querySelector('.pattern-delete').addEventListener('click', () => {
+                        this.showConfirmModal(
+                            'Delete Pattern',
+                            `Are you sure you want to delete the pattern "${pattern.pattern}"?`,
+                            () => this.deletePattern(pattern.id)
+                        );
+                    });
+                });
+                
+                // Update pagination
+                this.updatePagination(paginationContainer, totalPages, this.currentPatternPage, page => {
+                    this.currentPatternPage = page;
+                    this.updatePatternsDisplay();
+                });
+            }
+            
+            /**
+             * Update the facts display
+             */
+            updateFactsDisplay() {
+                const container = document.getElementById('facts-container');
+                const paginationContainer = document.getElementById('facts-pagination');
+                
+                if (!this.trainingData || Object.keys(this.trainingData.facts).length === 0) {
+                    container.innerHTML = '<p class="section-loading">No facts available. Load a file or create new facts.</p>';
+                    paginationContainer.innerHTML = '';
+                    return;
+                }
+                
+                // Apply search filter
+                const searchText = document.getElementById('fact-search').value.toLowerCase();
+                const domainFilter = document.getElementById('fact-domain-filter').value;
+                const trustedFilter = document.getElementById('fact-trusted-filter').value;
+                
+                let filteredFacts = Object.entries(this.trainingData.facts).map(([id, fact]) => ({
+                    id,
+                    ...fact
+                }));
+                
+                if (searchText) {
+                    filteredFacts = filteredFacts.filter(fact => 
+                        (fact.text && fact.text.toLowerCase().includes(searchText)) ||
+                        (fact.source && fact.source.toLowerCase().includes(searchText)) ||
+                        (fact.domain && fact.domain.toLowerCase().includes(searchText))
+                    );
+                }
+                
+                if (domainFilter !== 'all') {
+                    filteredFacts = filteredFacts.filter(fact => fact.domain === domainFilter);
+                }
+                
+                if (trustedFilter !== 'all') {
+                    filteredFacts = filteredFacts.filter(fact => {
+                        if (trustedFilter === 'trusted') return fact.trusted;
+                        if (trustedFilter === 'untrusted') return !fact.trusted;
+                        return true;
+                    });
+                }
+                
+                // Calculate pagination
+                const totalFacts = filteredFacts.length;
+                const totalPages = Math.ceil(totalFacts / this.itemsPerPage);
+                const startIndex = (this.currentFactPage - 1) * this.itemsPerPage;
+                const endIndex = Math.min(startIndex + this.itemsPerPage, totalFacts);
+                
+                const displayFacts = filteredFacts.slice(startIndex, endIndex);
+                
+                // Clear container
+                container.innerHTML = '';
+                
+                if (displayFacts.length === 0) {
+                    container.innerHTML = '<p class="section-loading">No facts match your search criteria.</p>';
+                    paginationContainer.innerHTML = '';
+                    return;
+                }
+                
+                // Render facts
+                displayFacts.forEach(fact => {
+                    const card = document.createElement('div');
+                    card.className = 'item-card fact-card';
+                    
+                    card.innerHTML = `
+                        <div class="item-card-title">Fact #${fact.id}</div>
+                        <div class="item-card-content">${this.escapeHtml(fact.text || 'No text')}</div>
+                        <div class="item-card-meta">
+                            <span class="badge blue">${this.escapeHtml(fact.domain || 'No domain')}</span>
+                            <span class="badge ${fact.trusted ? 'green' : 'red'}">${fact.trusted ? 'Trusted' : 'Untrusted'}</span>
+                            <span class="badge purple">${this.escapeHtml(fact.source || 'No source')}</span>
+                        </div>
+                        <div class="item-card-actions">
+                            <button class="action-button secondary-button fact-edit" data-id="${fact.id}">Edit</button>
+                            <button class="action-button danger-button fact-delete" data-id="${fact.id}">Delete</button>
+                        </div>
+                    `;
+                    
+                    container.appendChild(card);
+                    
+                    // Add event listeners
+                    card.querySelector('.fact-edit').addEventListener('click', () => {
+                        this.editFact(fact.id);
+                    });
+                    
+                    card.querySelector('.fact-delete').addEventListener('click', () => {
+                        this.showConfirmModal(
+                            'Delete Fact',
+                            `Are you sure you want to delete fact #${fact.id}?`,
+                            () => this.deleteFact(fact.id)
+                        );
+                    });
+                });
+                
+                // Update pagination
+                this.updatePagination(paginationContainer, totalPages, this.currentFactPage, page => {
+                    this.currentFactPage = page;
+                    this.updateFactsDisplay();
+                });
+            }
+            
+            /**
+             * Update pagination controls
+             */
+            updatePagination(container, totalPages, currentPage, onPageClick) {
+                container.innerHTML = '';
+                
+                if (totalPages <= 1) {
+                    return;
+                }
+                
+                // Previous button
+                const prevButton = document.createElement('button');
+                prevButton.className = `pagination-button ${currentPage === 1 ? 'disabled' : ''}`;
+                prevButton.textContent = '←';
+                prevButton.disabled = currentPage === 1;
+                prevButton.addEventListener('click', () => {
+                    if (currentPage > 1) {
+                        onPageClick(currentPage - 1);
+                    }
+                });
+                container.appendChild(prevButton);
+                
+                // Page numbers
+                const maxPages = 5; // Maximum number of page buttons to show
+                let startPage = Math.max(1, currentPage - Math.floor(maxPages / 2));
+                let endPage = Math.min(totalPages, startPage + maxPages - 1);
+                
+                if (endPage - startPage < maxPages - 1) {
+                    startPage = Math.max(1, endPage - maxPages + 1);
+                }
+                
+                // First page button if not visible
+                if (startPage > 1) {
+                    const firstButton = document.createElement('button');
+                    firstButton.className = 'pagination-button';
+                    firstButton.textContent = '1';
+                    firstButton.addEventListener('click', () => onPageClick(1));
+                    container.appendChild(firstButton);
+                    
+                    if (startPage > 2) {
+                        const ellipsis = document.createElement('span');
+                        ellipsis.className = 'pagination-ellipsis';
+                        ellipsis.textContent = '...';
+                        container.appendChild(ellipsis);
+                    }
+                }
+                
+                // Page buttons
+                for (let i = startPage; i <= endPage; i++) {
+                    const pageButton = document.createElement('button');
+                    pageButton.className = `pagination-button ${i === currentPage ? 'active' : ''}`;
+                    pageButton.textContent = i;
+                    pageButton.addEventListener('click', () => onPageClick(i));
+                    container.appendChild(pageButton);
+                }
+                
+                // Last page button if not visible
+                if (endPage < totalPages) {
+                    if (endPage < totalPages - 1) {
+                        const ellipsis = document.createElement('span');
+                        ellipsis.className = 'pagination-ellipsis';
+                        ellipsis.textContent = '...';
+                        container.appendChild(ellipsis);
+                    }
+                    
+                    const lastButton = document.createElement('button');
+                    lastButton.className = 'pagination-button';
+                    lastButton.textContent = totalPages;
+                    lastButton.addEventListener('click', () => onPageClick(totalPages));
+                    container.appendChild(lastButton);
+                }
+                
+                // Next button
+                const nextButton = document.createElement('button');
+                nextButton.className = `pagination-button ${currentPage === totalPages ? 'disabled' : ''}`;
+                nextButton.textContent = '→';
+                nextButton.disabled = currentPage === totalPages;
+                nextButton.addEventListener('click', () => {
+                    if (currentPage < totalPages) {
+                        onPageClick(currentPage + 1);
+                    }
+                });
+                container.appendChild(nextButton);
+            }
+            
+            /**
+             * Show pattern modal for creating/editing
+             */
+            showPatternModal(patternId = null) {
+                // Reset form
+                document.getElementById('pattern-form').reset();
+                
+                const modalTitle = document.getElementById('pattern-modal-title');
+                const patternIdField = document.getElementById('pattern-id');
+                const patternTextField = document.getElementById('pattern-text');
+                const patternResponseField = document.getElementById('pattern-response');
+                const exactMatchCheckbox = document.getElementById('exact-match');
+                const substringMatchCheckbox = document.getElementById('substring-match');
+                const caseSensitiveCheckbox = document.getElementById('case-sensitive');
+                
+                if (patternId) {
+                    // Editing existing pattern
+                    const pattern = this.trainingData.patterns.find(p => p.id === patternId);
+                    
+                    if (!pattern) {
+                        this.showToast('Pattern not found', 'error');
+                        return;
+                    }
+                    
+                    modalTitle.textContent = 'Edit Pattern';
+                    patternIdField.value = pattern.id;
+                    patternTextField.value = pattern.pattern || '';
+                    patternResponseField.value = pattern.response || '';
+                    
+                    // Set constraints
+                    exactMatchCheckbox.checked = pattern.constraints?.exactMatch || false;
+                    substringMatchCheckbox.checked = pattern.constraints?.substringMatch || false;
+                    caseSensitiveCheckbox.checked = pattern.constraints?.caseSensitive || false;
+                    
+                    // Select associated facts
+                    this.populateFactSelector(pattern.factIds || []);
+                } else {
+                    // Creating new pattern
+                    modalTitle.textContent = 'Create New Pattern';
+                    patternIdField.value = '';
+                    
+                    // Default constraints
+                    exactMatchCheckbox.checked = true;
+                    substringMatchCheckbox.checked = false;
+                    caseSensitiveCheckbox.checked = false;
+                    
+                    // Empty fact selector
+                    this.populateFactSelector([]);
+                }
+                
+                // Show modal
+                document.getElementById('pattern-modal').style.display = 'flex';
+            }
+            
+            /**
+             * Populate fact selector with checkboxes
+             */
+            populateFactSelector(selectedFactIds) {
+                const factSelector = document.getElementById('fact-selector');
+                
+                if (!this.trainingData || Object.keys(this.trainingData.facts).length === 0) {
+                    factSelector.innerHTML = '<p>No facts available. Create facts first.</p>';
+                    return;
+                }
+                
+                factSelector.innerHTML = '';
+                
+                // Convert to Set for easier checking
+                const selectedFactsSet = new Set(selectedFactIds.map(id => id.toString()));
+                
+                // Get all facts
+                const facts = Object.entries(this.trainingData.facts).map(([id, fact]) => ({
+                    id,
+                    ...fact
+                }));
+                
+                // Sort facts by domain and then by id
+                facts.sort((a, b) => {
+                    if (a.domain !== b.domain) {
+                        return a.domain.localeCompare(b.domain);
+                    }
+                    return parseInt(a.id) - parseInt(b.id);
+                });
+                
+                // Group facts by domain
+                const factsByDomain = {};
+                
+                facts.forEach(fact => {
+                    if (!factsByDomain[fact.domain]) {
+                        factsByDomain[fact.domain] = [];
+                    }
+                    factsByDomain[fact.domain].push(fact);
+                });
+                
+                // Create checkboxes grouped by domain
+                for (const domain in factsByDomain) {
+                    const domainHeader = document.createElement('div');
+                    domainHeader.className = 'fact-domain-header';
+                    domainHeader.style.marginTop = '10px';
+                    domainHeader.style.marginBottom = '5px';
+                    domainHeader.style.fontWeight = 'bold';
+                    domainHeader.style.color = 'var(--text-bright)';
+                    domainHeader.textContent = domain.charAt(0).toUpperCase() + domain.slice(1);
+                    factSelector.appendChild(domainHeader);
+                    
+                    factsByDomain[domain].forEach(fact => {
+                        const factItem = document.createElement('div');
+                        factItem.className = 'fact-item';
+                        
+                        const checkbox = document.createElement('input');
+                        checkbox.type = 'checkbox';
+                        checkbox.id = `fact-${fact.id}`;
+                        checkbox.value = fact.id;
+                        checkbox.checked = selectedFactsSet.has(fact.id.toString());
+                        
+                        const label = document.createElement('label');
+                        label.htmlFor = `fact-${fact.id}`;
+                        label.className = 'fact-text';
+                        label.textContent = `#${fact.id}: ${fact.text.substring(0, 50)}${fact.text.length > 50 ? '...' : ''}`;
+                        
+                        factItem.appendChild(checkbox);
+                        factItem.appendChild(label);
+                        factSelector.appendChild(factItem);
+                    });
+                }
+            }
+            
+            /**
+             * Save pattern from modal
+             */
+            savePattern() {
+                const patternIdField = document.getElementById('pattern-id');
+                const patternTextField = document.getElementById('pattern-text');
+                const patternResponseField = document.getElementById('pattern-response');
+                const exactMatchCheckbox = document.getElementById('exact-match');
+                const substringMatchCheckbox = document.getElementById('substring-match');
+                const caseSensitiveCheckbox = document.getElementById('case-sensitive');
+                
+                // Validate form
+                if (!patternTextField.value.trim()) {
+                    this.showToast('Pattern text is required', 'error');
+                    return;
+                }
+                
+                if (!patternResponseField.value.trim()) {
+                    this.showToast('Response is required', 'error');
+                    return;
+                }
+                
+                // Get selected facts
+                const selectedFactIds = Array.from(document.querySelectorAll('#fact-selector input[type="checkbox"]:checked'))
+                    .map(checkbox => checkbox.value);
+                
+                // Create pattern object
+                const patternData = {
+                    pattern: patternTextField.value.trim(),
+                    response: patternResponseField.value.trim(),
+                    factIds: selectedFactIds,
+                    constraints: {
+                        exactMatch: exactMatchCheckbox.checked,
+                        substringMatch: substringMatchCheckbox.checked,
+                        caseSensitive: caseSensitiveCheckbox.checked
+                    }
+                };
+                
+                const patternId = patternIdField.value;
+                
+                if (patternId) {
+                    // Update existing pattern
+                    const patternIndex = this.trainingData.patterns.findIndex(p => p.id === patternId);
+                    
+                    if (patternIndex === -1) {
+                        this.showToast('Pattern not found', 'error');
+                        return;
+                    }
+                    
+                    // Preserve the ID
+                    patternData.id = patternId;
+                    
+                    this.trainingData.patterns[patternIndex] = patternData;
+                    this.showToast('Pattern updated', 'success');
+                } else {
+                    // Create new pattern
+                    patternData.id = `pattern_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+                    this.trainingData.patterns.push(patternData);
+                    this.showToast('Pattern created', 'success');
+                }
+                
+                // Mark as modified
+                this.isModified = true;
+                
+                // Update UI
+                this.updateDashboard();
+                this.updatePatternsDisplay();
+                
+                // Hide modal
+                this.hideModal('pattern-modal');
+            }
+            
+            /**
+             * Edit an existing pattern
+             */
+            editPattern(patternId) {
+                this.showPatternModal(patternId);
+            }
+            
+            /**
+             * Delete a pattern
+             */
+            deletePattern(patternId) {
+                const patternIndex = this.trainingData.patterns.findIndex(p => p.id === patternId);
+                
+                if (patternIndex === -1) {
+                    this.showToast('Pattern not found', 'error');
+                    return;
+                }
+                
+                // Remove the pattern
+                this.trainingData.patterns.splice(patternIndex, 1);
+                
+                // Mark as modified
+                this.isModified = true;
+                
+                // Update UI
+                this.updateDashboard();
+                this.updatePatternsDisplay();
+                
+                this.showToast('Pattern deleted', 'success');
+            }
+            
+            /**
+             * Show fact modal for creating/editing
+             */
+            showFactModal(factId = null) {
+                // Reset form
+                document.getElementById('fact-form').reset();
+                
+                const modalTitle = document.getElementById('fact-modal-title');
+                const factIdField = document.getElementById('fact-id');
+                const factTextField = document.getElementById('fact-text');
+                const factSourceField = document.getElementById('fact-source');
+                const factDomainField = document.getElementById('fact-domain');
+                const factTrustedCheckbox = document.getElementById('fact-trusted');
+                
+                if (factId) {
+                    // Editing existing fact
+                    const fact = this.trainingData.facts[factId];
+                    
+                    if (!fact) {
+                        this.showToast('Fact not found', 'error');
+                        return;
+                    }
+                    
+                    modalTitle.textContent = `Edit Fact #${factId}`;
+                    factIdField.value = factId;
+                    factTextField.value = fact.text || '';
+                    factSourceField.value = fact.source || '';
+                    factDomainField.value = fact.domain || 'general';
+                    factTrustedCheckbox.checked = fact.trusted !== undefined ? fact.trusted : true;
+                } else {
+                    // Creating new fact
+                    modalTitle.textContent = 'Create New Fact';
+                    factIdField.value = '';
+                    factTrustedCheckbox.checked = true;
+                }
+                
+                // Show modal
+                document.getElementById('fact-modal').style.display = 'flex';
+            }
+            
+            /**
+             * Save fact from modal
+             */
+            saveFact() {
+                const factIdField = document.getElementById('fact-id');
+                const factTextField = document.getElementById('fact-text');
+                const factSourceField = document.getElementById('fact-source');
+                const factDomainField = document.getElementById('fact-domain');
+                const factTrustedCheckbox = document.getElementById('fact-trusted');
+                
+                // Validate form
+                if (!factTextField.value.trim()) {
+                    this.showToast('Fact text is required', 'error');
+                    return;
+                }
+                
+                if (!factSourceField.value.trim()) {
+                    this.showToast('Source is required', 'error');
+                    return;
+                }
+                
+                // Create fact object
+                const factData = {
+                    text: factTextField.value.trim(),
+                    source: factSourceField.value.trim(),
+                    domain: factDomainField.value,
+                    trusted: factTrustedCheckbox.checked,
+                    timestamp: Date.now()
+                };
+                
+                const factId = factIdField.value;
+                
+                if (factId) {
+                    // Update existing fact
+                    if (!this.trainingData.facts[factId]) {
+                        this.showToast('Fact not found', 'error');
+                        return;
+                    }
+                    
+                    // Update the fact
+                    this.trainingData.facts[factId] = {
+                        ...factData,
+                        id: parseInt(factId)
+                    };
+                    
+                    this.showToast('Fact updated', 'success');
+                } else {
+                    // Create new fact
+                    const newFactId = this.trainingData.factIdCounter++;
+                    this.trainingData.facts[newFactId] = {
+                        ...factData,
+                        id: newFactId
+                    };
+                    
+                    this.showToast('Fact created', 'success');
+                }
+                
+                // Mark as modified
+                this.isModified = true;
+                
+                // Update domains set
+                this.updateDomains();
+                
+                // Update UI
+                this.updateDashboard();
+                this.updateFactsDisplay();
+                
+                // Hide modal
+                this.hideModal('fact-modal');
+            }
+            
+            /**
+             * Edit an existing fact
+             */
+            editFact(factId) {
+                this.showFactModal(factId);
+            }
+            
+            /**
+             * Delete a fact
+             */
+            deleteFact(factId) {
+                if (!this.trainingData.facts[factId]) {
+                    this.showToast('Fact not found', 'error');
+                    return;
+                }
+                
+                // Check if fact is used in patterns
+                const usedInPatterns = this.trainingData.patterns.filter(pattern => 
+                    pattern.factIds && pattern.factIds.includes(parseInt(factId))
+                );
+                
+                if (usedInPatterns.length > 0) {
+                    this.showConfirmModal(
+                        'Fact Used in Patterns',
+                        `This fact is used in ${usedInPatterns.length} pattern(s). Deleting it will remove it from these patterns. Continue?`,
+                        () => this.performFactDeletion(factId)
+                    );
+                } else {
+                    this.performFactDeletion(factId);
+                }
+            }
+            
+            /**
+             * Perform fact deletion
+             */
+            performFactDeletion(factId) {
+                // Remove fact from all patterns
+                this.trainingData.patterns.forEach(pattern => {
+                    if (pattern.factIds && pattern.factIds.includes(parseInt(factId))) {
+                        pattern.factIds = pattern.factIds.filter(id => id !== parseInt(factId));
+                    }
+                });
+                
+                // Delete the fact
+                delete this.trainingData.facts[factId];
+                
+                // Mark as modified
+                this.isModified = true;
+                
+                // Update domains set
+                this.updateDomains();
+                
+                // Update UI
+                this.updateDashboard();
+                this.updateFactsDisplay();
+                
+                this.showToast('Fact deleted', 'success');
+            }
+            
+            /**
+             * Update JSON editor with current training data
+             */
+            updateJsonEditor() {
+                if (!this.trainingData) return;
+                
+                const jsonEditor = document.getElementById('json-editor');
+                jsonEditor.value = JSON.stringify(this.trainingData, null, 2);
+            }
+            
+            /**
+             * Format JSON in the editor
+             */
+            formatJson() {
+                const jsonEditor = document.getElementById('json-editor');
+                
+                try {
+                    const jsonData = JSON.parse(jsonEditor.value);
+                    jsonEditor.value = JSON.stringify(jsonData, null, 2);
+                    this.showToast('JSON formatted', 'success');
+                } catch (error) {
+                    this.showValidationError('Invalid JSON: ' + error.message);
+                }
+            }
+            
+            /**
+             * Validate JSON in the editor
+             */
+            validateJson() {
+                const jsonEditor = document.getElementById('json-editor');
+                
+                try {
+                    const jsonData = JSON.parse(jsonEditor.value);
+                    
+                    if (!this.validateTrainingFileStructure(jsonData)) {
+                        this.showValidationError('Invalid training file structure');
+                        return;
+                    }
+                    
+                    this.showToast('JSON is valid', 'success');
+                    document.getElementById('json-validation-error').textContent = '';
+                } catch (error) {
+                    this.showValidationError('Invalid JSON: ' + error.message);
+                }
+            }
+            
+            /**
+             * Show validation error in the editor
+             */
+            showValidationError(message) {
+                const errorElement = document.getElementById('json-validation-error');
+                errorElement.textContent = message;
+                this.showToast(message, 'error');
+            }
+            
+            /**
+             * Save JSON edits
+             */
+            saveJsonEdits() {
+                const jsonEditor = document.getElementById('json-editor');
+                
+                try {
+                    const jsonData = JSON.parse(jsonEditor.value);
+                    
+                    if (!this.validateTrainingFileStructure(jsonData)) {
+                        this.showValidationError('Invalid training file structure');
+                        return;
+                    }
+                    
+                    // Update training data
+                    this.trainingData = jsonData;
+                    
+                    // Update domains set
+                    this.updateDomains();
+                    
+                    // Mark as modified
+                    this.isModified = true;
+                    
+                    // Update UI
+                    this.updateDashboard();
+                    this.updatePatternsDisplay();
+                    this.updateFactsDisplay();
+                    
+                    this.showToast('JSON changes applied', 'success');
+                    document.getElementById('json-validation-error').textContent = '';
+                } catch (error) {
+                    this.showValidationError('Invalid JSON: ' + error.message);
+                }
+            }
+            
+            /**
+             * Show a modal dialog
+             */
+            showModal(modalId) {
+                document.getElementById(modalId).style.display = 'flex';
+            }
+            
+            /**
+             * Hide a modal dialog
+             */
+            hideModal(modalId) {
+                document.getElementById(modalId).style.display = 'none';
+            }
+            
+            /**
+             * Show confirmation modal
+             */
+            showConfirmModal(title, message, onConfirm) {
+                const modal = document.getElementById('confirm-modal');
+                const titleElement = document.getElementById('confirm-modal-title');
+                const messageElement = document.getElementById('confirm-modal-message');
+                const confirmButton = document.getElementById('confirm-action-button');
+                
+                titleElement.textContent = title;
+                messageElement.textContent = message;
+                
+                // Remove previous event listener
+                const newConfirmButton = confirmButton.cloneNode(true);
+                confirmButton.parentNode.replaceChild(newConfirmButton, confirmButton);
+                
+                // Add new event listener
+                newConfirmButton.addEventListener('click', () => {
+                    this.hideModal('confirm-modal');
+                    onConfirm();
+                });
+                
+                modal.style.display = 'flex';
+            }
+            
+            /**
+             * Show a toast notification
+             */
+            showToast(message, type = 'info') {
+                const container = document.getElementById('toast-container');
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                toast.textContent = message;
+                
+                container.appendChild(toast);
+                
+                // Show the toast after a small delay
+                setTimeout(() => {
+                    toast.classList.add('show');
+                }, 10);
+                
+                // Hide and remove the toast after 3 seconds
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    setTimeout(() => {
+                        container.removeChild(toast);
+                    }, 300);
+                }, 3000);
+            }
+            
+            /**
+             * Escape HTML to prevent XSS
+             */
+            escapeHtml(text) {
+                if (!text) return '';
+                
+                return text
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#039;');
+            }
+            
+            /**
+             * Use a pattern template
+             */
+            usePatternTemplate(type) {
+                switch (type) {
+                    case 'basic':
+                        document.getElementById('pattern-text').value = 'What is...?';
+                        document.getElementById('pattern-response').value = 'This is a basic answer to your question.';
+                        document.getElementById('exact-match').checked = true;
+                        document.getElementById('substring-match').checked = false;
+                        document.getElementById('case-sensitive').checked = false;
+                        break;
+                        
+                    case 'casestudy':
+                        document.getElementById('pattern-text').value = 'What is...?';
+                        document.getElementById('pattern-response').value = 'Definition: This is the formal definition of the concept.\n\nCase Study: Here is a real-world application of this concept. When [specific scenario], this concept is used to [specific application]. For example, [detailed example with practical implications].';
+                        document.getElementById('exact-match').checked = false;
+                        document.getElementById('substring-match').checked = true;
+                        document.getElementById('case-sensitive').checked = false;
+                        break;
+                        
+                    case 'list':
+                        document.getElementById('pattern-text').value = 'List all...';
+                        document.getElementById('pattern-response').value = '# Complete List\n\nHere\'s a comprehensive list organized by category:\n\n## Category 1\n\n- Item 1: Brief description\n- Item 2: Brief description\n- Item 3: Brief description\n\n## Category 2\n\n- Item 4: Brief description\n- Item 5: Brief description\n- Item 6: Brief description\n\nYou can ask for more details about any specific item by name.';
+                        document.getElementById('exact-match').checked = false;
+                        document.getElementById('substring-match').checked = true;
+                        document.getElementById('case-sensitive').checked = false;
+                        break;
+                }
+                
+                this.showPatternModal();
+                this.showToast('Pattern template applied', 'success');
+            }
+            
+            /**
+             * Use a fact template
+             */
+            useFactTemplate(type) {
+                switch (type) {
+                    case 'definition':
+                        document.getElementById('fact-text').value = 'A formal definition of the concept, including its key properties and characteristics.';
+                        document.getElementById('fact-source').value = 'Authoritative Textbook or Publication';
+                        document.getElementById('fact-domain').value = 'general';
+                        document.getElementById('fact-trusted').checked = true;
+                        break;
+                        
+                    case 'application':
+                        document.getElementById('fact-text').value = 'This concept is applied in [specific field] to solve [specific problem], resulting in [specific benefit].';
+                        document.getElementById('fact-source').value = 'Application Reference or Journal';
+                        document.getElementById('fact-domain').value = 'technology';
+                        document.getElementById('fact-trusted').checked = true;
+                        break;
+                        
+                    case 'historical':
+                        document.getElementById('fact-text').value = 'This concept was first developed by [person] in [year/period], in response to [historical context].';
+                        document.getElementById('fact-source').value = 'Historical Reference or Biography';
+                        document.getElementById('fact-domain').value = 'history';
+                        document.getElementById('fact-trusted').checked = true;
+                        break;
+                }
+                
+                this.showFactModal();
+                this.showToast('Fact template applied', 'success');
+            }
+            
+            /**
+             * Use a file template
+             */
+            useFileTemplate(type) {
+                // Check if there are unsaved changes
+                if (this.isModified) {
+                    this.showConfirmModal(
+                        'Unsaved Changes',
+                        'You have unsaved changes. Are you sure you want to load a template?',
+                        () => this.applyFileTemplate(type)
+                    );
+                } else {
+                    this.applyFileTemplate(type);
+                }
+            }
+            
+            /**
+             * Apply a file template
+             */
+            applyFileTemplate(type) {
+                switch (type) {
+                    case 'empty':
+                        this.trainingData = {
+                            patterns: [],
+                            facts: {},
+                            factIdCounter: 1
+                        };
+                        break;
+                        
+                    case 'mathematics':
+                        this.trainingData = {
+                            patterns: [
+                                {
+                                    id: "pattern_1",
+                                    pattern: "What is a vector space?",
+                                    response: "A vector space is a collection of objects called vectors, which may be added together and multiplied by scalars. Vector spaces are fundamental structures in linear algebra.\n\nCase Study: In computer graphics, 3D positions are represented as vectors in a 3-dimensional vector space. Operations like moving an object (vector addition) and scaling an object (scalar multiplication) correspond directly to vector space operations.",
+                                    factIds: [1, 2],
+                                    constraints: {
+                                        caseSensitive: false,
+                                        exactMatch: true,
+                                        substringMatch: false
+                                    }
+                                },
+                                {
+                                    id: "pattern_2",
+                                    pattern: "List all mathematical terms",
+                                    response: "# Mathematical Concepts\n\n## Linear Algebra\n- Vector space: A collection of vectors with addition and scalar multiplication\n\n## Calculus\n- Derivative: Rate of change of a function\n\nYou can ask about any of these terms for more information.",
+                                    factIds: [1, 3],
+                                    constraints: {
+                                        caseSensitive: false,
+                                        exactMatch: false,
+                                        substringMatch: true
+                                    }
+                                }
+                            ],
+                            facts: {
+                                "1": {
+                                    id: 1,
+                                    text: "A vector space is a collection of objects called vectors, which may be added together and multiplied by scalars.",
+                                    source: "Linear Algebra and Its Applications by Gilbert Strang",
+                                    domain: "mathematics",
+                                    trusted: true,
+                                    timestamp: Date.now()
+                                },
+                                "2": {
+                                    id: 2,
+                                    text: "Vector spaces are used in computer graphics for representing positions and transformations in 3D space.",
+                                    source: "Computer Graphics: Principles and Practice",
+                                    domain: "technology",
+                                    trusted: true,
+                                    timestamp: Date.now()
+                                },
+                                "3": {
+                                    id: 3,
+                                    text: "The derivative of a function at a point is the rate at which the function value changes as the input changes.",
+                                    source: "Calculus by James Stewart",
+                                    domain: "mathematics",
+                                    trusted: true,
+                                    timestamp: Date.now()
+                                }
+                            },
+                            factIdCounter: 4
+                        };
+                        break;
+                        
+                    case 'faq':
+                        this.trainingData = {
+                            patterns: [
+                                {
+                                    id: "faq_1",
+                                    pattern: "What is SmallLLM?",
+                                    response: "SmallLLM is a deterministic pattern-matching system that can be trained to recognize specific inputs and provide predefined responses.",
+                                    factIds: [1],
+                                    constraints: {
+                                        caseSensitive: false,
+                                        exactMatch: true,
+                                        substringMatch: false
+                                    }
+                                },
+                                {
+                                    id: "faq_2",
+                                    pattern: "How do I train SmallLLM?",
+                                    response: "You can train SmallLLM by creating pattern-response pairs in a JSON file. Each pattern can be associated with facts that provide context for the response.",
+                                    factIds: [2],
+                                    constraints: {
+                                        caseSensitive: false,
+                                        exactMatch: true,
+                                        substringMatch: false
+                                    }
+                                }
+                            ],
+                            facts: {
+                                "1": {
+                                    id: 1,
+                                    text: "SmallLLM is a deterministic pattern-matching system for natural language processing.",
+                                    source: "SmallLLM Documentation",
+                                    domain: "technology",
+                                    trusted: true,
+                                    timestamp: Date.now()
+                                },
+                                "2": {
+                                    id: 2,
+                                    text: "SmallLLM training involves creating pattern-response pairs in JSON format.",
+                                    source: "SmallLLM Documentation",
+                                    domain: "technology",
+                                    trusted: true,
+                                    timestamp: Date.now()
+                                }
+                            },
+                            factIdCounter: 3
+                        };
+                        break;
+                }
+                
+                // Update domains set
+                this.updateDomains();
+                
+                // Mark as modified
+                this.isModified = true;
+                
+                // Update UI
+                this.updateDashboard();
+                this.updatePatternsDisplay();
+                this.updateFactsDisplay();
+                this.updateJsonEditor();
+                
+                // Enable save buttons
+                document.getElementById('save-file').disabled = false;
+                document.getElementById('download-file').disabled = false;
+                
+                // Update file info
+                document.getElementById('file-info').textContent = 'Template File';
+                
+                this.showToast('Template applied', 'success');
+            }
+        }
+        
+        // Initialize the application when the DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            window.app = new SmallLLMManager();
+        });
+    </script>
+</body>
+</html>
