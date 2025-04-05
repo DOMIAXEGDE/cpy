@@ -1,0 +1,1355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Bank Manager</title>
+    <style>
+        /* Global styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+        
+        body {
+            background-color: #f0f0f0;
+            padding: 10px;
+            overflow-y: auto;
+            min-height: 100vh;
+        }
+        
+        .app-container {
+            max-width: 100%;
+            margin: 0 auto;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            min-height: calc(100vh - 20px);
+            overflow: hidden;
+        }
+        
+        /* Main content area - allow scrolling */
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+        }
+        
+        /* Header styles */
+        header {
+            text-align: center;
+            padding: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        header h1 {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        header p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        /* Section styles */
+        section {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        section h2 {
+            font-size: 1rem;
+            margin-bottom: 10px;
+            padding: 5px;
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+        }
+        
+        /* Configuration section */
+        .config-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .config-item {
+            display: flex;
+            align-items: center;
+        }
+        
+        .config-item label {
+            flex: 1;
+            font-size: 0.9rem;
+        }
+        
+        .config-item input,
+        .config-item select {
+            width: 100px;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+        
+        .file-actions {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 10px 0;
+        }
+        
+        .file-actions label {
+            margin-right: 10px;
+        }
+        
+        /* Button styles */
+        button {
+            padding: 5px 10px;
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            white-space: nowrap;
+        }
+        
+        button:hover {
+            background-color: #e0e0e0;
+        }
+        
+        button:focus {
+            outline: 2px solid #4d90fe;
+        }
+        
+        /* Banks section */
+        .banks-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .tab-container {
+            display: flex;
+            border-bottom: 1px solid #ccc;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
+        }
+        
+        .tab {
+            padding: 8px 15px;
+            background-color: #f5f5f5;
+            border: 1px solid #ccc;
+            border-bottom: none;
+            margin-right: 1px;
+            cursor: pointer;
+            border-radius: 3px 3px 0 0;
+            white-space: nowrap;
+        }
+        
+        .tab:focus {
+            outline: 2px solid #4d90fe;
+        }
+        
+        .tab.active {
+            background-color: #fff;
+            border-bottom: 1px solid #fff;
+            margin-bottom: -1px;
+        }
+        
+        .tab-contents {
+            flex: 1;
+            overflow: auto;
+        }
+        
+        .tab-content {
+            padding: 10px;
+            display: none;
+            height: 100%;
+        }
+        
+        .tab-content.active {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Bank display */
+        .bank-toolbar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 5px;
+            background-color: #f9f9f9;
+            border: 1px solid #eee;
+            border-radius: 3px;
+        }
+        
+        .registers-container {
+            overflow-y: auto;
+            flex: 1;
+        }
+        
+        .register-container {
+            margin-bottom: 20px;
+        }
+        
+        .register-header {
+            background-color: #f5f5f5;
+            padding: 5px 10px;
+            border: 1px solid #ddd;
+            border-radius: 3px 3px 0 0;
+            font-weight: bold;
+        }
+        
+        .addresses-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 5px;
+        }
+        
+        .addresses-table th,
+        .addresses-table td {
+            text-align: left;
+            padding: 5px 10px;
+            border: 1px solid #ddd;
+        }
+        
+        .addresses-table th {
+            background-color: #f9f9f9;
+            font-weight: normal;
+        }
+        
+        .reference {
+            color: blue;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+        
+        .reference:focus {
+            outline: 2px solid #4d90fe;
+        }
+        
+        .resolved-value {
+            color: blue;
+            margin-top: 3px;
+            font-style: italic;
+        }
+        
+        /* Text editor */
+        .editor-container {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-height: 200px;
+        }
+        
+        .text-editor {
+            width: 100%;
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            font-family: monospace;
+            resize: none;
+            tab-size: 4;
+            -moz-tab-size: 4;
+            min-height: 200px;
+            overflow: auto;
+        }
+        
+        .text-editor:focus {
+            outline: 2px solid #4d90fe;
+            border-color: #4d90fe;
+        }
+        
+        /* Status bar */
+        .status-bar {
+            padding: 5px 10px;
+            background-color: #f5f5f5;
+            border-top: 1px solid #ddd;
+            font-size: 0.85rem;
+        }
+        
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 15px;
+            background-color: #333;
+            color: #fff;
+            border-radius: 3px;
+            max-width: 300px;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+        }
+        
+        /* Modal styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            display: none;
+        }
+        
+        .modal {
+            background-color: #fff;
+            border-radius: 5px;
+            padding: 20px;
+            width: 90%;
+            max-width: 350px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        }
+        
+        .modal-title {
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        
+        .form-row {
+            margin-bottom: 15px;
+        }
+        
+        .form-row label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        .form-row input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+        }
+        
+        .form-row input:focus {
+            outline: 2px solid #4d90fe;
+            border-color: #4d90fe;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .config-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .file-actions {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .file-actions button {
+                width: 100%;
+                margin-top: 5px;
+            }
+            
+            .bank-toolbar {
+                flex-direction: column;
+                gap: 5px;
+            }
+            
+            .bank-toolbar div:last-child {
+                display: flex;
+                gap: 5px;
+            }
+            
+            .bank-toolbar div:last-child button {
+                flex: 1;
+            }
+            
+            .addresses-table {
+                font-size: 0.9rem;
+            }
+            
+            .tab {
+                padding: 5px 10px;
+                font-size: 0.9rem;
+            }
+            
+            /* Make sure all form inputs are large enough for touch on mobile */
+            button, input, select {
+                min-height: 44px;
+            }
+        }
+        
+        /* For small screens, adapt table layout */
+        @media (max-width: 480px) {
+            .addresses-table, .addresses-table tbody, .addresses-table tr {
+                display: block;
+                width: 100%;
+            }
+            
+            .addresses-table th {
+                display: none;
+            }
+            
+            .addresses-table td {
+                display: flex;
+                padding: 8px;
+                border-bottom: none;
+            }
+            
+            .addresses-table td:first-child {
+                font-weight: bold;
+                background-color: #f5f5f5;
+            }
+            
+            .addresses-table td:before {
+                content: attr(data-label);
+                font-weight: bold;
+                flex: 0 0 80px;
+            }
+            
+            .addresses-table tr {
+                border: 1px solid #ddd;
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Main App Container -->
+    <div class="app-container">
+        <!-- Header -->
+        <header>
+            <h1>DATA BANK MANAGER</h1>
+            <p>Manage and query multi-level reference data files</p>
+        </header>
+
+        <!-- Main scrollable content area -->
+        <div class="main-content">
+            <!-- Bank Configuration Section -->
+            <section class="config-section">
+                <h2>BANK CONFIGURATION</h2>
+                <div class="config-grid">
+                    <div class="config-item">
+                        <label for="maxRegisters">Max Registers Per Bank</label>
+                        <input type="number" id="maxRegisters" min="1" max="100" value="10">
+                    </div>
+                    <div class="config-item">
+                        <label for="maxAddresses">Max Addresses Per Register</label>
+                        <input type="number" id="maxAddresses" min="1" max="100" value="20">
+                    </div>
+                    <div class="config-item">
+                        <label for="readingMode">Reading Mode</label>
+                        <select id="readingMode">
+                            <option value="raw">raw</option>
+                            <option value="resolve">resolve</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="file-actions">
+                    <label>Bank Files</label>
+                    <button id="uploadButton" tabindex="0">UPLOAD FILES</button>
+                    <button id="createNewButton" tabindex="0">CREATE NEW BANK</button>
+                    <button id="downloadAllButton" tabindex="0">DOWNLOAD ALL</button>
+                    <input type="file" id="fileUpload" multiple accept=".txt" style="display: none;">
+                </div>
+            </section>
+
+            <!-- Data Banks Section -->
+            <section class="banks-section">
+                <h2>DATA BANKS</h2>
+                <div class="tab-container" id="bankTabs" role="tablist">
+                    <div class="tab" id="addBankTab" role="tab" tabindex="0" aria-selected="false">+ Add</div>
+                </div>
+                <div class="tab-contents" id="bankContents">
+                    <!-- Bank content will be dynamically added here -->
+                </div>
+            </section>
+        </div>
+
+        <!-- Status Bar -->
+        <div class="status-bar" id="statusBar">READY</div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast" role="alert"></div>
+
+    <!-- New Bank Modal -->
+    <div class="modal-overlay" id="newBankModal" role="dialog" aria-labelledby="newBankTitle">
+        <div class="modal">
+            <div class="modal-title" id="newBankTitle">Create New Bank</div>
+            <div class="form-row">
+                <label for="bankId">Bank ID Number</label>
+                <input type="number" id="bankId" min="1" value="1">
+            </div>
+            <div class="form-row">
+                <label for="numRegisters">Number of Registers</label>
+                <input type="number" id="numRegisters" min="1" value="3">
+            </div>
+            <div class="form-row">
+                <label for="numAddresses">Addresses Per Register</label>
+                <input type="number" id="numAddresses" min="1" value="5">
+            </div>
+            <div class="modal-buttons">
+                <button id="cancelNewBank" tabindex="0">Cancel</button>
+                <button id="createBank" tabindex="0">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Application state
+        const app = {
+            maxRegisters: 10,
+            maxAddresses: 20,
+            readingMode: "raw",
+            banks: {},
+            currentBankId: null,
+            editMode: {}
+        };
+
+        // DOM Elements
+        const elements = {
+            maxRegisters: document.getElementById("maxRegisters"),
+            maxAddresses: document.getElementById("maxAddresses"),
+            readingMode: document.getElementById("readingMode"),
+            uploadButton: document.getElementById("uploadButton"),
+            fileUpload: document.getElementById("fileUpload"),
+            createNewButton: document.getElementById("createNewButton"),
+            downloadAllButton: document.getElementById("downloadAllButton"),
+            bankTabs: document.getElementById("bankTabs"),
+            bankContents: document.getElementById("bankContents"),
+            statusBar: document.getElementById("statusBar"),
+            toast: document.getElementById("toast"),
+            newBankModal: document.getElementById("newBankModal"),
+            bankId: document.getElementById("bankId"),
+            numRegisters: document.getElementById("numRegisters"),
+            numAddresses: document.getElementById("numAddresses"),
+            cancelNewBank: document.getElementById("cancelNewBank"),
+            createBank: document.getElementById("createBank"),
+            addBankTab: document.getElementById("addBankTab")
+        };
+
+        // Initialize application
+        function initApp() {
+            // Set up event listeners
+            elements.maxRegisters.addEventListener("change", updateConfig);
+            elements.maxAddresses.addEventListener("change", updateConfig);
+            elements.readingMode.addEventListener("change", updateReadingMode);
+            elements.uploadButton.addEventListener("click", () => elements.fileUpload.click());
+            elements.fileUpload.addEventListener("change", handleFileUpload);
+            elements.createNewButton.addEventListener("click", showNewBankModal);
+            elements.downloadAllButton.addEventListener("click", downloadAllBanks);
+            elements.addBankTab.addEventListener("click", showNewBankModal);
+            elements.cancelNewBank.addEventListener("click", hideNewBankModal);
+            elements.createBank.addEventListener("click", createNewBank);
+
+            // Add keyboard accessibility for tabs
+            elements.addBankTab.addEventListener("keydown", (e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    showNewBankModal();
+                }
+            });
+
+            // Load config from storage
+            loadConfigFromStorage();
+        }
+
+        // Configuration methods
+        function loadConfigFromStorage() {
+            try {
+                const storedConfig = localStorage.getItem("dataBankConfig");
+                if (storedConfig) {
+                    const config = JSON.parse(storedConfig);
+                    app.maxRegisters = config.maxRegisters || 10;
+                    app.maxAddresses = config.maxAddresses || 20;
+                    app.readingMode = config.readingMode || "raw";
+
+                    // Update UI controls
+                    elements.maxRegisters.value = app.maxRegisters;
+                    elements.maxAddresses.value = app.maxAddresses;
+                    elements.readingMode.value = app.readingMode;
+                }
+            } catch (e) {
+                console.error("Error loading config:", e);
+            }
+        }
+
+        function saveConfigToStorage() {
+            try {
+                localStorage.setItem("dataBankConfig", JSON.stringify({
+                    maxRegisters: app.maxRegisters,
+                    maxAddresses: app.maxAddresses,
+                    readingMode: app.readingMode
+                }));
+            } catch (e) {
+                console.error("Error saving config:", e);
+            }
+        }
+
+        function updateConfig() {
+            try {
+                app.maxRegisters = parseInt(elements.maxRegisters.value);
+                app.maxAddresses = parseInt(elements.maxAddresses.value);
+                saveConfigToStorage();
+                showToast("Configuration updated");
+            } catch (e) {
+                showToast(`Error updating config: ${e}`);
+            }
+        }
+
+        function updateReadingMode() {
+            const previousMode = app.readingMode;
+            app.readingMode = elements.readingMode.value;
+
+            if (previousMode !== app.readingMode) {
+                saveConfigToStorage();
+                refreshAllBanks();
+                showToast(`Reading mode changed to: ${app.readingMode}`);
+            }
+        }
+
+        // File handling methods
+        function handleFileUpload(event) {
+            const files = event.target.files;
+            if (!files || files.length === 0) return;
+
+            setStatusMessage("Processing files...");
+
+            let processedCount = 0;
+            let errorCount = 0;
+
+            // Process each file
+            Array.from(files).forEach(file => {
+                // Check filename format (should be number.txt)
+                const match = file.name.match(/^(\d+)\.txt$/);
+
+                if (!match) {
+                    showToast(`Skipped ${file.name} - Invalid filename format. Should be 'number.txt'`);
+                    errorCount++;
+                    return;
+                }
+
+                const bankId = parseInt(match[1]);
+
+                // Read file content
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const content = e.target.result;
+                        processFileContent(bankId, content);
+                        processedCount++;
+
+                        // Show notification when all files are processed
+                        if (processedCount + errorCount === files.length) {
+                            setStatusMessage("File processing complete");
+                            showToast(`Processed ${processedCount} bank files, ${errorCount} errors`);
+                        }
+                    } catch (e) {
+                        errorCount++;
+                        showToast(`Failed to read file: ${file.name} - ${e.message}`);
+                    }
+                };
+
+                reader.readAsText(file);
+            });
+
+            // Reset file input
+            event.target.value = "";
+        }
+
+        function processFileContent(bankId, content) {
+            try {
+                const bank = parseBankData(bankId, content);
+                app.banks[bankId] = bank;
+
+                // Create or update the bank tab
+                createBankTab(bankId);
+
+                // If this is the first bank, select it
+                if (app.currentBankId === null) {
+                    selectBank(bankId);
+                }
+
+                showToast(`Bank ${bankId} loaded successfully`);
+            } catch (e) {
+                showToast(`Error processing Bank ${bankId}: ${e.message}`);
+                console.error(`Error processing Bank ${bankId}:`, e);
+            }
+        }
+
+        function parseBankData(bankId, content) {
+            const lines = content.split('\n');
+            const bank = {
+                id: bankId,
+                registers: {}
+            };
+
+            let currentRegister = null;
+
+            // Process each line
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+
+                // Skip empty lines
+                if (!line.trim()) {
+                    continue;
+                }
+
+                // Check if it's a register line (no tab at the beginning)
+                if (!line.startsWith('\t')) {
+                    // It's a register number
+                    try {
+                        currentRegister = parseInt(line.trim());
+                    } catch (e) {
+                        throw new Error(`Invalid register number at line ${i + 1}`);
+                    }
+
+                    // Initialize register if not exists
+                    if (!bank.registers[currentRegister]) {
+                        bank.registers[currentRegister] = {
+                            addresses: {}
+                        };
+                    }
+                } else {
+                    // It's an address line (starts with tab)
+                    if (currentRegister === null) {
+                        throw new Error(`Address found before any register at line ${i + 1}`);
+                    }
+
+                    // Extract the content after the tab
+                    const addressLine = line.replace(/^\t+/, '');
+
+                    // Split into address ID and value using the first tab as delimiter
+                    const parts = addressLine.split('\t', 2);
+
+                    // If there's only one part, it might be an empty value
+                    if (parts.length === 1) {
+                        try {
+                            const addressId = parseInt(parts[0].trim());
+                            bank.registers[currentRegister].addresses[addressId] = "";
+                        } catch (e) {
+                            throw new Error(`Invalid address format at line ${i + 1}`);
+                        }
+                    } else {
+                        try {
+                            const addressId = parseInt(parts[0].trim());
+                            const value = parts[1];
+                            bank.registers[currentRegister].addresses[addressId] = value;
+                        } catch (e) {
+                            throw new Error(`Invalid address number at line ${i + 1}`);
+                        }
+                    }
+                }
+            }
+
+            return bank;
+        }
+
+        // Tab management methods
+        function createBankTab(bankId) {
+            // Check if tab already exists
+            const existingTab = document.getElementById(`bankTab_${bankId}`);
+            if (existingTab) {
+                return; // Tab already exists
+            }
+
+            // Create new tab
+            const tab = document.createElement("div");
+            tab.className = "tab";
+            tab.id = `bankTab_${bankId}`;
+            tab.textContent = `Bank ${bankId}`;
+            tab.setAttribute("role", "tab");
+            tab.setAttribute("tabindex", "0");
+            tab.setAttribute("aria-selected", "false");
+            
+            // Add event listeners
+            tab.addEventListener("click", () => selectBank(bankId));
+            tab.addEventListener("keydown", (e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    selectBank(bankId);
+                }
+            });
+
+            // Insert before the Add tab
+            elements.bankTabs.insertBefore(tab, elements.addBankTab);
+
+            // Create content container for this bank
+            const content = document.createElement("div");
+            content.className = "tab-content";
+            content.id = `bankContent_${bankId}`;
+            content.setAttribute("role", "tabpanel");
+            content.setAttribute("aria-labelledby", `bankTab_${bankId}`);
+            elements.bankContents.appendChild(content);
+        }
+
+        function selectBank(bankId) {
+            // Update current bank ID
+            app.currentBankId = bankId;
+
+            // Update tab styles and ARIA attributes
+            const tabs = elements.bankTabs.querySelectorAll(".tab");
+            tabs.forEach(tab => {
+                tab.classList.remove("active");
+                tab.setAttribute("aria-selected", "false");
+            });
+            
+            const selectedTab = document.getElementById(`bankTab_${bankId}`);
+            if (selectedTab) {
+                selectedTab.classList.add("active");
+                selectedTab.setAttribute("aria-selected", "true");
+            }
+
+            // Update content visibility
+            const contents = elements.bankContents.querySelectorAll(".tab-content");
+            contents.forEach(content => content.classList.remove("active"));
+            const selectedContent = document.getElementById(`bankContent_${bankId}`);
+            if (selectedContent) {
+                selectedContent.classList.add("active");
+                displayBankData(bankId);
+            }
+        }
+
+        // Bank data display methods
+        function displayBankData(bankId) {
+            // Get the bank data
+            const bank = app.banks[bankId];
+            if (!bank) return;
+
+            // Get the content container
+            const contentContainer = document.getElementById(`bankContent_${bankId}`);
+            if (!contentContainer) return;
+
+            // Clear the container
+            contentContainer.innerHTML = "";
+
+            // Check if in edit mode
+            if (app.editMode[bankId]) {
+                displayEditMode(bankId, contentContainer);
+            } else {
+                displayViewMode(bankId, contentContainer);
+            }
+        }
+
+        function displayEditMode(bankId, container) {
+            const bank = app.banks[bankId];
+
+            // Create edit control toolbar
+            const toolbar = document.createElement("div");
+            toolbar.className = "bank-toolbar";
+            toolbar.innerHTML = `
+                <div>Editing Bank ${bankId}</div>
+                <div>
+                    <button id="cancelEditBank_${bankId}" tabindex="0">Cancel</button>
+                    <button id="saveEditBank_${bankId}" tabindex="0">Save</button>
+                </div>
+            `;
+            container.appendChild(toolbar);
+
+            // Add event listeners to buttons
+            document.getElementById(`cancelEditBank_${bankId}`).addEventListener("click", () => cancelBankEdits(bankId));
+            document.getElementById(`saveEditBank_${bankId}`).addEventListener("click", () => saveBankEdits(bankId));
+
+            // Create editor container to control flex sizing
+            const editorContainer = document.createElement("div");
+            editorContainer.className = "editor-container";
+            container.appendChild(editorContainer);
+
+            // Create text editor
+            const textEditor = document.createElement("textarea");
+            textEditor.className = "text-editor";
+            textEditor.id = `textEditor_${bankId}`;
+            textEditor.spellcheck = false;
+            
+            // Enable tab character insertion
+            textEditor.addEventListener("keydown", function(e) {
+                if (e.key === "Tab") {
+                    e.preventDefault();
+                    const start = this.selectionStart;
+                    const end = this.selectionEnd;
+                    
+                    // Insert tab at cursor position
+                    this.value = this.value.substring(0, start) + "\t" + this.value.substring(end);
+                    
+                    // Move cursor after the inserted tab
+                    this.selectionStart = this.selectionEnd = start + 1;
+                }
+            });
+            
+            editorContainer.appendChild(textEditor);
+
+            // Generate bank text content
+            const bankText = generateBankText(bank);
+            textEditor.value = bankText;
+            
+            // Focus the editor
+            setTimeout(() => textEditor.focus(), 0);
+        }
+
+        function displayViewMode(bankId, container) {
+            const bank = app.banks[bankId];
+
+            // Create toolbar
+            const toolbar = document.createElement("div");
+            toolbar.className = "bank-toolbar";
+            toolbar.innerHTML = `
+                <div>Bank ${bankId}</div>
+                <div>
+                    <button id="editBank_${bankId}" tabindex="0">Edit Bank</button>
+                </div>
+            `;
+            container.appendChild(toolbar);
+
+            // Add event listener to edit button
+            document.getElementById(`editBank_${bankId}`).addEventListener("click", () => startEditMode(bankId));
+
+            // Create a scrollable container for registers
+            const registersContainer = document.createElement("div");
+            registersContainer.className = "registers-container";
+            container.appendChild(registersContainer);
+
+            // Sort registers by ID
+            const registerIds = Object.keys(bank.registers).map(id => parseInt(id)).sort((a, b) => a - b);
+
+            // Create UI for each register
+            registerIds.forEach(registerId => {
+                const register = bank.registers[registerId];
+
+                // Register container
+                const registerContainer = document.createElement("div");
+                registerContainer.className = "register-container";
+                registersContainer.appendChild(registerContainer);
+
+                // Register header
+                const registerHeader = document.createElement("div");
+                registerHeader.className = "register-header";
+                registerHeader.textContent = `Register ${registerId}`;
+                registerContainer.appendChild(registerHeader);
+
+                // Addresses table
+                const table = document.createElement("table");
+                table.className = "addresses-table";
+                registerContainer.appendChild(table);
+
+                // Table header
+                const thead = document.createElement("thead");
+                thead.innerHTML = `
+                    <tr>
+                        <th>Address</th>
+                        <th>Value</th>
+                    </tr>
+                `;
+                table.appendChild(thead);
+
+                // Table body
+                const tbody = document.createElement("tbody");
+                table.appendChild(tbody);
+
+                // Sort addresses by ID
+                const addressIds = Object.keys(register.addresses).map(id => parseInt(id)).sort((a, b) => a - b);
+
+                // Create rows for each address
+                addressIds.forEach(addressId => {
+                    const value = register.addresses[addressId];
+                    const row = document.createElement("tr");
+                    
+                    // Address ID cell
+                    const addressCell = document.createElement("td");
+                    addressCell.textContent = addressId;
+                    addressCell.setAttribute("data-label", "Address:");
+                    row.appendChild(addressCell);
+                    
+                    // Value cell
+                    const valueCell = document.createElement("td");
+                    valueCell.setAttribute("data-label", "Value:");
+                    
+                    if (app.readingMode === "resolve" && containsReferences(value)) {
+                        // Raw value with reference highlighting
+                        valueCell.appendChild(formatValueWithReferences(value, bankId, registerId, addressId));
+                        
+                        // Resolved value
+                        const resolvedDiv = document.createElement("div");
+                        resolvedDiv.className = "resolved-value";
+                        resolvedDiv.textContent = `→ ${resolveValue(value)}`;
+                        valueCell.appendChild(resolvedDiv);
+                    } else {
+                        // Just show raw value
+                        valueCell.textContent = value;
+                    }
+                    
+                    row.appendChild(valueCell);
+                    tbody.appendChild(row);
+                });
+            });
+        }
+
+        function containsReferences(value) {
+            if (!value) return false;
+            
+            // Regular expression to find references (e.g., 1.2.3)
+            const refRegex = /\d+\.\d+\.\d+/;
+            return refRegex.test(value);
+        }
+
+        function formatValueWithReferences(value, bankId, registerId, addressId) {
+            if (!value) return document.createTextNode("");
+            
+            // Create a container for the formatted text
+            const container = document.createElement("div");
+            
+            // Regular expression to find references
+            const refRegex = /(\d+\.\d+\.\d+)/g;
+            
+            // Split the text by references
+            const parts = value.split(refRegex);
+            
+            // Add each part to the container
+            parts.forEach((part, i) => {
+                if (i % 2 === 0) {
+                    // Regular text
+                    if (part) {
+                        container.appendChild(document.createTextNode(part));
+                    }
+                } else {
+                    // Reference - make it a button
+                    const refLink = document.createElement("span");
+                    refLink.className = "reference";
+                    refLink.textContent = part;
+                    refLink.setAttribute("tabindex", "0"); // Make focusable
+                    refLink.setAttribute("role", "button");
+                    refLink.setAttribute("aria-label", `Navigate to reference ${part}`);
+                    
+                    // Add click and keyboard handlers
+                    refLink.onclick = () => handleReferenceClick(part);
+                    refLink.onkeydown = (e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            handleReferenceClick(part);
+                        }
+                    };
+                    
+                    container.appendChild(refLink);
+                }
+            });
+            
+            return container;
+        }
+
+        function handleReferenceClick(refPath) {
+            // Parse the reference path (e.g., "1.2.3")
+            try {
+                const [bankId, registerId, addressId] = refPath.split('.').map(part => parseInt(part));
+                
+                // Check if we need to switch banks
+                if (app.currentBankId !== bankId && app.banks[bankId]) {
+                    selectBank(bankId);
+                }
+                
+                // TODO: Highlight the referenced address
+                showToast(`Reference: Bank ${bankId}, Register ${registerId}, Address ${addressId}`);
+                
+            } catch (e) {
+                showToast(`Invalid reference format: ${refPath}`);
+            }
+        }
+
+        function resolveValue(value, visited = null) {
+            if (visited === null) visited = new Set();
+            if (!value) return "";
+            
+            // Regular expression to find references
+            const refRegex = /(\d+)\.(\d+)\.(\d+)/g;
+            
+            return value.replace(refRegex, (match, bankIdStr, registerIdStr, addressIdStr) => {
+                const bankId = parseInt(bankIdStr);
+                const registerId = parseInt(registerIdStr);
+                const addressId = parseInt(addressIdStr);
+                
+                // Check for circular references
+                const refKey = `${bankId}.${registerId}.${addressId}`;
+                if (visited.has(refKey)) {
+                    return `[Circular Ref: ${match}]`;
+                }
+                
+                // Get referenced value
+                const referencedValue = getReferencedValue(bankId, registerId, addressId);
+                
+                // Handle errors
+                if (!referencedValue.success) {
+                    return `[${referencedValue.error}]`;
+                }
+                
+                // Check for nested references
+                if (referencedValue.value.includes('.')) {
+                    const newVisited = new Set(visited);
+                    newVisited.add(refKey);
+                    return resolveValue(referencedValue.value, newVisited);
+                }
+                
+                return referencedValue.value;
+            });
+        }
+
+        function getReferencedValue(bankId, registerId, addressId) {
+            // Check if bank exists
+            if (!app.banks[bankId]) {
+                return { success: false, error: `Bank ${bankId} not found` };
+            }
+            
+            // Check if register exists
+            if (!app.banks[bankId].registers[registerId]) {
+                return { success: false, error: `Register ${registerId} not found in Bank ${bankId}` };
+            }
+            
+            // Check if address exists
+            if (!app.banks[bankId].registers[registerId].addresses[addressId]) {
+                return { success: false, error: `Address ${addressId} not found in Bank ${bankId}, Register ${registerId}` };
+            }
+            
+            // Return the value
+            return {
+                success: true,
+                value: app.banks[bankId].registers[registerId].addresses[addressId]
+            };
+        }
+
+        // Bank editing methods
+        function startEditMode(bankId) {
+            app.editMode[bankId] = true;
+            displayBankData(bankId);
+        }
+
+        function saveBankEdits(bankId) {
+            const textEditor = document.getElementById(`textEditor_${bankId}`);
+            if (!textEditor) return;
+            
+            const bankText = textEditor.value;
+            
+            try {
+                // Parse the edited text
+                const updatedBank = parseBankData(bankId, bankText);
+                
+                // Update the bank
+                app.banks[bankId] = updatedBank;
+                
+                // Exit edit mode
+                app.editMode[bankId] = false;
+                
+                // Refresh display
+                displayBankData(bankId);
+                
+                showToast(`Bank ${bankId} saved successfully`);
+            } catch (e) {
+                showToast(`Error saving bank: ${e.message}`);
+                console.error(`Error saving bank:`, e);
+            }
+        }
+
+        function cancelBankEdits(bankId) {
+            app.editMode[bankId] = false;
+            displayBankData(bankId);
+        }
+
+        function generateBankText(bank) {
+            let text = "";
+            
+            // Sort registers by ID
+            const registerIds = Object.keys(bank.registers).map(id => parseInt(id)).sort((a, b) => a - b);
+            
+            for (const registerId of registerIds) {
+                const register = bank.registers[registerId];
+                
+                // Add register header
+                text += `${registerId}\n`;
+                
+                // Sort addresses by ID
+                const addressIds = Object.keys(register.addresses).map(id => parseInt(id)).sort((a, b) => a - b);
+                
+                // Add each address
+                for (const addressId of addressIds) {
+                    const value = register.addresses[addressId];
+                    text += `\t${addressId}\t${value}\n`;
+                }
+                
+                // Add a blank line between registers
+                text += "\n";
+            }
+            
+            return text;
+        }
+
+        // New bank modal methods
+        function showNewBankModal() {
+            // Find next available bank ID
+            const bankIds = Object.keys(app.banks).map(id => parseInt(id));
+            const nextId = bankIds.length > 0 ? Math.max(...bankIds) + 1 : 1;
+            
+            // Set default values
+            elements.bankId.value = nextId;
+            elements.numRegisters.value = 3;
+            elements.numAddresses.value = 5;
+            
+            // Show modal
+            elements.newBankModal.style.display = "flex";
+            
+            // Focus first input
+            setTimeout(() => elements.bankId.focus(), 0);
+        }
+
+        function hideNewBankModal() {
+            elements.newBankModal.style.display = "none";
+        }
+
+        function createNewBank() {
+            // Get values from form
+            const bankId = parseInt(elements.bankId.value);
+            const numRegisters = parseInt(elements.numRegisters.value);
+            const numAddresses = parseInt(elements.numAddresses.value);
+            
+            // Validate inputs
+            if (bankId < 1) {
+                showToast("Bank ID must be a positive number");
+                return;
+            }
+            
+            if (numRegisters < 1 || numRegisters > app.maxRegisters) {
+                showToast(`Number of registers must be between 1 and ${app.maxRegisters}`);
+                return;
+            }
+            
+            if (numAddresses < 1 || numAddresses > app.maxAddresses) {
+                showToast(`Number of addresses must be between 1 and ${app.maxAddresses}`);
+                return;
+            }
+            
+            // Check if bank already exists
+            if (app.banks[bankId]) {
+                if (!confirm(`Bank ${bankId} already exists. Overwrite?`)) {
+                    return;
+                }
+            }
+            
+            // Create empty bank
+            const bank = {
+                id: bankId,
+                registers: {}
+            };
+            
+            // Create registers and addresses
+            for (let r = 1; r <= numRegisters; r++) {
+                bank.registers[r] = {
+                    addresses: {}
+                };
+                
+                for (let a = 1; a <= numAddresses; a++) {
+                    bank.registers[r].addresses[a] = `Value ${r}.${a}`;
+                }
+            }
+            
+            // Add to app state
+            app.banks[bankId] = bank;
+            
+            // Create tab and select it
+            createBankTab(bankId);
+            selectBank(bankId);
+            
+            // Enter edit mode
+            app.editMode[bankId] = true;
+            displayBankData(bankId);
+            
+            // Close modal
+            hideNewBankModal();
+            
+            showToast(`Bank ${bankId} created successfully`);
+        }
+
+        // File download method
+        function downloadAllBanks() {
+            const bankIds = Object.keys(app.banks);
+            if (bankIds.length === 0) {
+                showToast("No banks to download");
+                return;
+            }
+            
+            setStatusMessage("Creating ZIP file...");
+            
+            try {
+                // Create a JSZip instance
+                const zip = new JSZip();
+                
+                // Add each bank to the zip
+                for (const bankId of bankIds) {
+                    const bank = app.banks[bankId];
+                    const content = generateBankText(bank);
+                    zip.file(`${bankId}.txt`, content);
+                }
+                
+                // Generate zip and trigger download
+                zip.generateAsync({ type: "blob" }).then(function(content) {
+                    // Create download link
+                    const link = document.createElement("a");
+                    link.href = URL.createObjectURL(content);
+                    link.download = "databanks.zip";
+                    link.click();
+                    
+                    setStatusMessage("ZIP file downloaded");
+                    showToast(`${bankIds.length} banks downloaded as ZIP`);
+                });
+            } catch (e) {
+                setStatusMessage("Error creating ZIP file");
+                showToast(`Failed to create ZIP file: ${e.message}`);
+                console.error("Error creating ZIP:", e);
+            }
+        }
+
+        function refreshAllBanks() {
+            // Refresh the current bank display if any
+            if (app.currentBankId !== null) {
+                displayBankData(app.currentBankId);
+            }
+        }
+
+        // Utility methods
+        function setStatusMessage(message) {
+            elements.statusBar.textContent = message;
+        }
+
+        function showToast(message) {
+            elements.toast.textContent = message;
+            elements.toast.style.display = "block";
+            
+            // Hide toast after 3 seconds
+            setTimeout(() => {
+                elements.toast.style.display = "none";
+            }, 3000);
+        }
+
+        // Add JSZip for ZIP file creation
+        const script = document.createElement("script");
+        script.src = "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js";
+        script.onload = function() {
+            // Initialize application after JSZip is loaded
+            initApp();
+        };
+        document.head.appendChild(script);
+    </script>
+</body>
+</html>
