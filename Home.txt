@@ -1,0 +1,921 @@
+PROGRAM 1
+
+#!/usr/bin/env python3
+"""
+High-Performance 3D Line Pair Generator
+
+This script efficiently generates all possible 3D line pairs with coefficients 0, 1, or 2
+and saves valid ones to a text file in the compact 16CF format.
+
+	
+# Generate 10,000 valid pairs using all available CPU cores
+python generate_line_pairs_fast.py -m 1000000
+
+# Specify number of processes (e.g., 4 cores)
+python generate_line_pairs_fast.py -m 10000 -p 4
+
+# Continue from a previous run
+python generate_line_pairs_fast.py -m x1 -s x2 -o continued_output.txt
+
+# Adjust batch size (smaller batches use less memory but have more overhead)
+python generate_line_pairs_fast.py -m 10000 -b 5000
+
+python generate_line_pairs_fast.py -m 1000000 -v 0,1
+	
+
+"""
+
+import os
+import argparse
+import itertools
+import numpy as np
+from datetime import datetime
+import time
+import multiprocessing as mp
+
+def is_linearly_independent(vec1, vec2):
+    """Check if two 3D vectors are linearly independent using numpy"""
+    # Calculate cross product
+    cross_prod = np.cross(vec1, vec2)
+    
+    # If cross product is non-zero, vectors are linearly independent
+    return np.any(cross_prod != 0)
+
+def check_intersection_numeric(eq1, eq2, eq3, eq4):
+    """Check if two lines intersect using fast numerical methods"""
+    # Convert to numpy arrays for faster computation
+    a1, b1, c1, d1 = eq1
+    a2, b2, c2, d2 = eq2
+    a3, b3, c3, d3 = eq3
+    a4, b4, c4, d4 = eq4
+    
+    # Create coefficient matrices for both lines
+    A1 = np.array([[a1, b1, c1], [a2, b2, c2]])
+    A2 = np.array([[a3, b3, c3], [a4, b4, c4]])
+    
+    # Create right-hand side vectors
+    b1 = np.array([d1, d2])
+    b2 = np.array([d3, d4])
+    
+    # Check rank of the combined system
+    A_combined = np.vstack((A1, A2))
+    b_combined = np.concatenate((b1, b2))
+    
+    # Augmented matrix [A|b]
+    aug_matrix = np.column_stack((A_combined, b_combined))
+    
+    # Calculate ranks
+    rank_A = np.linalg.matrix_rank(A_combined)
+    rank_aug = np.linalg.matrix_rank(aug_matrix)
+    
+    # If ranks are equal and rank is 3, we have a single intersection
+    if rank_A == rank_aug and rank_A == 3:
+        return True
+    
+    return False
+
+def verify_line_pair_fast(coeffs):
+    """Quickly verify if the coefficients represent a valid line pair"""
+    eq1 = coeffs[0:4]
+    eq2 = coeffs[4:8]
+    eq3 = coeffs[8:12]
+    eq4 = coeffs[12:16]
+    
+    # Quick check: each equation must have at least one non-zero coefficient for x, y, or z
+    if (eq1[0] == 0 and eq1[1] == 0 and eq1[2] == 0) or \
+       (eq2[0] == 0 and eq2[1] == 0 and eq2[2] == 0) or \
+       (eq3[0] == 0 and eq3[1] == 0 and eq3[2] == 0) or \
+       (eq4[0] == 0 and eq4[1] == 0 and eq4[2] == 0):
+        return False
+    
+    # Check if the equations for each line are linearly independent
+    if not is_linearly_independent(eq1[:3], eq2[:3]):
+        return False
+    
+    if not is_linearly_independent(eq3[:3], eq4[:3]):
+        return False
+    
+    # Check if the lines intersect
+    return check_intersection_numeric(eq1, eq2, eq3, eq4)
+
+def process_batch(batch, start_index):
+    """Process a batch of combinations and return valid pairs"""
+    valid_pairs = []
+    
+    for i, coeffs in enumerate(batch):
+        if verify_line_pair_fast(coeffs):
+            valid_pairs.append((start_index + i, coeffs))
+    
+    return valid_pairs
+
+def generate_line_pairs_parallel(max_pairs=1000, values=[0, 1, 2], start_index=0, output_file="line_pairs.txt", batch_size=10000, num_processes=None):
+    """
+    Generate valid 3D line pairs with coefficients from the given values using parallel processing.
+    
+    Parameters:
+    max_pairs -- Maximum number of pairs to generate
+    values -- List of possible coefficient values
+    start_index -- Starting index for 16CF labels
+    output_file -- Output file name
+    batch_size -- Number of combinations to process in each batch
+    num_processes -- Number of parallel processes to use (default: CPU count)
+    """
+    # If num_processes is not specified, use CPU count
+    if num_processes is None:
+        num_processes = mp.cpu_count()
+    
+    # Total possible combinations
+    total_possible = len(values) ** 16
+    print(f"Total possible coefficient combinations: {total_possible:,}")
+    print(f"Using {num_processes} parallel processes with batch size {batch_size:,}")
+    print(f"Will generate up to {min(max_pairs, total_possible):,} valid pairs")
+    
+    # Create/open the output file
+    with open(output_file, 'w') as f:
+        f.write(f"# Generated 3D Line Pairs in Compact 16CF Format\n")
+        f.write(f"# Generated on {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+        f.write(f"# Format: Each entry represents a complete line pair with 16 coefficients\n")
+        f.write(f"# Coefficient values: {values}\n\n")
+    
+    # Initialize counters
+    valid_pairs_count = 0
+    checked_combinations = 0
+    
+    # Create a pool of worker processes
+    pool = mp.Pool(processes=num_processes)
+    
+    # Start timing
+    start_time = time.time()
+    last_report_time = start_time
+    
+    # Process combinations in batches
+    batch = []
+    batch_start_index = start_index
+    
+    # Skip combinations if start_index > 0
+    skipped = 0
+    
+    # For very large skip values, use a more efficient approach
+    if start_index > 1000000:
+        print(f"Efficiently skipping {start_index:,} combinations...")
+        # Calculate how many full iterations to skip for each position
+        base = len(values)
+        positions = 16
+        
+        # Generate combinations directly starting from the correct point
+        # This requires math to map a linear index to a specific combination
+        indices = []
+        remaining = start_index
+        for i in range(positions):
+            divisor = base ** (positions - i - 1)
+            index = remaining // divisor
+            remaining = remaining % divisor
+            indices.append(index)
+        
+        # Verify we calculated correctly
+        skipped = start_index
+        print(f"Starting from combination: {[values[i] for i in indices]}")
+        
+        # Create a generator starting from this point
+        def combination_generator():
+            # Start with the calculated indices
+            current_indices = indices.copy()
+            
+            while True:
+                # Convert indices to values
+                yield tuple(values[i] for i in current_indices)
+                
+                # Increment indices (like an odometer)
+                for i in range(positions - 1, -1, -1):
+                    current_indices[i] += 1
+                    if current_indices[i] < base:
+                        break
+                    current_indices[i] = 0
+                    # If we've reset the 0th position, we're done
+                    if i == 0:
+                        return
+        
+        # Use our custom generator
+        all_combinations = combination_generator()
+    else:
+        # For smaller skip values, use the standard approach
+        all_combinations = itertools.product(values, repeat=16)
+        
+        # Skip combinations
+        if start_index > 0:
+            print(f"Skipping {start_index:,} combinations...")
+            for _ in range(start_index):
+                next(all_combinations)
+                skipped += 1
+            print("Skip complete.")
+    
+    # Process all combinations
+    try:
+        # Submit initial batches to the pool
+        pending_results = []
+        for _ in range(num_processes * 2):  # 2x batches per process for continuous work
+            batch = list(itertools.islice(all_combinations, batch_size))
+            if not batch:
+                break
+            
+            result = pool.apply_async(process_batch, (batch, batch_start_index))
+            pending_results.append(result)
+            
+            checked_combinations += len(batch)
+            batch_start_index += len(batch)
+        
+        # Process results and submit new batches
+        while pending_results and valid_pairs_count < max_pairs:
+            # Wait for the first result to complete
+            result = pending_results.pop(0)
+            valid_pairs = result.get()
+            
+            # Submit a new batch
+            batch = list(itertools.islice(all_combinations, batch_size))
+            if batch:
+                result = pool.apply_async(process_batch, (batch, batch_start_index))
+                pending_results.append(result)
+                
+                checked_combinations += len(batch)
+                batch_start_index += len(batch)
+            
+            # Write valid pairs to the output file
+            with open(output_file, 'a') as f:
+                for idx, coeffs in valid_pairs:
+                    if valid_pairs_count >= max_pairs:
+                        break
+                    
+                    # Write the 16CF label
+                    f.write(f"16CF{idx}\n\n")
+                    
+                    # Write the coefficients
+                    f.write(" ".join(map(str, coeffs)) + "\n\n")
+                    
+                    valid_pairs_count += 1
+            
+            # Progress reporting
+            current_time = time.time()
+            if current_time - last_report_time >= 5:  # Report every 5 seconds
+                elapsed = current_time - start_time
+                combinations_per_sec = checked_combinations / elapsed
+                percent_complete = 100 * (skipped + checked_combinations) / total_possible
+                
+                print(f"Progress: {percent_complete:.3f}% - Checked: {checked_combinations:,} - Valid: {valid_pairs_count:,} - Speed: {combinations_per_sec:.0f} combs/sec")
+                last_report_time = current_time
+            
+            # Check if we've reached the maximum
+            if valid_pairs_count >= max_pairs:
+                print(f"Reached maximum of {max_pairs:,} valid pairs")
+                break
+        
+    finally:
+        # Clean up
+        pool.close()
+        pool.join()
+    
+    # Final summary
+    elapsed = time.time() - start_time
+    combinations_per_sec = checked_combinations / elapsed if elapsed > 0 else 0
+    
+    print("\nGeneration complete:")
+    print(f"- Found {valid_pairs_count:,} valid pairs out of {checked_combinations:,} combinations checked")
+    print(f"- Processing speed: {combinations_per_sec:.0f} combinations per second")
+    print(f"- Total elapsed time: {elapsed:.1f} seconds")
+    print(f"- Results saved to {output_file}")
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='Generate 3D line pairs in compact 16CF format')
+    parser.add_argument('--output', '-o', type=str, default='line_pairs.txt', 
+                        help='Output file name (default: line_pairs.txt)')
+    parser.add_argument('--max-pairs', '-m', type=int, default=1000, 
+                        help='Maximum number of pairs to generate (default: 1000)')
+    parser.add_argument('--values', '-v', type=str, default='0,1,2', 
+                        help='Comma-separated list of coefficient values (default: 0,1,2)')
+    parser.add_argument('--start-index', '-s', type=int, default=0, 
+                        help='Starting index for 16CF labels (default: 0)')
+    parser.add_argument('--batch-size', '-b', type=int, default=10000, 
+                        help='Number of combinations to process in each batch (default: 10000)')
+    parser.add_argument('--processes', '-p', type=int, default=None, 
+                        help='Number of parallel processes to use (default: CPU count)')
+    
+    args = parser.parse_args()
+    
+    # Parse the values
+    values = list(map(int, args.values.split(',')))
+    
+    print(f"Generating 3D line pairs with coefficients from {values}")
+    print(f"Will save up to {args.max_pairs:,} valid pairs to {args.output}")
+    
+    # Start the high-performance generation
+    generate_line_pairs_parallel(
+        max_pairs=args.max_pairs,
+        values=values,
+        start_index=args.start_index,
+        output_file=args.output,
+        batch_size=args.batch_size,
+        num_processes=args.processes
+    )
+
+PROGRAM 2
+
+from sympy import symbols, Eq, solve, lambdify, N
+from fractions import Fraction
+import numpy as np
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+import os
+import time
+import argparse
+import multiprocessing as mp
+from tqdm import tqdm
+import gc  # Garbage collection
+
+x, y, z = symbols('x y z', real=True)
+
+"""
+# Basic usage (interactive prompts)
+python analyze_lines.py
+
+# Specifying input/output files
+python analyze_lines.py -i line_pairs.txt -o results.txt
+
+# Using 8 CPU cores with fast numeric methods
+python analyze_lines.py -i line_pairs.txt -o results.txt -p 8 -f
+
+# Processing large files with minimal output
+python analyze_lines.py -i large_dataset.txt -o results.txt -f -q
+
+# Fine-tuning batch size for memory optimization
+python analyze_lines.py -i line_pairs.txt -o results.txt -b 5
+"""
+
+# Faster intersection finding using numpy for non-symbolic cases
+def find_intersection_numeric(eq1, eq2, eq3, eq4):
+    """Find intersection using fast numerical methods"""
+    # Convert to numpy arrays
+    A = np.zeros((4, 3))
+    b = np.zeros(4)
+    
+    # First line equations
+    A[0, :] = [eq1[0], eq1[1], eq1[2]]
+    A[1, :] = [eq2[0], eq2[1], eq2[2]]
+    b[0] = eq1[3]
+    b[1] = eq2[3]
+    
+    # Second line equations
+    A[2, :] = [eq3[0], eq3[1], eq3[2]]
+    A[3, :] = [eq4[0], eq4[1], eq4[2]]
+    b[2] = eq3[3]
+    b[3] = eq4[3]
+    
+    # Check matrix rank
+    rank_A = np.linalg.matrix_rank(A)
+    aug = np.column_stack((A, b.reshape(-1, 1)))
+    rank_aug = np.linalg.matrix_rank(aug)
+    
+    if rank_A == rank_aug:
+        if rank_A == 3:  # Unique solution
+            try:
+                # Use least squares for overdetermined system
+                solution, residuals, rank, s = np.linalg.lstsq(A, b, rcond=None)
+                if np.sum(residuals) < 1e-10:  # Check if it's a good solution
+                    return {x: solution[0], y: solution[1], z: solution[2]}
+            except:
+                pass
+    
+    # If we can't solve numerically, return None (no intersection)
+    return None
+
+# Symbolic intersection finding (slower but more accurate)
+def find_intersection(eqns1, eqns2):
+    sol = solve(eqns1 + eqns2, (x, y, z), dict=True)
+    if len(sol) == 1:
+        return sol[0]
+    elif len(sol) == 0:
+        return None  # No intersection (skew lines)
+    else:
+        return 'Infinite'  # Lines coincide
+
+def arithmetic_seq(coord, max_step=5, max_n=5):
+    sequences = set()
+    # Convert SymPy expression to float if needed
+    try:
+        coord_val = float(N(coord))
+    except:
+        return sequences  # Return empty set if conversion fails
+        
+    for step in range(-max_step, max_step + 1):
+        if step == 0:
+            continue
+        for n in range(-max_n, max_n + 1):
+            a0 = coord_val - step * n
+            # Check if a0 is approximately an integer
+            if abs(a0 - round(a0)) < 1e-10:
+                # Use a consistent format that's easier to parse later
+                sequences.add(f"{int(round(a0))} + {step}*n")
+    return sequences
+
+# Function to parametrize a line from two linear equations
+def parametrize_line(eq1, eq2):
+    # Extract coefficients
+    a1, b1, c1, d1 = eq1
+    a2, b2, c2, d2 = eq2
+    
+    # Create the system of equations
+    eqn1 = a1*x + b1*y + c1*z - d1
+    eqn2 = a2*x + b2*y + c2*z - d2
+    
+    # Try to solve for x, y in terms of z
+    try:
+        sol = solve([eqn1, eqn2], [x, y], dict=True)
+        if sol:
+            # Line is parametrized by z
+            x_expr = sol[0][x]
+            y_expr = sol[0][y]
+            x_func = lambdify(z, x_expr, "numpy")
+            y_func = lambdify(z, y_expr, "numpy")
+            
+            return {
+                'type': 'z',
+                'x_func': x_func,
+                'y_func': y_func,
+                'z_func': lambda t: t,
+                'x_expr': x_expr,
+                'y_expr': y_expr,
+                'z_expr': z
+            }
+    except Exception as e:
+        pass
+    
+    # Try to solve for x, z in terms of y
+    try:
+        sol = solve([eqn1, eqn2], [x, z], dict=True)
+        if sol:
+            # Line is parametrized by y
+            x_expr = sol[0][x]
+            z_expr = sol[0][z]
+            x_func = lambdify(y, x_expr, "numpy")
+            z_func = lambdify(y, z_expr, "numpy")
+            
+            return {
+                'type': 'y',
+                'x_func': x_func,
+                'y_func': lambda t: t,
+                'z_func': z_func,
+                'x_expr': x_expr,
+                'y_expr': y,
+                'z_expr': z_expr
+            }
+    except Exception as e:
+        pass
+    
+    # Try to solve for y, z in terms of x
+    try:
+        sol = solve([eqn1, eqn2], [y, z], dict=True)
+        if sol:
+            # Line is parametrized by x
+            y_expr = sol[0][y]
+            z_expr = sol[0][z]
+            y_func = lambdify(x, y_expr, "numpy")
+            z_func = lambdify(x, z_expr, "numpy")
+            
+            return {
+                'type': 'x',
+                'x_func': lambda t: t,
+                'y_func': y_func,
+                'z_func': z_func,
+                'x_expr': x,
+                'y_expr': y_expr,
+                'z_expr': z_expr
+            }
+    except Exception as e:
+        pass
+    
+    return None
+
+# Function to safely evaluate a function with error handling
+def safe_eval(func, t_values):
+    try:
+        return [func(t) for t in t_values]
+    except Exception as e:
+        # If scalar evaluation fails, try array evaluation
+        try:
+            return func(t_values)
+        except Exception as e:
+            print(f"Evaluation error: {e}")
+            return np.zeros_like(t_values)
+
+# Fix the sequence parsing in the visualize_line_pair function
+def visualize_line_pair(eq1, eq2, eq3, eq4, intersection, seq1, seq2, pair_num):
+    fig = plt.figure(figsize=(10, 8))
+    ax = fig.add_subplot(111, projection='3d')
+    
+    # Get line parametrizations
+    line1_params = parametrize_line(eq1, eq2)
+    line2_params = parametrize_line(eq3, eq4)
+    
+    # Set axis limits for better visualization
+    ax.set_xlim(-10, 10)
+    ax.set_ylim(-10, 10)
+    ax.set_zlim(-10, 10)
+    
+    if line1_params:
+        # Plot Line 1
+        t_values = np.linspace(-5, 5, 100)
+        try:
+            x_vals1 = safe_eval(line1_params['x_func'], t_values)
+            y_vals1 = safe_eval(line1_params['y_func'], t_values)
+            z_vals1 = safe_eval(line1_params['z_func'], t_values)
+            ax.plot(x_vals1, y_vals1, z_vals1, 'b-', label='Line 1')
+        except Exception as e:
+            print(f"Error plotting Line 1: {e}")
+    
+    if line2_params:
+        # Plot Line 2
+        t_values = np.linspace(-5, 5, 100)
+        try:
+            x_vals2 = safe_eval(line2_params['x_func'], t_values)
+            y_vals2 = safe_eval(line2_params['y_func'], t_values)
+            z_vals2 = safe_eval(line2_params['z_func'], t_values)
+            ax.plot(x_vals2, y_vals2, z_vals2, 'r-', label='Line 2')
+        except Exception as e:
+            print(f"Error plotting Line 2: {e}")
+    
+    # If there's an intersection, plot it
+    if intersection and intersection != 'Infinite':
+        try:
+            ix = float(N(intersection[x]))
+            iy = float(N(intersection[y]))
+            iz = float(N(intersection[z]))
+            ax.scatter([ix], [iy], [iz], color='green', s=100, label='Intersection')
+            
+            # Plot points from arithmetic sequences on Line 1
+            if seq1 and line1_params and line1_params['type'] == 'x':
+                for seq_str in list(seq1)[:2]:  # Limit to 2 sequences for clarity
+                    try:
+                        # More robust sequence string parsing
+                        parts = seq_str.split(' + ')
+                        a0 = int(parts[0])
+                        
+                        # Extract step size using a more robust method
+                        step_part = parts[1].strip('()')
+                        step = int(step_part.split('*')[0])
+                        
+                        # Plot a few points from the sequence
+                        seq_x = [a0 + step*n for n in range(-3, 4)]
+                        seq_y = safe_eval(line1_params['y_func'], seq_x)
+                        seq_z = safe_eval(line1_params['z_func'], seq_x)
+                        ax.scatter(seq_x, seq_y, seq_z, color='cyan', s=50, 
+                                label=f'Line 1 Seq: {seq_str}')
+                    except Exception as e:
+                        print(f"Error plotting Line 1 sequence: {e}")
+            
+            # Plot points from arithmetic sequences on Line 2
+            if seq2 and line2_params and line2_params['type'] == 'x':
+                for seq_str in list(seq2)[:2]:  # Limit to 2 sequences for clarity
+                    try:
+                        # More robust sequence string parsing
+                        parts = seq_str.split(' + ')
+                        a0 = int(parts[0])
+                        
+                        # Extract step size using a more robust method
+                        step_part = parts[1].strip('()')
+                        step = int(step_part.split('*')[0])
+                        
+                        # Plot a few points from the sequence
+                        seq_x = [a0 + step*n for n in range(-3, 4)]
+                        seq_y = safe_eval(line2_params['y_func'], seq_x)
+                        seq_z = safe_eval(line2_params['z_func'], seq_x)
+                        ax.scatter(seq_x, seq_y, seq_z, color='magenta', s=50,
+                                label=f'Line 2 Seq: {seq_str}')
+                    except Exception as e:
+                        print(f"Error plotting Line 2 sequence: {e}")
+        except Exception as e:
+            print(f"Error plotting intersection: {e}")
+    
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    ax.set_zlabel('Z')
+    ax.set_title(f'Line Pair #{pair_num}')
+    ax.legend()
+    
+    # Create directory for plots if it doesn't exist
+    if not os.path.exists('plots'):
+        os.makedirs('plots')
+    
+    plt.savefig(f'plots/line_pair_{pair_num}.png')
+    plt.close()
+    return f'plots/line_pair_{pair_num}.png'
+
+# Function to parse an input file in compact 16CF format (16 numbers representing 4 equations)
+def parse_compact_16cf_file(filename, verbose=True):
+    """Parse a file in the compact 16CF format with optimized reading"""
+    line_pairs = []
+    
+    if verbose:
+        print(f"Reading file: {filename}")
+    
+    # Check if file exists
+    if not os.path.exists(filename):
+        print(f"Error: File '{filename}' not found.")
+        return []
+    
+    # Get approximate file size for progress bar
+    file_size = os.path.getsize(filename)
+    
+    # Start with just counting the entries
+    entry_count = 0
+    with open(filename, 'r') as f:
+        for line in f:
+            if line.strip().startswith('16CF'):
+                entry_count += 1
+    
+    if verbose:
+        print(f"Found {entry_count} entries in file")
+    
+    # Now read the actual data with progress tracking
+    current_label = None
+    
+    with open(filename, 'r') as f:
+        lines = f.readlines()
+    
+    i = 0
+    with tqdm(total=len(lines), desc="Parsing file", disable=not verbose) as pbar:
+        while i < len(lines):
+            line = lines[i].strip()
+            pbar.update(1)
+            
+            # Skip empty lines and comments
+            if not line or line.startswith('#'):
+                i += 1
+                continue
+            
+            # Check if this is a 16CF label line
+            if line.startswith('16CF'):
+                current_label = line
+                i += 1
+                
+                # Look for the next non-empty line
+                while i < len(lines):
+                    coord_line = lines[i].strip()
+                    pbar.update(1)
+                    if coord_line and not coord_line.startswith('#'):
+                        break
+                    i += 1
+                    
+                # If we reached the end of the file, break
+                if i >= len(lines):
+                    break
+                    
+                # We should now have the coordinate line
+                coord_line = lines[i].strip()
+                
+                try:
+                    # Parse the numbers
+                    coords = list(map(int, coord_line.split()))
+                    
+                    if len(coords) == 16:
+                        # Split into 4 groups of 4 coefficients
+                        eq1 = coords[0:4]
+                        eq2 = coords[4:8]
+                        eq3 = coords[8:12]
+                        eq4 = coords[12:16]
+                        
+                        # Add as a complete line pair
+                        line_pairs.append([eq1, eq2, eq3, eq4])
+                except Exception as e:
+                    if verbose:
+                        print(f"Error parsing line: {e}")
+                
+                i += 1
+            else:
+                # Unexpected content - skip this line
+                i += 1
+    
+    if verbose:
+        print(f"Successfully parsed {len(line_pairs)} line pairs")
+    
+    return line_pairs
+
+# Process a single line pair and return analysis results
+def process_line_pair(pair_data, pair_num, fast_mode=True):
+    eq1, eq2, eq3, eq4 = pair_data
+    
+    result_data = {
+        'pair_num': pair_num,
+        'equations': [eq1, eq2, eq3, eq4],
+        'status': 'skew',
+        'intersection': None,
+        'sequences1': [],
+        'sequences2': [],
+        'plot_file': None,
+        'error': None
+    }
+    
+    try:
+        # Try fast numeric intersection first if enabled
+        if fast_mode:
+            intersection = find_intersection_numeric(eq1, eq2, eq3, eq4)
+            # Fall back to symbolic if numeric fails
+            if intersection is None:
+                equations1 = [Eq(eq1[0]*x + eq1[1]*y + eq1[2]*z, eq1[3]),
+                            Eq(eq2[0]*x + eq2[1]*y + eq2[2]*z, eq2[3])]
+                equations2 = [Eq(eq3[0]*x + eq3[1]*y + eq3[2]*z, eq3[3]),
+                            Eq(eq4[0]*x + eq4[1]*y + eq4[2]*z, eq4[3])]
+                intersection = find_intersection(equations1, equations2)
+        else:
+            # Use symbolic method directly
+            equations1 = [Eq(eq1[0]*x + eq1[1]*y + eq1[2]*z, eq1[3]),
+                        Eq(eq2[0]*x + eq2[1]*y + eq2[2]*z, eq2[3])]
+            equations2 = [Eq(eq3[0]*x + eq3[1]*y + eq3[2]*z, eq3[3]),
+                        Eq(eq4[0]*x + eq4[1]*y + eq4[2]*z, eq4[3])]
+            intersection = find_intersection(equations1, equations2)
+        
+        if intersection is None:
+            result_data['status'] = 'skew'
+        elif intersection == 'Infinite':
+            result_data['status'] = 'coincident'
+        else:
+            result_data['status'] = 'intersect'
+            result_data['intersection'] = intersection
+            
+            # Generate arithmetic sequences
+            ix = intersection[x]
+            result_data['sequences1'] = sorted(arithmetic_seq(ix))
+            result_data['sequences2'] = sorted(arithmetic_seq(ix))
+            
+            # Generate visualization
+            try:
+                plot_file = visualize_line_pair(eq1, eq2, eq3, eq4, intersection, 
+                                             result_data['sequences1'], 
+                                             result_data['sequences2'], pair_num)
+                result_data['plot_file'] = plot_file
+            except Exception as e:
+                result_data['error'] = f"Visualization error: {str(e)}"
+    
+    except Exception as e:
+        result_data['error'] = f"Processing error: {str(e)}"
+    
+    return result_data
+
+# Process a batch of line pairs
+def process_batch(batch, start_idx, fast_mode=True):
+    results = []
+    for i, pair_data in enumerate(batch):
+        result = process_line_pair(pair_data, start_idx + i, fast_mode)
+        results.append(result)
+    return results
+
+# Write results to output file
+def write_results(results, output_file):
+    with open(output_file, 'w') as f:
+        f.write(f"Analysis of {len(results)} 3D Line Pairs\n")
+        f.write("="*50 + "\n\n")
+        
+        for result in results:
+            pair_num = result['pair_num']
+            eq1, eq2, eq3, eq4 = result['equations']
+            
+            f.write(f"--- Line Pair #{pair_num} ---\n")
+            
+            f.write("Line 1 equations:\n")
+            f.write(f"  {eq1[0]}x + {eq1[1]}y + {eq1[2]}z = {eq1[3]}\n")
+            f.write(f"  {eq2[0]}x + {eq2[1]}y + {eq2[2]}z = {eq2[3]}\n")
+
+            f.write("Line 2 equations:\n")
+            f.write(f"  {eq3[0]}x + {eq3[1]}y + {eq3[2]}z = {eq3[3]}\n")
+            f.write(f"  {eq4[0]}x + {eq4[1]}y + {eq4[2]}z = {eq4[3]}\n")
+
+            if result['status'] == 'skew':
+                f.write("Result: Lines are skew (no intersection).\n")
+            elif result['status'] == 'coincident':
+                f.write("Result: Lines coincide (infinitely many intersections).\n")
+            elif result['status'] == 'intersect':
+                intersection = result['intersection']
+                ix, iy, iz = intersection[x], intersection[y], intersection[z]
+                f.write(f"Intersection point: ({ix}, {iy}, {iz})\n")
+
+                # Write sequences
+                if result['sequences1'] and result['sequences2']:
+                    f.write("\nValid arithmetic puncture sequences (x-coordinate) for Line 1 explicitly including intersection:\n")
+                    for seq in result['sequences1']:
+                        f.write(f"  x_n = {seq}\n")
+
+                    f.write("\nValid arithmetic puncture sequences (x-coordinate) for Line 2 explicitly including intersection:\n")
+                    for seq in result['sequences2']:
+                        f.write(f"  x_m = {seq}\n")
+                else:
+                    f.write("No valid arithmetic puncture sequences explicitly found passing through intersection.\n")
+            
+            # Write plot file info
+            if result['plot_file']:
+                f.write(f"\nVisualization saved to {result['plot_file']}\n")
+            
+            # Write any errors
+            if result['error']:
+                f.write(f"\nError: {result['error']}\n")
+            
+            f.write("\n" + "="*50 + "\n\n")
+
+# Main function with parallel processing support
+def main():
+    # Set up command line arguments for more flexibility
+    parser = argparse.ArgumentParser(description='3D Line Pair Analysis Tool')
+    parser.add_argument('--input', '-i', type=str, help='Input file with line equations')
+    parser.add_argument('--output', '-o', type=str, help='Output file for analysis results')
+    parser.add_argument('--processes', '-p', type=int, default=None, help='Number of parallel processes')
+    parser.add_argument('--batch-size', '-b', type=int, default=10, help='Batch size for processing')
+    parser.add_argument('--fast', '-f', action='store_true', help='Use fast numeric methods when possible')
+    parser.add_argument('--quiet', '-q', action='store_true', help='Suppress detailed progress output')
+    args = parser.parse_args()
+    
+    # If arguments not provided, prompt for input
+    input_file = args.input
+    if not input_file:
+        input_file = input("Enter input file name with line equations: ")
+    
+    output_file = args.output
+    if not output_file:
+        output_file = input("Enter output file name (.txt): ")
+        if not output_file.endswith('.txt'):
+            output_file += '.txt'
+    
+    # Set number of processes if not specified
+    num_processes = args.processes if args.processes else mp.cpu_count()
+    
+    # Create plots directory if it doesn't exist
+    if not os.path.exists('plots'):
+        os.makedirs('plots')
+    
+    # Start timing
+    start_time = time.time()
+    
+    try:
+        # Parse the input file (use verbose mode if not in quiet mode)
+        line_pairs = parse_compact_16cf_file(input_file, verbose=not args.quiet)
+        
+        if not line_pairs:
+            print("No valid line pairs found in the input file.")
+            return
+            
+        print(f"Found {len(line_pairs)} line pair(s) in the input file.")
+        print(f"Processing using {num_processes} parallel processes with batch size {args.batch_size}")
+        
+        # Process in parallel
+        results = []
+        
+        if num_processes > 1:
+            # Split data into batches
+            batches = []
+            for i in range(0, len(line_pairs), args.batch_size):
+                batch = line_pairs[i:i + args.batch_size]
+                batches.append((batch, i + 1, args.fast))
+            
+            # Process batches in parallel
+            with mp.Pool(processes=num_processes) as pool:
+                batch_results = list(tqdm(
+                    pool.starmap(process_batch, batches),
+                    total=len(batches),
+                    desc="Processing line pairs",
+                    disable=args.quiet
+                ))
+                
+                # Flatten results
+                for batch in batch_results:
+                    results.extend(batch)
+        else:
+            # Single process mode
+            for i, pair_data in enumerate(tqdm(line_pairs, desc="Processing line pairs", disable=args.quiet)):
+                result = process_line_pair(pair_data, i + 1, args.fast)
+                results.append(result)
+        
+        # Sort results by pair number
+        results.sort(key=lambda x: x['pair_num'])
+        
+        # Write results to file
+        write_results(results, output_file)
+        
+        # Calculate statistics
+        intersect_count = sum(1 for r in results if r['status'] == 'intersect')
+        skew_count = sum(1 for r in results if r['status'] == 'skew')
+        coincident_count = sum(1 for r in results if r['status'] == 'coincident')
+        error_count = sum(1 for r in results if r['error'])
+        
+        # Report results
+        elapsed_time = time.time() - start_time
+        print(f"\nProcessing completed in {elapsed_time:.1f} seconds")
+        print(f"Total line pairs processed: {len(results)}")
+        print(f"- Intersecting pairs: {intersect_count}")
+        print(f"- Skew pairs: {skew_count}")
+        print(f"- Coincident pairs: {coincident_count}")
+        print(f"- Errors encountered: {error_count}")
+        print(f"Results saved to {output_file}")
+        
+        # Force garbage collection to free memory
+        gc.collect()
+        
+    except Exception as e:
+        print(f"Error processing input file: {e}")
+
+if __name__ == "__main__":
+    main()
