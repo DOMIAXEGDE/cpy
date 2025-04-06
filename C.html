@@ -1,0 +1,1501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C/C++ Variable Management System</title>
+    <style>
+        :root {
+            --primary-color: #0078d7;
+            --secondary-color: #f0f0f0;
+            --dark-color: #333;
+            --light-color: #fff;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --warning-color: #ffc107;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--dark-color);
+            background-color: var(--light-color);
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background-color: var(--primary-color);
+            color: var(--light-color);
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        
+        h2 {
+            font-size: 20px;
+            margin: 15px 0;
+            color: var(--primary-color);
+            border-bottom: 1px solid var(--primary-color);
+            padding-bottom: 5px;
+        }
+        
+        h3 {
+            font-size: 18px;
+            margin: 10px 0;
+        }
+        
+        .container {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .panel {
+            background: var(--secondary-color);
+            padding: 20px;
+            border-radius: 5px;
+            flex: 1;
+        }
+        
+        .types-panel {
+            flex: 1;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        
+        .output-panel {
+            flex: 2;
+        }
+        
+        #variableList {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            background-color: var(--light-color);
+        }
+        
+        .info {
+            background-color: #e0f7fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 5px solid #00acc1;
+        }
+        
+        .error {
+            background-color: #ffebee;
+            color: var(--danger-color);
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border-left: 5px solid var(--danger-color);
+        }
+        
+        .success {
+            background-color: #e8f5e9;
+            color: var(--success-color);
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border-left: 5px solid var(--success-color);
+        }
+        
+        .warning {
+            background-color: #fff8e1;
+            color: #ff8f00;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border-left: 5px solid #ff8f00;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            font-size: 16px;
+        }
+        
+        button {
+            background-color: var(--primary-color);
+            color: var(--light-color);
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 16px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #005fa3;
+        }
+        
+        .btn-warning {
+            background-color: var(--warning-color);
+            color: var(--dark-color);
+        }
+        
+        .btn-warning:hover {
+            background-color: #e0a800;
+        }
+        
+        .btn-danger {
+            background-color: var(--danger-color);
+        }
+        
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+        
+        .btn-success {
+            background-color: var(--success-color);
+        }
+        
+        .btn-success:hover {
+            background-color: #218838;
+        }
+        
+        .btn-secondary {
+            background-color: #6c757d;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+        
+        .variable-entry {
+            padding: 5px;
+            margin-bottom: 5px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .variable-entry:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .variable-type {
+            font-weight: bold;
+            color: #0066cc;
+        }
+        
+        .variable-name {
+            color: #cc6600;
+        }
+        
+        .variable-value {
+            color: #006600;
+        }
+        
+        .type-category {
+            margin-bottom: 15px;
+        }
+        
+        .type-list {
+            list-style-type: none;
+            padding-left: 15px;
+        }
+        
+        .type-list li {
+            padding: 3px 0;
+            cursor: pointer;
+        }
+        
+        .type-list li:hover {
+            color: var(--primary-color);
+            text-decoration: underline;
+        }
+        
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 15px;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            border-radius: 5px 5px 0 0;
+            margin-right: 5px;
+            background-color: #f5f5f5;
+        }
+        
+        .tab.active {
+            background-color: var(--light-color);
+            border-bottom: 1px solid var(--light-color);
+            margin-bottom: -1px;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .code-area {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            margin: 15px 0;
+        }
+        
+        .search-box {
+            margin-bottom: 15px;
+        }
+        
+        #searchBox {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        
+        footer {
+            margin-top: 30px;
+            text-align: center;
+            color: #6c757d;
+            border-top: 1px solid #ddd;
+            padding-top: 20px;
+        }
+        
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: var(--light-color);
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .dropdown-content a {
+            color: black;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+        }
+        
+        .dropdown-content a:hover {
+            background-color: #f1f1f1;
+        }
+        
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .panel {
+                margin-bottom: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div>
+            <h1>C/C++ Variable Management System</h1>
+            <p>Track and manage all variable/constant data types</p>
+        </div>
+        <div>
+            <button id="saveBtn" class="btn-success">Save Database</button>
+            <button id="loadBtn" class="btn-warning">Load Database</button>
+        </div>
+    </header>
+    
+    <div class="info">
+        This system helps you manage variable declarations for C and C++ with unique IDs per data type. Create, store, and manage all your variable declarations in one place.
+    </div>
+    
+    <div class="container">
+        <div class="panel">
+            <h2>Create Variables</h2>
+            
+            <div class="tabs">
+                <div class="tab active" data-tab="singleVar">Single Variable</div>
+                <div class="tab" data-tab="multiVar">Multiple Variables</div>
+                <div class="tab" data-tab="exampleVar">Example Variables</div>
+            </div>
+            
+            <div id="singleVar" class="tab-content active">
+                <label for="variableType">Variable Type:</label>
+                <div class="dropdown">
+                    <input type="text" id="variableType" placeholder="e.g., int, float, char...">
+                    <div class="dropdown-content" id="typeDropdown"></div>
+                </div>
+                
+                <label for="variableValue">Initial Value (optional):</label>
+                <input type="text" id="variableValue" placeholder="e.g., 42, 3.14, 'A'...">
+                
+                <button id="createBtn">Create Variable</button>
+            </div>
+            
+            <div id="multiVar" class="tab-content">
+                <label for="multiVarType">Variable Type:</label>
+                <div class="dropdown">
+                    <input type="text" id="multiVarType" placeholder="e.g., int, float, char...">
+                    <div class="dropdown-content" id="multiTypeDropdown"></div>
+                </div>
+                
+                <label for="varCount">Number of Variables:</label>
+                <input type="number" id="varCount" min="1" max="100" value="5">
+                
+                <div>
+                    <input type="checkbox" id="withValues" style="width: auto;">
+                    <label for="withValues" style="display: inline;">With Values</label>
+                </div>
+                
+                <div id="valuesContainer" style="display: none;">
+                    <label for="startValue">Start Value:</label>
+                    <input type="text" id="startValue" placeholder="e.g., 1">
+                    
+                    <label for="increment">Increment By:</label>
+                    <input type="text" id="increment" placeholder="e.g., 1">
+                </div>
+                
+                <button id="createMultiBtn">Create Multiple Variables</button>
+            </div>
+            
+            <div id="exampleVar" class="tab-content">
+                <p>Create example variables for all supported data types.</p>
+                <button id="createExamplesBtn">Create Example Variables</button>
+            </div>
+        </div>
+        
+        <div class="panel types-panel">
+            <h2>Available Data Types</h2>
+            <div class="search-box">
+                <input type="text" id="searchBox" placeholder="Search types...">
+            </div>
+            
+            <div id="typesContainer">
+                <!-- Types will be populated here -->
+            </div>
+        </div>
+    </div>
+    
+    <div class="panel output-panel">
+        <h2>Variable Database</h2>
+        
+        <div class="tabs">
+            <div class="tab active" data-tab="varList">List View</div>
+            <div class="tab" data-tab="codeView">Code View</div>
+            <div class="tab" data-tab="fileGen">File Generation</div>
+        </div>
+        
+        <div id="varList" class="tab-content active">
+            <div class="search-box">
+                <input type="text" id="varSearchBox" placeholder="Search variables...">
+            </div>
+            
+            <div id="variableList">
+                <!-- Variables will be listed here -->
+                <p>No variables created yet. Use the form on the left to create variables.</p>
+            </div>
+            
+            <div>
+                <button id="clearAllBtn" class="btn-danger">Clear All Variables</button>
+                <span id="varCount">Total: 0 variables</span>
+            </div>
+        </div>
+        
+        <div id="codeView" class="tab-content">
+            <button id="copyCodeBtn">Copy Code</button>
+            <div class="code-area" id="codeArea">// No variables defined yet</div>
+        </div>
+        
+        <div id="fileGen" class="tab-content">
+            <h3>Generate Code File</h3>
+            <label for="filename">Filename:</label>
+            <input type="text" id="filename" value="variables.h">
+            
+            <div>
+                <input type="checkbox" id="includeHeaders" style="width: auto;" checked>
+                <label for="includeHeaders" style="display: inline;">Include Standard Headers</label>
+            </div>
+            
+            <div>
+                <input type="checkbox" id="generateMain" style="width: auto;">
+                <label for="generateMain" style="display: inline;">Generate Main Function</label>
+            </div>
+            
+            <button id="generateBtn" class="btn-success">Generate & Download</button>
+            
+            <h3>Export/Import Database</h3>
+            <button id="exportJsonBtn">Export as JSON</button>
+            <button id="exportCsvBtn">Export as CSV</button>
+            
+            <div style="margin-top: 15px;">
+                <label for="importFile">Import Database:</label>
+                <input type="file" id="importFile" accept=".json,.csv">
+                <button id="importBtn">Import</button>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        C/C++ Variable Management System © 2025
+    </footer>
+    
+    <script>
+        // Type system data
+        const typeCategories = {
+            "C Basic Integer Types": [
+                "char", "signed_char", "unsigned_char", 
+                "short", "short_int", "signed_short", "signed_short_int",
+                "unsigned_short", "unsigned_short_int",
+                "int", "signed", "signed_int", 
+                "unsigned", "unsigned_int",
+                "long", "long_int", "signed_long", "signed_long_int",
+                "unsigned_long", "unsigned_long_int",
+                "long_long", "long_long_int", "signed_long_long", "signed_long_long_int",
+                "unsigned_long_long", "unsigned_long_long_int"
+            ],
+            "C Floating-Point Types": [
+                "float", "double", "long_double"
+            ],
+            "C Other Types": [
+                "_Bool", "void_ptr"
+            ],
+            "C++ Integer Types": [
+                "bool", "wchar_t", "char8_t", "char16_t", "char32_t"
+            ],
+            "Fixed-Width Integer Types": [
+                "int8_t", "uint8_t", "int16_t", "uint16_t", 
+                "int32_t", "uint32_t", "int64_t", "uint64_t",
+                "int_fast8_t", "uint_fast8_t", "int_fast16_t", "uint_fast16_t",
+                "int_fast32_t", "uint_fast32_t", "int_fast64_t", "uint_fast64_t",
+                "int_least8_t", "uint_least8_t", "int_least16_t", "uint_least16_t",
+                "int_least32_t", "uint_least32_t", "int_least64_t", "uint_least64_t",
+                "intmax_t", "uintmax_t", "intptr_t", "uintptr_t"
+            ],
+            "C++23 Floating-Point Types": [
+                "float16_t", "float32_t", "float64_t", "float128_t", "bfloat16_t"
+            ],
+            "User-Defined Types": [
+                "enum", "enum_class", "struct", "class", "union"
+            ],
+            "Special C++ Types": [
+                "reference", "rvalue_reference", "nullptr_t", "auto", "decltype", "byte"
+            ],
+            "Constants": [
+                "const_int", "const_char", "const_float", "const_double", 
+                "const_char_ptr", "constexpr_int", "constexpr_float"
+            ],
+            "STD Namespace Types": [
+                "std_string", "std_vector_int", "std_vector_float", "std_map", "std_set",
+                "std_array_int", "std_array_char", "std_unique_ptr", "std_shared_ptr"
+            ]
+        };
+        
+        // Database of variables
+        let variableDB = [];
+        
+        // Type counters to track next available ID for each type
+        let typeCounters = {};
+        
+        // Initialize type counters for all types
+        function initTypeCounters() {
+            for (const category in typeCategories) {
+                for (const type of typeCategories[category]) {
+                    typeCounters[type] = 1;
+                }
+            }
+        }
+        
+        // Initialize the system
+        function init() {
+            initTypeCounters();
+            populateTypesList();
+            setupTabNavigation();
+            setupEventListeners();
+            updateVariableList();
+            updateCodeView();
+            
+            // Load from localStorage if available
+            loadFromLocalStorage();
+        }
+        
+        // Populate the types list in the sidebar
+        function populateTypesList() {
+            const typesContainer = document.getElementById('typesContainer');
+            typesContainer.innerHTML = '';
+            
+            for (const category in typeCategories) {
+                const categoryDiv = document.createElement('div');
+                categoryDiv.className = 'type-category';
+                
+                const categoryTitle = document.createElement('h3');
+                categoryTitle.textContent = category;
+                categoryDiv.appendChild(categoryTitle);
+                
+                const typesList = document.createElement('ul');
+                typesList.className = 'type-list';
+                
+                for (const type of typeCategories[category]) {
+                    const typeItem = document.createElement('li');
+                    typeItem.textContent = type;
+                    typeItem.onclick = () => {
+                        document.getElementById('variableType').value = type;
+                        document.getElementById('multiVarType').value = type;
+                    };
+                    typesList.appendChild(typeItem);
+                }
+                
+                categoryDiv.appendChild(typesList);
+                typesContainer.appendChild(categoryDiv);
+            }
+            
+            // Also populate dropdowns
+            populateTypeDropdowns();
+        }
+        
+        // Populate type dropdowns
+        function populateTypeDropdowns() {
+            const dropdownContent = document.getElementById('typeDropdown');
+            const multiDropdownContent = document.getElementById('multiTypeDropdown');
+            dropdownContent.innerHTML = '';
+            multiDropdownContent.innerHTML = '';
+            
+            const allTypes = [];
+            for (const category in typeCategories) {
+                for (const type of typeCategories[category]) {
+                    allTypes.push(type);
+                }
+            }
+            
+            allTypes.sort();
+            
+            for (const type of allTypes) {
+                const typeLink = document.createElement('a');
+                typeLink.textContent = type;
+                typeLink.href = "#";
+                typeLink.onclick = (e) => {
+                    e.preventDefault();
+                    document.getElementById('variableType').value = type;
+                };
+                dropdownContent.appendChild(typeLink);
+                
+                const multiTypeLink = document.createElement('a');
+                multiTypeLink.textContent = type;
+                multiTypeLink.href = "#";
+                multiTypeLink.onclick = (e) => {
+                    e.preventDefault();
+                    document.getElementById('multiVarType').value = type;
+                };
+                multiDropdownContent.appendChild(multiTypeLink);
+            }
+        }
+        
+        // Setup tab navigation
+        function setupTabNavigation() {
+            const tabs = document.querySelectorAll('.tab');
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Find which tab container this belongs to
+                    const tabContainer = tab.parentElement;
+                    
+                    // Remove active class from all tabs in this container
+                    tabContainer.querySelectorAll('.tab').forEach(t => {
+                        t.classList.remove('active');
+                    });
+                    
+                    // Add active class to clicked tab
+                    tab.classList.add('active');
+                    
+                    // Hide all tab content for this container
+                    const tabContents = tabContainer.parentElement.querySelectorAll('.tab-content');
+                    tabContents.forEach(content => {
+                        content.classList.remove('active');
+                    });
+                    
+                    // Show the corresponding tab content
+                    const tabName = tab.getAttribute('data-tab');
+                    document.getElementById(tabName).classList.add('active');
+                });
+            });
+        }
+        
+        // Setup event listeners
+        function setupEventListeners() {
+            // Create single variable
+            document.getElementById('createBtn').addEventListener('click', createVariable);
+            
+            // Create multiple variables
+            document.getElementById('createMultiBtn').addEventListener('click', createMultipleVariables);
+            
+            // Create example variables
+            document.getElementById('createExamplesBtn').addEventListener('click', createExampleVariables);
+            
+            // Toggle values container in multi variables tab
+            document.getElementById('withValues').addEventListener('change', function() {
+                document.getElementById('valuesContainer').style.display = 
+                    this.checked ? 'block' : 'none';
+            });
+            
+            // Search types
+            document.getElementById('searchBox').addEventListener('input', function() {
+                searchTypes(this.value);
+            });
+            
+            // Search variables
+            document.getElementById('varSearchBox').addEventListener('input', function() {
+                searchVariables(this.value);
+            });
+            
+            // Clear all variables
+            document.getElementById('clearAllBtn').addEventListener('click', clearAllVariables);
+            
+            // Copy code
+            document.getElementById('copyCodeBtn').addEventListener('click', copyCodeToClipboard);
+            
+            // Generate file
+            document.getElementById('generateBtn').addEventListener('click', generateAndDownloadFile);
+            
+            // Export as JSON
+            document.getElementById('exportJsonBtn').addEventListener('click', exportAsJson);
+            
+            // Export as CSV
+            document.getElementById('exportCsvBtn').addEventListener('click', exportAsCsv);
+            
+            // Import database
+            document.getElementById('importBtn').addEventListener('click', importDatabase);
+            
+            // Save database
+            document.getElementById('saveBtn').addEventListener('click', saveToLocalStorage);
+            
+            // Load database
+            document.getElementById('loadBtn').addEventListener('click', loadFromLocalStorage);
+        }
+        
+        // Get example value for a type
+        function getExampleValue(type) {
+            if (type.includes('char')) return "'A'";
+            if (type.includes('int') || type.includes('short') || 
+                type.includes('long') || type === 'signed' || 
+                type === 'unsigned') return "42";
+            if (type.includes('float') || type.includes('double')) return "3.14159";
+            if (type.includes('bool') || type === '_Bool') return "true";
+            if (type.includes('string')) return "\"Hello, World!\"";
+            if (type.includes('vector')) return "{1, 2, 3, 4, 5}";
+            if (type.includes('nullptr')) return "nullptr";
+            if (type.includes('reference') || type.includes('rvalue_reference')) return "some_variable";
+            if (type === 'void_ptr') return "NULL";
+            if (type.includes('std_map')) return "{ {\"key1\", 1}, {\"key2\", 2} }";
+            return "/* value here */";
+        }
+        
+        // Create declaration string
+        function createDeclaration(type, varName, value) {
+            if (type.startsWith('const_')) {
+                // Handle const types
+                const baseType = type.substring(6);
+                return value ? `const ${baseType} ${varName} = ${value};` : `const ${baseType} ${varName};`;
+            } 
+            else if (type.startsWith('constexpr_')) {
+                // Handle constexpr types
+                const baseType = type.substring(10);
+                return value ? `constexpr ${baseType} ${varName} = ${value};` : `constexpr ${baseType} ${varName};`;
+            }
+            else if (type === 'void_ptr') {
+                return value ? `void* ${varName} = ${value};` : `void* ${varName};`;
+            }
+            else if (type === 'reference') {
+                return value ? `int& ${varName} = ${value};` : `// ERROR: references must be initialized`;
+            }
+            else if (type === 'rvalue_reference') {
+                return value ? `int&& ${varName} = ${value};` : `// ERROR: rvalue references must be initialized`;
+            }
+            else if (type.startsWith('std_')) {
+                // Handle std types
+                let stdType = type.substring(4);
+                
+                // Replace underscores with ::
+                stdType = stdType.replace(/_/g, '::');
+                
+                return value ? `std::${stdType} ${varName} = ${value};` : `std::${stdType} ${varName};`;
+            }
+            else {
+                // Standard declaration for most types
+                return value ? `${type} ${varName} = ${value};` : `${type} ${varName};`;
+            }
+        }
+        
+        // Create a variable
+        function createVariable() {
+            const typeInput = document.getElementById('variableType');
+            const valueInput = document.getElementById('variableValue');
+            
+            const type = typeInput.value.trim();
+            const value = valueInput.value.trim();
+            
+            if (!type) {
+                showMessage('Please enter a variable type.', 'error');
+                return;
+            }
+            
+            // Get next ID for this type
+            if (!typeCounters[type]) {
+                typeCounters[type] = 1;
+            }
+            
+            const varId = typeCounters[type]++;
+            const varName = `variable_${type}_${varId}`;
+            const declaration = createDeclaration(type, varName, value);
+            
+            // Add to database
+            variableDB.push({
+                type: type,
+                name: varName,
+                id: varId,
+                value: value,
+                declaration: declaration
+            });
+            
+            // Update UI
+            updateVariableList();
+            updateCodeView();
+            saveToLocalStorage();
+            
+            // Clear inputs
+            valueInput.value = '';
+            
+            showMessage(`Created: ${declaration}`, 'success');
+        }
+        
+        // Create multiple variables
+        function createMultipleVariables() {
+            const typeInput = document.getElementById('multiVarType');
+            const countInput = document.getElementById('varCount');
+            const withValues = document.getElementById('withValues').checked;
+            
+            const type = typeInput.value.trim();
+            const count = parseInt(countInput.value);
+            
+            if (!type) {
+                showMessage('Please enter a variable type.', 'error');
+                return;
+            }
+            
+            if (isNaN(count) || count < 1) {
+                showMessage('Please enter a valid count.', 'error');
+                return;
+            }
+            
+            // Initialize type counter if needed
+            if (!typeCounters[type]) {
+                typeCounters[type] = 1;
+            }
+            
+            let startValue = null;
+            let increment = null;
+            
+            if (withValues) {
+                startValue = document.getElementById('startValue').value.trim();
+                increment = document.getElementById('increment').value.trim();
+                
+                if (!startValue) {
+                    showMessage('Please enter a start value.', 'error');
+                    return;
+                }
+                
+                // Try to parse as number if possible
+                let startNum = parseFloat(startValue);
+                let incNum = increment ? parseFloat(increment) : 1;
+                
+                if (!isNaN(startNum) && (increment === '' || !isNaN(incNum))) {
+                    // It's a number, we can increment
+                    for (let i = 0; i < count; i++) {
+                        const varId = typeCounters[type]++;
+                        const varName = `variable_${type}_${varId}`;
+                        
+                        let currentValue;
+                        if (startValue.includes('"') || startValue.includes("'")) {
+                            // String or character - don't increment
+                            currentValue = startValue;
+                        } else {
+                            // Number - increment
+                            currentValue = (startNum + i * incNum).toString();
+                        }
+                        
+                        const declaration = createDeclaration(type, varName, currentValue);
+                        
+                        variableDB.push({
+                            type: type,
+                            name: varName,
+                            id: varId,
+                            value: currentValue,
+                            declaration: declaration
+                        });
+                    }
+                } else {
+                    // Not a number, repeat the same value
+                    for (let i = 0; i < count; i++) {
+                        const varId = typeCounters[type]++;
+                        const varName = `variable_${type}_${varId}`;
+                        const declaration = createDeclaration(type, varName, startValue);
+                        
+                        variableDB.push({
+                            type: type,
+                            name: varName,
+                            id: varId,
+                            value: startValue,
+                            declaration: declaration
+                        });
+                    }
+                }
+            } else {
+                // No values
+                for (let i = 0; i < count; i++) {
+                    const varId = typeCounters[type]++;
+                    const varName = `variable_${type}_${varId}`;
+                    const declaration = createDeclaration(type, varName, '');
+                    
+                    variableDB.push({
+                        type: type,
+                        name: varName,
+                        id: varId,
+                        value: '',
+                        declaration: declaration
+                    });
+                }
+            }
+            
+            // Update UI
+            updateVariableList();
+            updateCodeView();
+            saveToLocalStorage();
+            
+            showMessage(`Created ${count} ${type} variables.`, 'success');
+        }
+        
+        // Create example variables for all types
+        function createExampleVariables() {
+            let createdCount = 0;
+            
+            for (const category in typeCategories) {
+                for (const type of typeCategories[category]) {
+                    // Skip if it's a special type that needs special handling
+                    if (type === 'reference' || type === 'rvalue_reference') {
+                        continue;
+                    }
+                    
+                    // Get example value
+                    const exampleValue = getExampleValue(type);
+                    
+                    // Get next ID for this type
+                    if (!typeCounters[type]) {
+                        typeCounters[type] = 1;
+                    }
+                    
+                    const varId = typeCounters[type]++;
+                    const varName = `variable_${type}_${varId}`;
+                    const declaration = createDeclaration(type, varName, exampleValue);
+                    
+                    // Add to database
+                    variableDB.push({
+                        type: type,
+                        name: varName,
+                        id: varId,
+                        value: exampleValue,
+                        declaration: declaration
+                    });
+                    
+                    createdCount++;
+                }
+            }
+            
+            // Handle special reference types
+            const refType = 'reference';
+            const rvalueRefType = 'rvalue_reference';
+            
+            // Reference to int
+            if (!typeCounters[refType]) {
+                typeCounters[refType] = 1;
+            }
+            const refVarId = typeCounters[refType]++;
+            const refVarName = `variable_${refType}_${refVarId}`;
+            const refDeclaration = createDeclaration(refType, refVarName, 'variable_int_1');
+            
+            variableDB.push({
+                type: refType,
+                name: refVarName,
+                id: refVarId,
+                value: 'variable_int_1',
+                declaration: refDeclaration
+            });
+            createdCount++;
+            
+            // R-value reference
+            if (!typeCounters[rvalueRefType]) {
+                typeCounters[rvalueRefType] = 1;
+            }
+            const rvalueRefVarId = typeCounters[rvalueRefType]++;
+            const rvalueRefVarName = `variable_${rvalueRefType}_${rvalueRefVarId}`;
+            const rvalueRefDeclaration = createDeclaration(rvalueRefType, rvalueRefVarName, '42');
+            
+            variableDB.push({
+                type: rvalueRefType,
+                name: rvalueRefVarName,
+                id: rvalueRefVarId,
+                value: '42',
+                declaration: rvalueRefDeclaration
+            });
+            createdCount++;
+            
+            // Update UI
+            updateVariableList();
+            updateCodeView();
+            saveToLocalStorage();
+            
+            showMessage(`Created ${createdCount} example variables.`, 'success');
+        }
+        
+        // Update the variable list
+        function updateVariableList() {
+            const variableList = document.getElementById('variableList');
+            const varCountElement = document.getElementById('varCount');
+            
+            if (variableDB.length === 0) {
+                variableList.innerHTML = '<p>No variables created yet. Use the form on the left to create variables.</p>';
+                varCountElement.textContent = 'Total: 0 variables';
+                return;
+            }
+            
+            variableList.innerHTML = '';
+            
+            for (let i = 0; i < variableDB.length; i++) {
+                const variable = variableDB[i];
+                
+                const varEntry = document.createElement('div');
+                varEntry.className = 'variable-entry';
+                varEntry.innerHTML = `
+                    <span class="variable-type">${variable.type}</span> 
+                    <span class="variable-name">${variable.name}</span>
+                    ${variable.value ? `= <span class="variable-value">${variable.value}</span>` : ''};
+                    <button class="btn-danger" style="padding: 2px 5px; margin-left: 10px;" onclick="removeVariable(${i})">✕</button>
+                `;
+                
+                variableList.appendChild(varEntry);
+            }
+            
+            varCountElement.textContent = `Total: ${variableDB.length} variable${variableDB.length !== 1 ? 's' : ''}`;
+        }
+        
+        // Update the code view
+        function updateCodeView() {
+            const codeArea = document.getElementById('codeArea');
+            
+            if (variableDB.length === 0) {
+                codeArea.textContent = '// No variables defined yet';
+                return;
+            }
+            
+            let code = '// Variable declarations\n\n';
+            
+            for (const variable of variableDB) {
+                code += variable.declaration + '\n';
+            }
+            
+            codeArea.textContent = code;
+        }
+        
+        // Search types
+        function searchTypes(query) {
+            query = query.toLowerCase();
+            
+            const typesContainer = document.getElementById('typesContainer');
+            const categories = typesContainer.querySelectorAll('.type-category');
+            
+            categories.forEach(category => {
+                const title = category.querySelector('h3');
+                const typesList = category.querySelector('.type-list');
+                const types = typesList.querySelectorAll('li');
+                
+                let hasVisibleTypes = false;
+                
+                types.forEach(type => {
+                    if (type.textContent.toLowerCase().includes(query)) {
+                        type.style.display = '';
+                        hasVisibleTypes = true;
+                    } else {
+                        type.style.display = 'none';
+                    }
+                });
+                
+                category.style.display = hasVisibleTypes ? '' : 'none';
+            });
+        }
+        
+        // Search variables
+        function searchVariables(query) {
+            query = query.toLowerCase();
+            
+            const variableList = document.getElementById('variableList');
+            const variableEntries = variableList.querySelectorAll('.variable-entry');
+            
+            variableEntries.forEach(entry => {
+                if (entry.textContent.toLowerCase().includes(query)) {
+                    entry.style.display = '';
+                } else {
+                    entry.style.display = 'none';
+                }
+            });
+        }
+        
+        // Remove a variable
+        function removeVariable(index) {
+            if (index >= 0 && index < variableDB.length) {
+                const variable = variableDB[index];
+                variableDB.splice(index, 1);
+                
+                updateVariableList();
+                updateCodeView();
+                saveToLocalStorage();
+                
+                showMessage(`Removed: ${variable.declaration}`, 'warning');
+            }
+        }
+        
+        // Clear all variables
+        function clearAllVariables() {
+            if (variableDB.length === 0) {
+                showMessage('No variables to clear.', 'warning');
+                return;
+            }
+            
+            if (confirm(`Are you sure you want to delete all ${variableDB.length} variables?`)) {
+                variableDB = [];
+                updateVariableList();
+                updateCodeView();
+                saveToLocalStorage();
+                
+                showMessage('All variables cleared.', 'warning');
+            }
+        }
+        
+        // Copy code to clipboard
+        function copyCodeToClipboard() {
+            const codeArea = document.getElementById('codeArea');
+            
+            // Create a temporary textarea
+            const textarea = document.createElement('textarea');
+            textarea.value = codeArea.textContent;
+            document.body.appendChild(textarea);
+            
+            // Select and copy the text
+            textarea.select();
+            document.execCommand('copy');
+            
+            // Remove the textarea
+            document.body.removeChild(textarea);
+            
+            showMessage('Code copied to clipboard.', 'success');
+        }
+        
+        // Generate and download a file
+        function generateAndDownloadFile() {
+            const filename = document.getElementById('filename').value;
+            const includeHeaders = document.getElementById('includeHeaders').checked;
+            const generateMain = document.getElementById('generateMain').checked;
+            
+            if (!filename) {
+                showMessage('Please enter a filename.', 'error');
+                return;
+            }
+            
+            let fileContent = '';
+            
+            // Add headers
+            if (includeHeaders) {
+                fileContent += '// Auto-generated program with all variable declarations\n';
+                fileContent += '#include <stdio.h>\n';
+                fileContent += '#include <stdlib.h>\n';
+                fileContent += '#include <stdint.h>\n';
+                fileContent += '#include <stdbool.h>\n';
+                fileContent += '#include <string.h>\n';
+                fileContent += '#ifdef __cplusplus\n';
+                fileContent += '#include <iostream>\n';
+                fileContent += '#include <string>\n';
+                fileContent += '#include <vector>\n';
+                fileContent += '#include <map>\n';
+                fileContent += '#include <set>\n';
+                fileContent += '#include <memory>\n';
+                fileContent += '#endif\n\n';
+            }
+            
+            // Add variable declarations
+            fileContent += '// Variable declarations\n';
+            
+            for (const variable of variableDB) {
+                // Skip C++-only types if we're not sure about the language
+                if (variable.type.includes('std_') || 
+                    variable.type === 'nullptr_t' ||
+                    variable.type === 'auto' ||
+                    variable.type === 'class' ||
+                    variable.type.includes('constexpr_') ||
+                    variable.type === 'reference' ||
+                    variable.type === 'rvalue_reference') {
+                    fileContent += '#ifdef __cplusplus\n';
+                    fileContent += variable.declaration + '\n';
+                    fileContent += '#endif\n';
+                } else {
+                    fileContent += variable.declaration + '\n';
+                }
+            }
+            
+            // Add main function if requested
+            if (generateMain) {
+                fileContent += '\n// Main function\n';
+                fileContent += 'int main() {\n';
+                fileContent += `    printf("Program with ${variableDB.length} variable declarations\\n");\n`;
+                fileContent += '    \n';
+                fileContent += '    // Print a few sample values\n';
+                
+                // Print a few sample integer variables
+                let samplesCount = 0;
+                for (let i = 0; i < variableDB.length && samplesCount < 5; i++) {
+                    if (variableDB[i].type.includes('int') && 
+                        variableDB[i].value && 
+                        !variableDB[i].type.includes('const')) {
+                        fileContent += `    printf("${variableDB[i].name} = %d\\n", ${variableDB[i].name});\n`;
+                        samplesCount++;
+                    }
+                }
+                
+                fileContent += '    \n';
+                fileContent += '    return 0;\n';
+                fileContent += '}\n';
+            }
+            
+            // Create download link
+            const blob = new Blob([fileContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            
+            // Cleanup
+            setTimeout(() => {
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }, 0);
+            
+            showMessage(`File "${filename}" generated and downloaded.`, 'success');
+        }
+        
+        // Export database as JSON
+        function exportAsJson() {
+            const data = {
+                variables: variableDB,
+                typeCounters: typeCounters
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'variable_database.json';
+            document.body.appendChild(a);
+            a.click();
+            
+            // Cleanup
+            setTimeout(() => {
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }, 0);
+            
+            showMessage('Database exported as JSON.', 'success');
+        }
+        
+        // Export database as CSV
+        function exportAsCsv() {
+            let csv = 'Type,Variable Name,ID,Value,Declaration\n';
+            
+            for (const variable of variableDB) {
+                // Escape values for CSV
+                const escapedValue = `"${variable.value.replace(/"/g, '""')}"`;
+                const escapedDeclaration = `"${variable.declaration.replace(/"/g, '""')}"`;
+                
+                csv += `${variable.type},${variable.name},${variable.id},${escapedValue},${escapedDeclaration}\n`;
+            }
+            
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'variable_database.csv';
+            document.body.appendChild(a);
+            a.click();
+            
+            // Cleanup
+            setTimeout(() => {
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }, 0);
+            
+            showMessage('Database exported as CSV.', 'success');
+        }
+        
+        // Import database
+        function importDatabase() {
+            const fileInput = document.getElementById('importFile');
+            
+            if (!fileInput.files || fileInput.files.length === 0) {
+                showMessage('Please select a file to import.', 'error');
+                return;
+            }
+            
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                try {
+                    if (file.name.endsWith('.json')) {
+                        // Import JSON
+                        const data = JSON.parse(e.target.result);
+                        
+                        if (data.variables && Array.isArray(data.variables)) {
+                            variableDB = data.variables;
+                            
+                            if (data.typeCounters) {
+                                typeCounters = data.typeCounters;
+                            } else {
+                                // Recreate type counters if not in file
+                                initTypeCounters();
+                                for (const variable of variableDB) {
+                                    if (variable.id >= typeCounters[variable.type]) {
+                                        typeCounters[variable.type] = variable.id + 1;
+                                    }
+                                }
+                            }
+                            
+                            updateVariableList();
+                            updateCodeView();
+                            saveToLocalStorage();
+                            
+                            showMessage(`Imported ${variableDB.length} variables from JSON.`, 'success');
+                        } else {
+                            throw new Error('Invalid JSON format');
+                        }
+                    } else if (file.name.endsWith('.csv')) {
+                        // Import CSV
+                        const lines = e.target.result.split('\n');
+                        
+                        // Skip header
+                        if (lines.length < 2) {
+                            throw new Error('Invalid CSV format');
+                        }
+                        
+                        // Reset database
+                        variableDB = [];
+                        initTypeCounters();
+                        
+                        // Parse each line
+                        for (let i = 1; i < lines.length; i++) {
+                            if (!lines[i].trim()) continue;
+                            
+                            // Simple CSV parser (doesn't handle all edge cases)
+                            const parts = parseCSVLine(lines[i]);
+                            
+                            if (parts.length >= 5) {
+                                const type = parts[0];
+                                const name = parts[1];
+                                const id = parseInt(parts[2]);
+                                const value = parts[3];
+                                const declaration = parts[4];
+                                
+                                variableDB.push({
+                                    type: type,
+                                    name: name,
+                                    id: id,
+                                    value: value,
+                                    declaration: declaration
+                                });
+                                
+                                // Update type counter if needed
+                                if (id >= typeCounters[type] || !typeCounters[type]) {
+                                    typeCounters[type] = id + 1;
+                                }
+                            }
+                        }
+                        
+                        updateVariableList();
+                        updateCodeView();
+                        saveToLocalStorage();
+                        
+                        showMessage(`Imported ${variableDB.length} variables from CSV.`, 'success');
+                    } else {
+                        throw new Error('Unsupported file format');
+                    }
+                } catch (error) {
+                    showMessage(`Import error: ${error.message}`, 'error');
+                }
+            };
+            
+            if (file.name.endsWith('.json') || file.name.endsWith('.csv')) {
+                reader.readAsText(file);
+            } else {
+                showMessage('Please select a JSON or CSV file.', 'error');
+            }
+        }
+        
+        // Parse a CSV line (handling quoted values)
+        function parseCSVLine(line) {
+            const result = [];
+            let current = '';
+            let inQuotes = false;
+            
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                
+                if (char === '"') {
+                    if (i + 1 < line.length && line[i + 1] === '"') {
+                        // Double quote inside quoted value - add a single quote
+                        current += '"';
+                        i++; // Skip the next quote
+                    } else {
+                        // Toggle quote state
+                        inQuotes = !inQuotes;
+                    }
+                } else if (char === ',' && !inQuotes) {
+                    // End of field
+                    result.push(current);
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            
+            // Add the last field
+            result.push(current);
+            
+            return result;
+        }
+        
+        // Save to localStorage
+        function saveToLocalStorage() {
+            try {
+                const data = {
+                    variables: variableDB,
+                    typeCounters: typeCounters,
+                    timestamp: new Date().toISOString()
+                };
+                
+                localStorage.setItem('variableDB', JSON.stringify(data));
+                showMessage('Database saved locally.', 'success');
+            } catch (error) {
+                showMessage(`Error saving data: ${error.message}`, 'error');
+            }
+        }
+        
+        // Load from localStorage
+        function loadFromLocalStorage() {
+            try {
+                const savedData = localStorage.getItem('variableDB');
+                
+                if (savedData) {
+                    const data = JSON.parse(savedData);
+                    
+                    if (data.variables && Array.isArray(data.variables)) {
+                        variableDB = data.variables;
+                        
+                        if (data.typeCounters) {
+                            typeCounters = data.typeCounters;
+                        }
+                        
+                        updateVariableList();
+                        updateCodeView();
+                        
+                        const timestamp = data.timestamp ? new Date(data.timestamp).toLocaleString() : 'unknown date';
+                        showMessage(`Loaded ${variableDB.length} variables from local storage (saved ${timestamp}).`, 'success');
+                        return true;
+                    }
+                }
+                
+                return false;
+            } catch (error) {
+                showMessage(`Error loading data: ${error.message}`, 'error');
+                return false;
+            }
+        }
+        
+        // Show a message
+        function showMessage(message, type) {
+            // Create message element
+            const messageEl = document.createElement('div');
+            messageEl.className = type;
+            messageEl.textContent = message;
+            
+            // Insert after header
+            const header = document.querySelector('header');
+            if (header.nextSibling) {
+                header.parentNode.insertBefore(messageEl, header.nextSibling);
+            } else {
+                header.parentNode.appendChild(messageEl);
+            }
+            
+            // Remove after timeout
+            setTimeout(() => {
+                messageEl.remove();
+            }, 5000);
+        }
+        
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
