@@ -4,434 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Data Bank Manager</title>
-    <style>
-        /* Global styles */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: Arial, sans-serif;
-        }
-        
-        body {
-            background-color: #f0f0f0;
-            padding: 10px;
-            overflow-y: auto;
-            min-height: 100vh;
-        }
-        
-        .app-container {
-            max-width: 100%;
-            margin: 0 auto;
-            background-color: #fff;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            display: flex;
-            flex-direction: column;
-            min-height: calc(100vh - 20px);
-            overflow: hidden;
-        }
-        
-        /* Main content area - allow scrolling */
-        .main-content {
-            flex: 1;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
-        }
-        
-        /* Header styles */
-        header {
-            text-align: center;
-            padding: 15px;
-            border-bottom: 1px solid #ddd;
-        }
-        
-        header h1 {
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-        
-        header p {
-            color: #666;
-            font-size: 0.9rem;
-        }
-        
-        /* Section styles */
-        section {
-            padding: 10px;
-            border-bottom: 1px solid #ddd;
-        }
-        
-        section h2 {
-            font-size: 1rem;
-            margin-bottom: 10px;
-            padding: 5px;
-            background-color: #f5f5f5;
-            border: 1px solid #ddd;
-            border-radius: 3px;
-        }
-        
-        /* Configuration section */
-        .config-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-        
-        .config-item {
-            display: flex;
-            align-items: center;
-        }
-        
-        .config-item label {
-            flex: 1;
-            font-size: 0.9rem;
-        }
-        
-        .config-item input,
-        .config-item select {
-            width: 100px;
-            padding: 5px;
-            border: 1px solid #ccc;
-            border-radius: 3px;
-        }
-        
-        .file-actions {
-            display: flex;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
-            padding: 10px 0;
-        }
-        
-        .file-actions label {
-            margin-right: 10px;
-        }
-        
-        /* Button styles */
-        button {
-            padding: 5px 10px;
-            background-color: #f0f0f0;
-            border: 1px solid #ccc;
-            border-radius: 3px;
-            cursor: pointer;
-            font-size: 0.8rem;
-            white-space: nowrap;
-        }
-        
-        button:hover {
-            background-color: #e0e0e0;
-        }
-        
-        button:focus {
-            outline: 2px solid #4d90fe;
-        }
-        
-        /* Banks section */
-        .banks-section {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-        
-        .tab-container {
-            display: flex;
-            border-bottom: 1px solid #ccc;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: thin;
-        }
-        
-        .tab {
-            padding: 8px 15px;
-            background-color: #f5f5f5;
-            border: 1px solid #ccc;
-            border-bottom: none;
-            margin-right: 1px;
-            cursor: pointer;
-            border-radius: 3px 3px 0 0;
-            white-space: nowrap;
-        }
-        
-        .tab:focus {
-            outline: 2px solid #4d90fe;
-        }
-        
-        .tab.active {
-            background-color: #fff;
-            border-bottom: 1px solid #fff;
-            margin-bottom: -1px;
-        }
-        
-        .tab-contents {
-            flex: 1;
-            overflow: auto;
-        }
-        
-        .tab-content {
-            padding: 10px;
-            display: none;
-            height: 100%;
-        }
-        
-        .tab-content.active {
-            display: flex;
-            flex-direction: column;
-        }
-        
-        /* Bank display */
-        .bank-toolbar {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-            padding: 5px;
-            background-color: #f9f9f9;
-            border: 1px solid #eee;
-            border-radius: 3px;
-        }
-        
-        .registers-container {
-            overflow-y: auto;
-            flex: 1;
-        }
-        
-        .register-container {
-            margin-bottom: 20px;
-        }
-        
-        .register-header {
-            background-color: #f5f5f5;
-            padding: 5px 10px;
-            border: 1px solid #ddd;
-            border-radius: 3px 3px 0 0;
-            font-weight: bold;
-        }
-        
-        .addresses-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 5px;
-        }
-        
-        .addresses-table th,
-        .addresses-table td {
-            text-align: left;
-            padding: 5px 10px;
-            border: 1px solid #ddd;
-        }
-        
-        .addresses-table th {
-            background-color: #f9f9f9;
-            font-weight: normal;
-        }
-        
-        .reference {
-            color: blue;
-            text-decoration: underline;
-            cursor: pointer;
-        }
-        
-        .reference:focus {
-            outline: 2px solid #4d90fe;
-        }
-        
-        .resolved-value {
-            color: blue;
-            margin-top: 3px;
-            font-style: italic;
-        }
-        
-        /* Text editor */
-        .editor-container {
-            display: flex;
-            flex-direction: column;
-            flex: 1;
-            min-height: 200px;
-        }
-        
-        .text-editor {
-            width: 100%;
-            flex: 1;
-            padding: 10px;
-            border: 1px solid #ddd;
-            font-family: monospace;
-            resize: none;
-            tab-size: 4;
-            -moz-tab-size: 4;
-            min-height: 200px;
-            overflow: auto;
-        }
-        
-        .text-editor:focus {
-            outline: 2px solid #4d90fe;
-            border-color: #4d90fe;
-        }
-        
-        /* Status bar */
-        .status-bar {
-            padding: 5px 10px;
-            background-color: #f5f5f5;
-            border-top: 1px solid #ddd;
-            font-size: 0.85rem;
-        }
-        
-        /* Toast notification */
-        .toast {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 10px 15px;
-            background-color: #333;
-            color: #fff;
-            border-radius: 3px;
-            max-width: 300px;
-            z-index: 1000;
-            display: none;
-            box-shadow: 0 3px 6px rgba(0,0,0,0.2);
-        }
-        
-        /* Modal styles */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0,0,0,0.5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
-            display: none;
-        }
-        
-        .modal {
-            background-color: #fff;
-            border-radius: 5px;
-            padding: 20px;
-            width: 90%;
-            max-width: 350px;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
-        }
-        
-        .modal-title {
-            margin-bottom: 15px;
-            font-size: 1.2rem;
-            font-weight: bold;
-        }
-        
-        .form-row {
-            margin-bottom: 15px;
-        }
-        
-        .form-row label {
-            display: block;
-            margin-bottom: 5px;
-        }
-        
-        .form-row input {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 3px;
-        }
-        
-        .form-row input:focus {
-            outline: 2px solid #4d90fe;
-            border-color: #4d90fe;
-        }
-        
-        .modal-buttons {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        
-        /* Responsive adjustments */
-        @media (max-width: 768px) {
-            .config-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .file-actions {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            
-            .file-actions button {
-                width: 100%;
-                margin-top: 5px;
-            }
-            
-            .bank-toolbar {
-                flex-direction: column;
-                gap: 5px;
-            }
-            
-            .bank-toolbar div:last-child {
-                display: flex;
-                gap: 5px;
-            }
-            
-            .bank-toolbar div:last-child button {
-                flex: 1;
-            }
-            
-            .addresses-table {
-                font-size: 0.9rem;
-            }
-            
-            .tab {
-                padding: 5px 10px;
-                font-size: 0.9rem;
-            }
-            
-            /* Make sure all form inputs are large enough for touch on mobile */
-            button, input, select {
-                min-height: 44px;
-            }
-        }
-        
-        /* For small screens, adapt table layout */
-        @media (max-width: 480px) {
-            .addresses-table, .addresses-table tbody, .addresses-table tr {
-                display: block;
-                width: 100%;
-            }
-            
-            .addresses-table th {
-                display: none;
-            }
-            
-            .addresses-table td {
-                display: flex;
-                padding: 8px;
-                border-bottom: none;
-            }
-            
-            .addresses-table td:first-child {
-                font-weight: bold;
-                background-color: #f5f5f5;
-            }
-            
-            .addresses-table td:before {
-                content: attr(data-label);
-                font-weight: bold;
-                flex: 0 0 80px;
-            }
-            
-            .addresses-table tr {
-                border: 1px solid #ddd;
-                margin-bottom: 10px;
-            }
-        }
-    </style>
+	<link rel="stylesheet" href="algorithm-themes.css">
 </head>
 <body>
+
+    <!-- Theme Selector -->
+    <div class="theme-selector">
+        <label for="themeSelect">Theme:</label>
+        <select id="themeSelect">
+            <option value="default">Default</option>
+            <option value="cpp">C++ Developer</option>
+            <option value="minecraft">Minecraft Java</option>
+        </select>
+    </div>
+
     <!-- Main App Container -->
     <div class="app-container">
         <!-- Header -->
@@ -521,7 +107,8 @@
             readingMode: "raw",
             banks: {},
             currentBankId: null,
-            editMode: {}
+            editMode: {},
+			currentTheme: "default" // Default theme
         };
 
         // DOM Elements
@@ -543,7 +130,8 @@
             numAddresses: document.getElementById("numAddresses"),
             cancelNewBank: document.getElementById("cancelNewBank"),
             createBank: document.getElementById("createBank"),
-            addBankTab: document.getElementById("addBankTab")
+            addBankTab: document.getElementById("addBankTab"),
+            themeSelect: document.getElementById("themeSelect")
         };
 
         // Initialize application
@@ -559,6 +147,7 @@
             elements.addBankTab.addEventListener("click", showNewBankModal);
             elements.cancelNewBank.addEventListener("click", hideNewBankModal);
             elements.createBank.addEventListener("click", createNewBank);
+			elements.themeSelect.addEventListener("change", changeTheme);
 
             // Add keyboard accessibility for tabs
             elements.addBankTab.addEventListener("keydown", (e) => {
@@ -570,6 +159,54 @@
 
             // Load config from storage
             loadConfigFromStorage();
+
+            // Apply saved theme
+            loadThemeFromStorage();
+
+        }
+		
+        // Theme management
+        function changeTheme() {
+            const selectedTheme = elements.themeSelect.value;
+            
+            // Remove existing theme classes
+            document.body.classList.remove('theme-cpp', 'theme-minecraft');
+            
+            // Add new theme class if not default
+            if (selectedTheme !== 'default') {
+                document.body.classList.add(`theme-${selectedTheme}`);
+            }
+            
+            // Save theme preference
+            app.currentTheme = selectedTheme;
+            saveThemeToStorage();
+            
+            showToast(`Theme changed to ${selectedTheme}`);
+        }
+        
+        function saveThemeToStorage() {
+            try {
+                localStorage.setItem("dataBankTheme", app.currentTheme);
+            } catch (e) {
+                console.error("Error saving theme:", e);
+            }
+        }
+        
+        function loadThemeFromStorage() {
+            try {
+                const savedTheme = localStorage.getItem("dataBankTheme");
+                if (savedTheme) {
+                    app.currentTheme = savedTheme;
+                    elements.themeSelect.value = savedTheme;
+                    
+                    // Apply the theme
+                    if (savedTheme !== 'default') {
+                        document.body.classList.add(`theme-${savedTheme}`);
+                    }
+                }
+            } catch (e) {
+                console.error("Error loading theme:", e);
+            }
         }
 
         // Configuration methods
@@ -695,6 +332,7 @@
             }
         }
 
+        // Modified parseBankData function to support multi-line values
         function parseBankData(bankId, content) {
             const lines = content.split('\n');
             const bank = {
@@ -703,13 +341,31 @@
             };
 
             let currentRegister = null;
+            let inMultiLineValue = false;
+            let currentAddressId = null;
+            let multiLineBuffer = [];
 
             // Process each line
             for (let i = 0; i < lines.length; i++) {
                 const line = lines[i];
 
-                // Skip empty lines
-                if (!line.trim()) {
+                // If we're collecting a multi-line value
+                if (inMultiLineValue) {
+                    // Check if this line ends the multi-line value
+                    if (line.trim() === '"""') {
+                        // Save the multi-line value
+                        bank.registers[currentRegister].addresses[currentAddressId] = multiLineBuffer.join('\n');
+                        multiLineBuffer = [];
+                        inMultiLineValue = false;
+                    } else {
+                        // Add to multi-line buffer
+                        multiLineBuffer.push(line);
+                    }
+                    continue;
+                }
+
+                // Skip empty lines when not in multi-line mode
+                if (!line.trim() && !inMultiLineValue) {
                     continue;
                 }
 
@@ -740,24 +396,32 @@
                     // Split into address ID and value using the first tab as delimiter
                     const parts = addressLine.split('\t', 2);
 
-                    // If there's only one part, it might be an empty value
-                    if (parts.length === 1) {
-                        try {
-                            const addressId = parseInt(parts[0].trim());
+                    try {
+                        const addressId = parseInt(parts[0].trim());
+                        currentAddressId = addressId;
+                        
+                        if (parts.length === 1) {
+                            // Empty value
                             bank.registers[currentRegister].addresses[addressId] = "";
-                        } catch (e) {
-                            throw new Error(`Invalid address format at line ${i + 1}`);
+                        } else {
+                            // Check if this is a multi-line value start
+                            if (parts[1].trim() === '"""') {
+                                inMultiLineValue = true;
+                                multiLineBuffer = [];
+                            } else {
+                                // Single-line value
+                                bank.registers[currentRegister].addresses[addressId] = parts[1];
+                            }
                         }
-                    } else {
-                        try {
-                            const addressId = parseInt(parts[0].trim());
-                            const value = parts[1];
-                            bank.registers[currentRegister].addresses[addressId] = value;
-                        } catch (e) {
-                            throw new Error(`Invalid address number at line ${i + 1}`);
-                        }
+                    } catch (e) {
+                        throw new Error(`Invalid address format at line ${i + 1}`);
                     }
                 }
+            }
+
+            // Check if we ended with an unclosed multi-line value
+            if (inMultiLineValue) {
+                throw new Error('Unclosed multi-line value at end of file');
             }
 
             return bank;
@@ -914,12 +578,14 @@
                 <div>Bank ${bankId}</div>
                 <div>
                     <button id="editBank_${bankId}" tabindex="0">Edit Bank</button>
+                    <button id="downloadBank_${bankId}" tabindex="0">Download</button>
                 </div>
             `;
             container.appendChild(toolbar);
 
-            // Add event listener to edit button
+            // Add event listeners to buttons
             document.getElementById(`editBank_${bankId}`).addEventListener("click", () => startEditMode(bankId));
+            document.getElementById(`downloadBank_${bankId}`).addEventListener("click", () => downloadBank(bankId));
 
             // Create a scrollable container for registers
             const registersContainer = document.createElement("div");
@@ -986,19 +652,55 @@
                         valueCell.appendChild(formatValueWithReferences(value, bankId, registerId, addressId));
                         
                         // Resolved value
+                        const resolvedValue = resolveValue(value);
                         const resolvedDiv = document.createElement("div");
                         resolvedDiv.className = "resolved-value";
-                        resolvedDiv.textContent = `→ ${resolveValue(value)}`;
+                        
+                        if (resolvedValue.includes('\n')) {
+                            // Multi-line resolved value
+                            resolvedDiv.appendChild(document.createTextNode("→ "));
+                            const pre = document.createElement("pre");
+                            pre.style.margin = "0";
+                            pre.style.whiteSpace = "pre-wrap";
+                            pre.style.fontFamily = "inherit";
+                            pre.textContent = resolvedValue;
+                            resolvedDiv.appendChild(pre);
+                        } else {
+                            // Single-line resolved value
+                            resolvedDiv.textContent = `→ ${resolvedValue}`;
+                        }
+                        
                         valueCell.appendChild(resolvedDiv);
                     } else {
-                        // Just show raw value
-                        valueCell.textContent = value;
+                        // Display raw value with proper formatting
+                        valueCell.appendChild(displayValueWithFormatting(value));
                     }
                     
                     row.appendChild(valueCell);
                     tbody.appendChild(row);
                 });
             });
+        }
+
+        // Helper function to display value with proper formatting
+        function displayValueWithFormatting(value) {
+            const container = document.createElement("div");
+            
+            // Add special class for multi-line values
+            if (value && value.includes('\n')) {
+                container.classList.add("multi-line-value");
+            }
+            
+            // Create a text node that preserves whitespace
+            const pre = document.createElement("pre");
+            pre.style.margin = "0";
+            pre.style.whiteSpace = "pre-wrap";
+            pre.style.wordBreak = "break-word";
+            pre.style.fontFamily = "inherit";
+            pre.textContent = value || "";
+            
+            container.appendChild(pre);
+            return container;
         }
 
         function containsReferences(value) {
@@ -1015,18 +717,50 @@
             // Create a container for the formatted text
             const container = document.createElement("div");
             
+            // For multi-line content, we need to process each line separately
+            // while maintaining the line breaks
+            if (value.includes('\n')) {
+                container.classList.add("multi-line-value");
+                
+                const lines = value.split('\n');
+                
+                lines.forEach((line, lineIndex) => {
+                    // Process references in this line
+                    const lineElement = processLineWithReferences(line, bankId, registerId, addressId);
+                    container.appendChild(lineElement);
+                    
+                    // Add line break for all but the last line
+                    if (lineIndex < lines.length - 1) {
+                        container.appendChild(document.createElement("br"));
+                    }
+                });
+            } else {
+                // Single line processing
+                const processedLine = processLineWithReferences(value, bankId, registerId, addressId);
+                container.appendChild(processedLine);
+            }
+            
+            return container;
+        }
+
+        function processLineWithReferences(line, bankId, registerId, addressId) {
+            const container = document.createElement("span");
+            
             // Regular expression to find references
             const refRegex = /(\d+\.\d+\.\d+)/g;
             
             // Split the text by references
-            const parts = value.split(refRegex);
+            const parts = line.split(refRegex);
             
             // Add each part to the container
             parts.forEach((part, i) => {
                 if (i % 2 === 0) {
-                    // Regular text
+                    // Regular text - preserve whitespace
                     if (part) {
-                        container.appendChild(document.createTextNode(part));
+                        const textSpan = document.createElement("span");
+                        textSpan.style.whiteSpace = "pre";
+                        textSpan.textContent = part;
+                        container.appendChild(textSpan);
                     }
                 } else {
                     // Reference - make it a button
@@ -1038,13 +772,13 @@
                     refLink.setAttribute("aria-label", `Navigate to reference ${part}`);
                     
                     // Add click and keyboard handlers
-                    refLink.onclick = () => handleReferenceClick(part);
-                    refLink.onkeydown = (e) => {
+                    refLink.addEventListener("click", () => handleReferenceClick(part));
+                    refLink.addEventListener("keydown", (e) => {
                         if (e.key === "Enter" || e.key === " ") {
                             e.preventDefault();
                             handleReferenceClick(part);
                         }
-                    };
+                    });
                     
                     container.appendChild(refLink);
                 }
@@ -1061,14 +795,48 @@
                 // Check if we need to switch banks
                 if (app.currentBankId !== bankId && app.banks[bankId]) {
                     selectBank(bankId);
+                    
+                    // We need to give the UI time to update before trying to highlight
+                    setTimeout(() => highlightReference(bankId, registerId, addressId), 100);
+                } else {
+                    highlightReference(bankId, registerId, addressId);
                 }
-                
-                // TODO: Highlight the referenced address
-                showToast(`Reference: Bank ${bankId}, Register ${registerId}, Address ${addressId}`);
                 
             } catch (e) {
                 showToast(`Invalid reference format: ${refPath}`);
             }
+        }
+
+        function highlightReference(bankId, registerId, addressId) {
+            // Find the cell containing the reference
+            const registerContainers = document.querySelectorAll('.register-container');
+            
+            for (const container of registerContainers) {
+                const header = container.querySelector('.register-header');
+                if (header && header.textContent === `Register ${registerId}`) {
+                    const rows = container.querySelectorAll('tbody tr');
+                    
+                    for (const row of rows) {
+                        const addressCell = row.querySelector('td:first-child');
+                        if (addressCell && addressCell.textContent === addressId.toString()) {
+                            // Highlight the row
+                            row.style.backgroundColor = '#fff3cd'; // Soft yellow
+                            
+                            // Scroll to the row
+                            row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            
+                            // Remove highlight after a delay
+                            setTimeout(() => {
+                                row.style.backgroundColor = '';
+                            }, 2000);
+                            
+                            return;
+                        }
+                    }
+                }
+            }
+            
+            showToast(`Reference not found: Bank ${bankId}, Register ${registerId}, Address ${addressId}`);
         }
 
         function resolveValue(value, visited = null) {
@@ -1098,7 +866,7 @@
                 }
                 
                 // Check for nested references
-                if (referencedValue.value.includes('.')) {
+                if (containsReferences(referencedValue.value)) {
                     const newVisited = new Set(visited);
                     newVisited.add(refKey);
                     return resolveValue(referencedValue.value, newVisited);
@@ -1120,14 +888,14 @@
             }
             
             // Check if address exists
-            if (!app.banks[bankId].registers[registerId].addresses[addressId]) {
+            if (!app.banks[bankId].registers[registerId].addresses[addressId] === undefined) {
                 return { success: false, error: `Address ${addressId} not found in Bank ${bankId}, Register ${registerId}` };
             }
             
             // Return the value
             return {
                 success: true,
-                value: app.banks[bankId].registers[registerId].addresses[addressId]
+                value: app.banks[bankId].registers[registerId].addresses[addressId] || ""
             };
         }
 
@@ -1168,6 +936,7 @@
             displayBankData(bankId);
         }
 
+        // Updated generateBankText function to support multi-line values
         function generateBankText(bank) {
             let text = "";
             
@@ -1185,8 +954,16 @@
                 
                 // Add each address
                 for (const addressId of addressIds) {
-                    const value = register.addresses[addressId];
-                    text += `\t${addressId}\t${value}\n`;
+                    const value = register.addresses[addressId] || "";
+                    
+                    // Determine if this value should be multi-line
+                    if (value.includes('\n')) {
+                        text += `\t${addressId}\t"""\n`;
+                        text += `${value}\n`;
+                        text += `"""\n`;
+                    } else {
+                        text += `\t${addressId}\t${value}\n`;
+                    }
                 }
                 
                 // Add a blank line between registers
@@ -1264,6 +1041,11 @@
                 }
             }
             
+            // Add a multi-line example in the first register
+            if (numRegisters > 0 && numAddresses > 0) {
+                bank.registers[1].addresses[1] = `This is a\nmulti-line\nvalue example\n  with preserved indentation`;
+            }
+            
             // Add to app state
             app.banks[bankId] = bank;
             
@@ -1281,7 +1063,35 @@
             showToast(`Bank ${bankId} created successfully`);
         }
 
-        // File download method
+        // File download method for a single bank
+        function downloadBank(bankId) {
+            const bank = app.banks[bankId];
+            if (!bank) {
+                showToast(`Bank ${bankId} not found`);
+                return;
+            }
+            
+            try {
+                // Generate bank content
+                const content = generateBankText(bank);
+                
+                // Create blob
+                const blob = new Blob([content], { type: 'text/plain' });
+                
+                // Create download link
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `${bankId}.txt`;
+                link.click();
+                
+                showToast(`Bank ${bankId} downloaded successfully`);
+            } catch (e) {
+                showToast(`Error downloading bank: ${e.message}`);
+                console.error(`Error downloading bank:`, e);
+            }
+        }
+
+        // File download method for all banks
         function downloadAllBanks() {
             const bankIds = Object.keys(app.banks);
             if (bankIds.length === 0) {
@@ -1340,6 +1150,16 @@
             setTimeout(() => {
                 elements.toast.style.display = "none";
             }, 3000);
+        }
+
+        // Helper function to escape HTML
+        function escapeHtml(text) {
+            return text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
         }
 
         // Add JSZip for ZIP file creation

@@ -1,0 +1,714 @@
+/* algorithm-themes.css */
+
+/* Theme Selection Variables - Default Theme */
+:root {
+    /* Background Colors */
+    --bg-primary: #f0f0f0;
+    --bg-container: #fff;
+    --bg-header: #fff;
+    --bg-section-title: #f5f5f5;
+    --bg-tab: #f5f5f5;
+    --bg-tab-active: #fff;
+    --bg-toolbar: #f9f9f9;
+    --bg-register-header: #f5f5f5;
+    --bg-table-header: #f9f9f9;
+    --bg-multi-line: #f9f9f9;
+    --bg-toast: #333;
+    --bg-highlight: #fff3cd;
+    --bg-editor: #fff;
+
+    /* Text Colors */
+    --text-primary: #333;
+    --text-secondary: #666;
+    --text-contrast: #fff;
+    --text-reference: #0066cc;
+    --text-resolved: #0066cc;
+
+    /* Border Colors */
+    --border-light: #ddd;
+    --border-medium: #ccc;
+    --border-focus: #4d90fe;
+    --border-multi-line: #ddd;
+
+    /* Button Colors */
+    --btn-bg: #f0f0f0;
+    --btn-hover-bg: #e0e0e0;
+    --btn-border: #ccc;
+    --btn-text: #333;
+
+    /* Font Families */
+    --font-primary: 'Arial', sans-serif;
+    --font-mono: monospace;
+    
+    /* Shadows */
+    --shadow-sm: 0 2px 5px rgba(0,0,0,0.1);
+    --shadow-md: 0 3px 6px rgba(0,0,0,0.2);
+    --shadow-lg: 0 3px 10px rgba(0,0,0,0.2);
+
+    /* Animation */
+    --transition-speed: 0.3s;
+}
+
+/* C++ Developer Theme */
+.theme-cpp {
+    /* Background Colors */
+    --bg-primary: #1e1e1e;
+    --bg-container: #252526;
+    --bg-header: #323233;
+    --bg-section-title: #37373d;
+    --bg-tab: #2d2d2d;
+    --bg-tab-active: #1e1e1e;
+    --bg-toolbar: #333333;
+    --bg-register-header: #3c3c3c;
+    --bg-table-header: #2d2d2d;
+    --bg-multi-line: #1e1e1e;
+    --bg-toast: #0e639c;
+    --bg-highlight: #264f78;
+    --bg-editor: #1e1e1e;
+
+    /* Text Colors */
+    --text-primary: #d4d4d4;
+    --text-secondary: #bbbbbb;
+    --text-contrast: #ffffff;
+    --text-reference: #569cd6;
+    --text-resolved: #4ec9b0;
+
+    /* Border Colors */
+    --border-light: #3c3c3c;
+    --border-medium: #555555;
+    --border-focus: #007acc;
+    --border-multi-line: #3c3c3c;
+
+    /* Button Colors */
+    --btn-bg: #3c3c3c;
+    --btn-hover-bg: #505050;
+    --btn-border: #6a6a6a;
+    --btn-text: #cccccc;
+
+    /* Font Families */
+    --font-primary: 'Consolas', 'Courier New', monospace;
+    --font-mono: 'Consolas', 'Courier New', monospace;
+    
+    /* Shadows */
+    --shadow-sm: 0 2px 5px rgba(0,0,0,0.3);
+    --shadow-md: 0 3px 6px rgba(0,0,0,0.4);
+    --shadow-lg: 0 3px 10px rgba(0,0,0,0.5);
+}
+
+/* Minecraft Java Theme */
+.theme-minecraft {
+    /* Background Colors */
+    --bg-primary: #5c8c37; /* Grass green */
+    --bg-container: #6b6353; /* Dirt brown */
+    --bg-header: #5e5240; /* Dark dirt */
+    --bg-section-title: #2f2f2f; /* Stone */
+    --bg-tab: #444444; /* Dark stone */
+    --bg-tab-active: #767676; /* Light stone */
+    --bg-toolbar: #2f2f2f; /* Stone */
+    --bg-register-header: #4d3123; /* Dark wood */
+    --bg-table-header: #39240f; /* Darker wood */
+    --bg-multi-line: #282828; /* Coal */
+    --bg-toast: #1a1a1a; /* Bedrock */
+    --bg-highlight: #9a7b4f; /* Sand */
+    --bg-editor: #282828; /* Coal */
+
+    /* Text Colors */
+    --text-primary: #ffffff; /* White */
+    --text-secondary: #eeeeee; /* Light gray */
+    --text-contrast: #ffffff; /* White */
+    --text-reference: #55ffff; /* Diamond blue */
+    --text-resolved: #ffaa00; /* Gold */
+
+    /* Border Colors */
+    --border-light: #666666; /* Dark gray */
+    --border-medium: #777777; /* Medium gray */
+    --border-focus: #55ffff; /* Diamond blue */
+    --border-multi-line: #555555; /* Gray */
+
+    /* Button Colors */
+    --btn-bg: #7e735a; /* Crafting table */
+    --btn-hover-bg: #a19680; /* Light crafting table */
+    --btn-border: #4d3b22; /* Dark wood */
+    --btn-text: #ffffff; /* White */
+
+    /* Font Families */
+    --font-primary: 'Minecraft', 'VT323', monospace;
+    --font-mono: 'Minecraft', 'VT323', monospace;
+    
+    /* Shadows */
+    --shadow-sm: 0 2px 5px rgba(0,0,0,0.5);
+    --shadow-md: 0 3px 6px rgba(0,0,0,0.6);
+    --shadow-lg: 0 3px 10px rgba(0,0,0,0.7);
+    
+    /* Set a pixelated look for Minecraft theme */
+    image-rendering: pixelated;
+}
+
+/* Import Minecraft-style font */
+@font-face {
+    font-family: 'Minecraft';
+    src: url('https://cdn.jsdelivr.net/gh/South-Paw/typeface-minecraft@master/font/minecraft.woff2') format('woff2'),
+         url('https://cdn.jsdelivr.net/gh/South-Paw/typeface-minecraft@master/font/minecraft.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+/* Theme transition effect */
+body, body * {
+    transition: background-color var(--transition-speed), 
+                color var(--transition-speed), 
+                border-color var(--transition-speed),
+                box-shadow var(--transition-speed);
+}
+
+/* Global styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: var(--font-primary);
+}
+
+body {
+    background-color: var(--bg-primary);
+    padding: 10px;
+    overflow-y: auto;
+    min-height: 100vh;
+    color: var(--text-primary);
+}
+
+.app-container {
+    max-width: 100%;
+    margin: 0 auto;
+    background-color: var(--bg-container);
+    border-radius: 5px;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100vh - 20px);
+    overflow: hidden;
+}
+
+/* Theme Selector */
+.theme-selector {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    display: flex;
+    align-items: center;
+    z-index: 10;
+}
+
+.theme-selector label {
+    margin-right: 10px;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+}
+
+.theme-selector select {
+    padding: 5px;
+    border: 1px solid var(--border-medium);
+    border-radius: 3px;
+    background-color: var(--bg-container);
+    color: var(--text-primary);
+}
+
+/* Main content area - allow scrolling */
+.main-content {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+}
+
+/* Header styles */
+header {
+    text-align: center;
+    padding: 15px;
+    border-bottom: 1px solid var(--border-light);
+    background-color: var(--bg-header);
+}
+
+header h1 {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: var(--text-primary);
+}
+
+header p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+/* Section styles */
+section {
+    padding: 10px;
+    border-bottom: 1px solid var(--border-light);
+}
+
+section h2 {
+    font-size: 1rem;
+    margin-bottom: 10px;
+    padding: 5px;
+    background-color: var(--bg-section-title);
+    border: 1px solid var(--border-light);
+    border-radius: 3px;
+    color: var(--text-primary);
+}
+
+/* Configuration section */
+.config-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.config-item {
+    display: flex;
+    align-items: center;
+}
+
+.config-item label {
+    flex: 1;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+}
+
+.config-item input,
+.config-item select {
+    width: 100px;
+    padding: 5px;
+    border: 1px solid var(--border-medium);
+    border-radius: 3px;
+    background-color: var(--bg-container);
+    color: var(--text-primary);
+}
+
+.file-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 10px 0;
+}
+
+.file-actions label {
+    margin-right: 10px;
+    color: var(--text-primary);
+}
+
+/* Button styles */
+button {
+    padding: 5px 10px;
+    background-color: var(--btn-bg);
+    border: 1px solid var(--btn-border);
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    color: var(--btn-text);
+}
+
+button:hover {
+    background-color: var(--btn-hover-bg);
+}
+
+button:focus {
+    outline: 2px solid var(--border-focus);
+}
+
+/* Banks section */
+.banks-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.tab-container {
+    display: flex;
+    border-bottom: 1px solid var(--border-light);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+}
+
+.tab {
+    padding: 8px 15px;
+    background-color: var(--bg-tab);
+    border: 1px solid var(--border-medium);
+    border-bottom: none;
+    margin-right: 1px;
+    cursor: pointer;
+    border-radius: 3px 3px 0 0;
+    white-space: nowrap;
+    color: var(--text-primary);
+}
+
+.tab:focus {
+    outline: 2px solid var(--border-focus);
+}
+
+.tab.active {
+    background-color: var(--bg-tab-active);
+    border-bottom: 1px solid var(--bg-tab-active);
+    margin-bottom: -1px;
+}
+
+.tab-contents {
+    flex: 1;
+    overflow: auto;
+}
+
+.tab-content {
+    padding: 10px;
+    display: none;
+    height: 100%;
+}
+
+.tab-content.active {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Bank display */
+.bank-toolbar {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    padding: 5px;
+    background-color: var(--bg-toolbar);
+    border: 1px solid var(--border-light);
+    border-radius: 3px;
+    color: var(--text-primary);
+}
+
+.registers-container {
+    overflow-y: auto;
+    flex: 1;
+}
+
+.register-container {
+    margin-bottom: 20px;
+}
+
+.register-header {
+    background-color: var(--bg-register-header);
+    padding: 5px 10px;
+    border: 1px solid var(--border-light);
+    border-radius: 3px 3px 0 0;
+    font-weight: bold;
+    color: var(--text-primary);
+}
+
+.addresses-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 5px;
+}
+
+.addresses-table th,
+.addresses-table td {
+    text-align: left;
+    padding: 5px 10px;
+    border: 1px solid var(--border-light);
+    color: var(--text-primary);
+}
+
+.addresses-table th {
+    background-color: var(--bg-table-header);
+    font-weight: normal;
+}
+
+.reference {
+    color: var(--text-reference);
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.reference:focus {
+    outline: 2px solid var(--border-focus);
+}
+
+.resolved-value {
+    color: var(--text-resolved);
+    margin-top: 3px;
+    font-style: italic;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+/* Multi-line value display */
+.multi-line-value {
+    background-color: var(--bg-multi-line);
+    padding: 5px;
+    border-radius: 3px;
+    border: 1px dashed var(--border-multi-line);
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+/* Text editor */
+.editor-container {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 200px;
+}
+
+.text-editor {
+    width: 100%;
+    flex: 1;
+    padding: 10px;
+    border: 1px solid var(--border-light);
+    font-family: var(--font-mono);
+    resize: none;
+    tab-size: 4;
+    -moz-tab-size: 4;
+    min-height: 200px;
+    overflow: auto;
+    white-space: pre-wrap;
+    background-color: var(--bg-editor);
+    color: var(--text-primary);
+}
+
+.text-editor:focus {
+    outline: 2px solid var(--border-focus);
+    border-color: var(--border-focus);
+}
+
+/* Status bar */
+.status-bar {
+    padding: 5px 10px;
+    background-color: var(--bg-section-title);
+    border-top: 1px solid var(--border-light);
+    font-size: 0.85rem;
+    color: var(--text-primary);
+}
+
+/* Toast notification */
+.toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 10px 15px;
+    background-color: var(--bg-toast);
+    color: var(--text-contrast);
+    border-radius: 3px;
+    max-width: 300px;
+    z-index: 1000;
+    display: none;
+    box-shadow: var(--shadow-md);
+}
+
+/* Modal styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+    display: none;
+}
+
+.modal {
+    background-color: var(--bg-container);
+    border-radius: 5px;
+    padding: 20px;
+    width: 90%;
+    max-width: 350px;
+    box-shadow: var(--shadow-lg);
+}
+
+.modal-title {
+    margin-bottom: 15px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--text-primary);
+}
+
+.form-row {
+    margin-bottom: 15px;
+}
+
+.form-row label {
+    display: block;
+    margin-bottom: 5px;
+    color: var(--text-primary);
+}
+
+.form-row input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid var(--border-light);
+    border-radius: 3px;
+    background-color: var(--bg-container);
+    color: var(--text-primary);
+}
+
+.form-row input:focus {
+    outline: 2px solid var(--border-focus);
+    border-color: var(--border-focus);
+}
+
+.modal-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+/* Preserve whitespace styles */
+.preserve-whitespace {
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-family: inherit;
+}
+
+/* Minecraft theme specific styles */
+.theme-minecraft button {
+    text-transform: uppercase;
+    font-weight: bold;
+    box-shadow: inset -2px -4px #0006, inset 2px 2px #FFF7;
+}
+
+.theme-minecraft button:hover {
+    box-shadow: inset -2px -4px #0004, inset 2px 2px #FFF5;
+}
+
+.theme-minecraft button:active {
+    box-shadow: inset 2px 2px #0006, inset -2px -4px #FFF7;
+}
+
+.theme-minecraft .tab {
+    box-shadow: inset 2px 2px #FFF3, inset -2px 0 #0003;
+}
+
+.theme-minecraft .tab.active {
+    box-shadow: none;
+}
+
+/* C++ theme specific styles */
+.theme-cpp .text-editor {
+    line-height: 1.5;
+}
+
+.theme-cpp .reference {
+    font-weight: bold;
+}
+
+.theme-cpp .resolved-value {
+    font-family: var(--font-mono);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .config-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .file-actions {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .file-actions button {
+        width: 100%;
+        margin-top: 5px;
+    }
+    
+    .bank-toolbar {
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    .bank-toolbar div:last-child {
+        display: flex;
+        gap: 5px;
+    }
+    
+    .bank-toolbar div:last-child button {
+        flex: 1;
+    }
+    
+    .addresses-table {
+        font-size: 0.9rem;
+    }
+    
+    .tab {
+        padding: 5px 10px;
+        font-size: 0.9rem;
+    }
+    
+    /* Make sure all form inputs are large enough for touch on mobile */
+    button, input, select {
+        min-height: 44px;
+    }
+    
+    .theme-selector {
+        position: relative;
+        top: 0;
+        right: 0;
+        margin-bottom: 10px;
+        justify-content: flex-end;
+    }
+}
+
+/* For small screens, adapt table layout */
+@media (max-width: 480px) {
+    .addresses-table, .addresses-table tbody, .addresses-table tr {
+        display: block;
+        width: 100%;
+    }
+    
+    .addresses-table th {
+        display: none;
+    }
+    
+    .addresses-table td {
+        display: flex;
+        padding: 8px;
+        border-bottom: none;
+    }
+    
+    .addresses-table td:first-child {
+        font-weight: bold;
+        background-color: var(--bg-section-title);
+    }
+    
+    .addresses-table td:before {
+        content: attr(data-label);
+        font-weight: bold;
+        flex: 0 0 80px;
+    }
+    
+    .addresses-table tr {
+        border: 1px solid var(--border-light);
+        margin-bottom: 10px;
+    }
+}
+
+/* Custom scrollbar for modern browsers */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border-medium);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--border-light);
+}
