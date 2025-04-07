@@ -95,62 +95,78 @@
     --shadow-lg: 0 3px 10px rgba(0,0,0,0.5);
 }
 
-/* Minecraft Java Theme */
-.theme-minecraft {
+/* Dark Theme */
+.theme-dark {
     /* Background Colors */
-    --bg-primary: #5c8c37; /* Grass green */
-    --bg-container: #6b6353; /* Dirt brown */
-    --bg-header: #5e5240; /* Dark dirt */
-    --bg-section-title: #2f2f2f; /* Stone */
-    --bg-tab: #444444; /* Dark stone */
-    --bg-tab-active: #767676; /* Light stone */
-    --bg-toolbar: #2f2f2f; /* Stone */
-    --bg-register-header: #4d3123; /* Dark wood */
-    --bg-table-header: #39240f; /* Darker wood */
-    --bg-multi-line: #282828; /* Coal */
-    --bg-toast: #1a1a1a; /* Bedrock */
-    --bg-highlight: #9a7b4f; /* Sand */
-    --bg-editor: #282828; /* Coal */
+    --bg-primary: #121212;
+    --bg-container: #1e1e1e;
+    --bg-header: #252525;
+    --bg-section-title: #2a2a2a;
+    --bg-tab: #252525;
+    --bg-tab-active: #333333;
+    --bg-toolbar: #2a2a2a;
+    --bg-register-header: #303030;
+    --bg-table-header: #252525;
+    --bg-multi-line: #1a1a1a;
+    --bg-toast: #424242;
+    --bg-highlight: #2d4f50;
+    --bg-editor: #1e1e1e;
 
     /* Text Colors */
-    --text-primary: #ffffff; /* White */
-    --text-secondary: #eeeeee; /* Light gray */
-    --text-contrast: #ffffff; /* White */
-    --text-reference: #55ffff; /* Diamond blue */
-    --text-resolved: #ffaa00; /* Gold */
+    --text-primary: #e0e0e0;
+    --text-secondary: #b0b0b0;
+    --text-contrast: #ffffff;
+    --text-reference: #90caf9;
+    --text-resolved: #80cbc4;
 
     /* Border Colors */
-    --border-light: #666666; /* Dark gray */
-    --border-medium: #777777; /* Medium gray */
-    --border-focus: #55ffff; /* Diamond blue */
-    --border-multi-line: #555555; /* Gray */
+    --border-light: #424242;
+    --border-medium: #555555;
+    --border-focus: #64b5f6;
+    --border-multi-line: #424242;
 
     /* Button Colors */
-    --btn-bg: #7e735a; /* Crafting table */
-    --btn-hover-bg: #a19680; /* Light crafting table */
-    --btn-border: #4d3b22; /* Dark wood */
-    --btn-text: #ffffff; /* White */
-
-    /* Font Families */
-    --font-primary: 'Minecraft', 'VT323', monospace;
-    --font-mono: 'Minecraft', 'VT323', monospace;
-    
-    /* Shadows */
-    --shadow-sm: 0 2px 5px rgba(0,0,0,0.5);
-    --shadow-md: 0 3px 6px rgba(0,0,0,0.6);
-    --shadow-lg: 0 3px 10px rgba(0,0,0,0.7);
-    
-    /* Set a pixelated look for Minecraft theme */
-    image-rendering: pixelated;
+    --btn-bg: #424242;
+    --btn-hover-bg: #505050;
+    --btn-border: #616161;
+    --btn-text: #e0e0e0;
 }
 
-/* Import Minecraft-style font */
-@font-face {
-    font-family: 'Minecraft';
-    src: url('https://cdn.jsdelivr.net/gh/South-Paw/typeface-minecraft@master/font/minecraft.woff2') format('woff2'),
-         url('https://cdn.jsdelivr.net/gh/South-Paw/typeface-minecraft@master/font/minecraft.woff') format('woff');
-    font-weight: normal;
-    font-style: normal;
+/* Light Theme */
+.theme-light {
+    /* Background Colors */
+    --bg-primary: #ffffff;
+    --bg-container: #ffffff;
+    --bg-header: #f8f9fa;
+    --bg-section-title: #f1f3f4;
+    --bg-tab: #f1f3f4;
+    --bg-tab-active: #ffffff;
+    --bg-toolbar: #f8f9fa;
+    --bg-register-header: #f1f3f4;
+    --bg-table-header: #f8f9fa;
+    --bg-multi-line: #f8f9fa;
+    --bg-toast: #5f6368;
+    --bg-highlight: #e8f0fe;
+    --bg-editor: #ffffff;
+
+    /* Text Colors */
+    --text-primary: #202124;
+    --text-secondary: #5f6368;
+    --text-contrast: #ffffff;
+    --text-reference: #1a73e8;
+    --text-resolved: #188038;
+
+    /* Border Colors */
+    --border-light: #dadce0;
+    --border-medium: #bdc1c6;
+    --border-focus: #1a73e8;
+    --border-multi-line: #dadce0;
+
+    /* Button Colors */
+    --btn-bg: #f1f3f4;
+    --btn-hover-bg: #e8eaed;
+    --btn-border: #dadce0;
+    --btn-text: #202124;
 }
 
 /* Theme transition effect */
@@ -318,6 +334,11 @@ button:focus {
     outline: 2px solid var(--border-focus);
 }
 
+/* Primary button style */
+.primary-button {
+    font-weight: bold;
+}
+
 /* Banks section */
 .banks-section {
     flex: 1;
@@ -344,6 +365,8 @@ button:focus {
     border-radius: 3px 3px 0 0;
     white-space: nowrap;
     color: var(--text-primary);
+    position: relative;
+    padding-right: 25px;
 }
 
 .tab:focus {
@@ -354,6 +377,39 @@ button:focus {
     background-color: var(--bg-tab-active);
     border-bottom: 1px solid var(--bg-tab-active);
     margin-bottom: -1px;
+}
+
+.tab-title {
+    font-size: 0.9rem;
+}
+
+.tab-close {
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    font-size: 14px;
+    cursor: pointer;
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    opacity: 0.5;
+    transition: all 0.2s;
+}
+
+.tab:hover .tab-close,
+.tab.active .tab-close {
+    opacity: 0.8;
+}
+
+.tab-close:hover {
+    background-color: rgba(255,0,0,0.2);
+    opacity: 1;
 }
 
 .tab-contents {
@@ -384,6 +440,42 @@ button:focus {
     color: var(--text-primary);
 }
 
+.toolbar-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.toolbar-actions {
+    display: flex;
+    gap: 5px;
+}
+
+.toolbar-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.toolbar-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.bank-title {
+    margin: 0;
+}
+
+.bank-stats {
+    font-size: 0.8em;
+    opacity: 0.7;
+}
+
+.edit-hint {
+    font-size: 0.8em;
+    opacity: 0.7;
+}
+
 .registers-container {
     overflow-y: auto;
     flex: 1;
@@ -393,6 +485,10 @@ button:focus {
     margin-bottom: 20px;
 }
 
+.register-container.collapsed .table-container {
+    display: none;
+}
+
 .register-header {
     background-color: var(--bg-register-header);
     padding: 5px 10px;
@@ -400,6 +496,27 @@ button:focus {
     border-radius: 3px 3px 0 0;
     font-weight: bold;
     color: var(--text-primary);
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.register-title {
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.collapse-icon {
+    font-size: 0.8em;
+    font-family: monospace;
+}
+
+.register-count {
+    font-size: 0.8em;
+    opacity: 0.7;
 }
 
 .addresses-table {
@@ -421,6 +538,77 @@ button:focus {
     font-weight: normal;
 }
 
+.sortable {
+    cursor: pointer;
+}
+
+.sort-icon {
+    font-size: 0.8em;
+    margin-left: 3px;
+}
+
+.search-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.search-container input {
+    padding-right: 25px;
+}
+
+.clear-search {
+    position: absolute;
+    right: 5px;
+    background: none;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 0;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.5;
+}
+
+.clear-search:hover {
+    opacity: 1;
+}
+
+.search-match {
+    animation: pulse-highlight 2s ease-in-out 1;
+}
+
+.highlighted {
+    background-color: var(--bg-highlight, #ffffa0);
+    color: var(--text-color, #000);
+    border-radius: 3px;
+    padding: 0 2px;
+}
+
+.button-container {
+    display: flex;
+    gap: 5px;
+}
+
+.copy-value {
+    opacity: 0.3;
+    transition: opacity 0.2s;
+    font-size: 0.8em;
+    padding: 2px 5px;
+    margin-left: 5px;
+}
+
+.value-cell:hover .copy-value {
+    opacity: 1;
+}
+
+.address-cell {
+    font-weight: bold;
+}
+
 .reference {
     color: var(--text-reference);
     text-decoration: underline;
@@ -429,6 +617,10 @@ button:focus {
 
 .reference:focus {
     outline: 2px solid var(--border-focus);
+}
+
+.highlight-pulse {
+    animation: pulse-highlight 2s ease-in-out 1;
 }
 
 .resolved-value {
@@ -455,6 +647,31 @@ button:focus {
     flex-direction: column;
     flex: 1;
     min-height: 200px;
+    height: calc(100vh - 250px);
+    min-height: 300px;
+}
+
+.editor-wrapper {
+    display: flex;
+    flex: 1;
+    border: 1px solid #ccc;
+    margin-top: 5px;
+    height: 100%;
+}
+
+.line-numbers {
+    display: flex;
+    flex-direction: column;
+    text-align: right;
+    padding: 0 5px;
+    background-color: rgba(0, 0, 0, 0.05);
+    color: #888;
+    font-family: monospace;
+    border-right: 1px solid #ddd;
+    user-select: none;
+    overflow: hidden;
+    font-size: 14px;
+    line-height: 1.5;
 }
 
 .text-editor {
@@ -471,11 +688,30 @@ button:focus {
     white-space: pre-wrap;
     background-color: var(--bg-editor);
     color: var(--text-primary);
+    font-size: 14px;
+    line-height: 1.5;
+    padding: 0 5px;
+    border: none;
 }
 
 .text-editor:focus {
     outline: 2px solid var(--border-focus);
     border-color: var(--border-focus);
+}
+
+.syntax-hints {
+    background-color: rgba(0,0,0,0.05);
+    padding: 8px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    margin-bottom: 10px;
+}
+
+.syntax-hints code {
+    background-color: rgba(0,0,0,0.1);
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-family: monospace;
 }
 
 /* Status bar */
@@ -502,6 +738,50 @@ button:focus {
     box-shadow: var(--shadow-md);
 }
 
+.toast-fade-in {
+    animation: fade-in 0.3s ease-in-out;
+}
+
+.progress-toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #333;
+    color: white;
+    padding: 15px;
+    border-radius: 4px;
+    z-index: 1000;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 250px;
+}
+
+.progress-bar {
+    height: 10px;
+    background-color: #555;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background-color: #4CAF50;
+    transition: width 0.3s;
+}
+
+.progress-text {
+    text-align: right;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+.extended {
+    padding: 15px;
+    max-width: 400px;
+}
+
 /* Modal styles */
 .modal-overlay {
     position: fixed;
@@ -524,6 +804,10 @@ button:focus {
     width: 90%;
     max-width: 350px;
     box-shadow: var(--shadow-lg);
+}
+
+.help-modal {
+    max-width: 450px;
 }
 
 .modal-title {
@@ -564,39 +848,37 @@ button:focus {
     margin-top: 20px;
 }
 
+.help-content {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 15px 0;
+}
+
+.shortcut-row {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 15px;
+}
+
+.key {
+    background-color: #eee;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    padding: 2px 6px;
+    font-family: monospace;
+    font-size: 0.9em;
+    box-shadow: 0 1px 1px rgba(0,0,0,0.2);
+    min-width: 60px;
+    text-align: center;
+}
+
 /* Preserve whitespace styles */
 .preserve-whitespace {
     white-space: pre-wrap;
     word-break: break-word;
     font-family: inherit;
-}
-
-/* Minecraft theme specific styles */
-.theme-minecraft button {
-    text-transform: uppercase;
-    font-weight: bold;
-    box-shadow: inset -2px -4px #0006, inset 2px 2px #FFF7;
-}
-
-.theme-minecraft button:hover {
-    box-shadow: inset -2px -4px #0004, inset 2px 2px #FFF5;
-}
-
-.theme-minecraft button:active {
-    box-shadow: inset 2px 2px #0006, inset -2px -4px #FFF7;
-}
-
-.theme-minecraft .tab {
-    box-shadow: inset 2px 2px #FFF3, inset -2px 0 #0003;
-}
-
-.theme-minecraft .tab.active {
-    box-shadow: none;
-}
-
-/* C++ theme specific styles */
-.theme-cpp .text-editor {
-    line-height: 1.5;
 }
 
 .theme-cpp .reference {
@@ -605,6 +887,17 @@ button:focus {
 
 .theme-cpp .resolved-value {
     font-family: var(--font-mono);
+}
+
+/* Animation keyframes */
+@keyframes pulse-highlight {
+    0%, 100% { background-color: transparent; }
+    50% { background-color: var(--bg-highlight, rgba(255, 255, 0, 0.3)); }
+}
+
+@keyframes fade-in {
+    0% { opacity: 0; transform: translateY(20px); }
+    100% { opacity: 1; transform: translateY(0); }
 }
 
 /* Responsive adjustments */
@@ -625,7 +918,8 @@ button:focus {
     
     .bank-toolbar {
         flex-direction: column;
-        gap: 5px;
+        align-items: flex-start;
+        gap: 10px;
     }
     
     .bank-toolbar div:last-child {
@@ -657,6 +951,20 @@ button:focus {
         right: 0;
         margin-bottom: 10px;
         justify-content: flex-end;
+    }
+    
+    .toolbar-controls {
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .search-container {
+        width: 100%;
+    }
+    
+    .search-container input {
+        width: 100%;
     }
 }
 

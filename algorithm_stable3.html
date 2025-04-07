@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Data Bank Manager</title>
-    <link rel="stylesheet" href="algorithm-themes.css">
+	<link rel="stylesheet" href="algorithm-themes.css">
 </head>
 <body>
 
@@ -14,8 +14,7 @@
         <select id="themeSelect">
             <option value="default">Default</option>
             <option value="cpp">C++ Developer</option>
-            <option value="dark">Dark Mode</option>
-            <option value="light">Light Mode</option>
+            <option value="minecraft">Minecraft Java</option>
         </select>
     </div>
 
@@ -51,9 +50,9 @@
                 </div>
                 <div class="file-actions">
                     <label>Bank Files</label>
-                    <button id="uploadButton" tabindex="0" aria-label="Upload bank files">UPLOAD FILES</button>
-                    <button id="createNewButton" tabindex="0" aria-label="Create a new bank">CREATE NEW BANK</button>
-                    <button id="downloadAllButton" tabindex="0" aria-label="Download all banks as a ZIP file">DOWNLOAD ALL</button>
+                    <button id="uploadButton" tabindex="0">UPLOAD FILES</button>
+                    <button id="createNewButton" tabindex="0">CREATE NEW BANK</button>
+                    <button id="downloadAllButton" tabindex="0">DOWNLOAD ALL</button>
                     <input type="file" id="fileUpload" multiple accept=".txt" style="display: none;">
                 </div>
             </section>
@@ -62,7 +61,7 @@
             <section class="banks-section">
                 <h2>DATA BANKS</h2>
                 <div class="tab-container" id="bankTabs" role="tablist">
-                    <div class="tab" id="addBankTab" role="tab" tabindex="0" aria-selected="false" aria-label="Add a new bank">+ Add</div>
+                    <div class="tab" id="addBankTab" role="tab" tabindex="0" aria-selected="false">+ Add</div>
                 </div>
                 <div class="tab-contents" id="bankContents">
                     <!-- Bank content will be dynamically added here -->
@@ -71,27 +70,27 @@
         </div>
 
         <!-- Status Bar -->
-        <div class="status-bar" id="statusBar" aria-live="polite">READY</div>
+        <div class="status-bar" id="statusBar">READY</div>
     </div>
 
     <!-- Toast Notification -->
-    <div class="toast" id="toast" role="alert" aria-live="assertive"></div>
+    <div class="toast" id="toast" role="alert"></div>
 
     <!-- New Bank Modal -->
-    <div class="modal-overlay" id="newBankModal" role="dialog" aria-labelledby="newBankTitle" aria-modal="true">
+    <div class="modal-overlay" id="newBankModal" role="dialog" aria-labelledby="newBankTitle">
         <div class="modal">
             <div class="modal-title" id="newBankTitle">Create New Bank</div>
             <div class="form-row">
                 <label for="bankId">Bank ID Number</label>
-                <input type="number" id="bankId" min="1" value="1" aria-required="true">
+                <input type="number" id="bankId" min="1" value="1">
             </div>
             <div class="form-row">
                 <label for="numRegisters">Number of Registers</label>
-                <input type="number" id="numRegisters" min="1" value="3" aria-required="true">
+                <input type="number" id="numRegisters" min="1" value="3">
             </div>
             <div class="form-row">
                 <label for="numAddresses">Addresses Per Register</label>
-                <input type="number" id="numAddresses" min="1" value="5" aria-required="true">
+                <input type="number" id="numAddresses" min="1" value="5">
             </div>
             <div class="modal-buttons">
                 <button id="cancelNewBank" tabindex="0">Cancel</button>
@@ -109,10 +108,7 @@
             banks: {},
             currentBankId: null,
             editMode: {},
-            currentTheme: "default", // Default theme
-            undoHistory: {},         // Store previous bank states for undo
-            searchTerm: "",          // For search functionality
-            filterMode: "all"        // For filtering displays
+			currentTheme: "default" // Default theme
         };
 
         // DOM Elements
@@ -151,10 +147,7 @@
             elements.addBankTab.addEventListener("click", showNewBankModal);
             elements.cancelNewBank.addEventListener("click", hideNewBankModal);
             elements.createBank.addEventListener("click", createNewBank);
-            elements.themeSelect.addEventListener("change", changeTheme);
-
-            // Add keyboard accessibility
-            setupKeyboardShortcuts();
+			elements.themeSelect.addEventListener("change", changeTheme);
 
             // Add keyboard accessibility for tabs
             elements.addBankTab.addEventListener("keydown", (e) => {
@@ -164,194 +157,20 @@
                 }
             });
 
-            // Add modal handling for escape key
-            document.addEventListener("keydown", (e) => {
-                if (e.key === "Escape" && elements.newBankModal.style.display === "flex") {
-                    hideNewBankModal();
-                }
-            });
-
             // Load config from storage
             loadConfigFromStorage();
 
             // Apply saved theme
             loadThemeFromStorage();
 
-            // Add welcome message
-            showWelcomeMessage();
         }
-
-        // Show welcome message for first-time users
-        function showWelcomeMessage() {
-            if (!localStorage.getItem("dataBankWelcomed")) {
-                // Create a friendly welcome message
-                const welcomeHtml = `
-                    <div style="margin-bottom: 10px"><strong>Welcome to Data Bank Manager!</strong></div>
-                    <div>Get started by:</div>
-                    <div>• Uploading existing bank files</div>
-                    <div>• Creating a new bank with the "CREATE NEW BANK" button</div>
-                    <div style="margin-top: 10px">Press ESC to close this message</div>
-                `;
-                
-                // Show in the toast with extended duration
-                elements.toast.innerHTML = welcomeHtml;
-                elements.toast.style.display = "block";
-                elements.toast.classList.add("extended");
-                
-                // Add click to dismiss
-                elements.toast.addEventListener("click", dismissWelcome);
-                
-                // Add key to dismiss
-                document.addEventListener("keydown", dismissWelcomeOnEsc);
-                
-                // Mark as welcomed
-                localStorage.setItem("dataBankWelcomed", "true");
-                
-                function dismissWelcome() {
-                    elements.toast.style.display = "none";
-                    elements.toast.classList.remove("extended");
-                    elements.toast.removeEventListener("click", dismissWelcome);
-                    document.removeEventListener("keydown", dismissWelcomeOnEsc);
-                }
-                
-                function dismissWelcomeOnEsc(e) {
-                    if (e.key === "Escape") {
-                        dismissWelcome();
-                    }
-                }
-            }
-        }
-
-        // Setup keyboard shortcuts
-        function setupKeyboardShortcuts() {
-            document.addEventListener("keydown", (e) => {
-                // Only handle shortcut if not in an input field
-                if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA" || e.target.tagName === "SELECT") {
-                    return;
-                }
-                
-                // Check for modifier key (Ctrl or Command)
-                const modifierKey = e.ctrlKey || e.metaKey;
-                
-                // Ctrl+S or Command+S to save current bank
-                if (modifierKey && e.key === "s" && app.currentBankId && app.editMode[app.currentBankId]) {
-                    e.preventDefault();
-                    saveBankEdits(app.currentBankId);
-                }
-                
-                // Ctrl+Z or Command+Z to undo in edit mode
-                if (modifierKey && e.key === "z" && app.currentBankId && app.editMode[app.currentBankId]) {
-                    e.preventDefault();
-                    undoEdit(app.currentBankId);
-                }
-                
-                // Ctrl+N or Command+N to create new bank
-                if (modifierKey && e.key === "n") {
-                    e.preventDefault();
-                    showNewBankModal();
-                }
-                
-                // Ctrl+D or Command+D to download current bank
-                if (modifierKey && e.key === "d" && app.currentBankId) {
-                    e.preventDefault();
-                    downloadBank(app.currentBankId);
-                }
-                
-                // F1 for help
-                if (e.key === "F1") {
-                    e.preventDefault();
-                    showHelpOverlay();
-                }
-            });
-        }
-
-        // Show help overlay
-        function showHelpOverlay() {
-            // Create help overlay element if it doesn't exist
-            let helpOverlay = document.getElementById("helpOverlay");
-            if (!helpOverlay) {
-                helpOverlay = document.createElement("div");
-                helpOverlay.id = "helpOverlay";
-                helpOverlay.className = "modal-overlay";
-                helpOverlay.setAttribute("role", "dialog");
-                helpOverlay.setAttribute("aria-labelledby", "helpTitle");
-                
-                const helpContent = document.createElement("div");
-                helpContent.className = "modal help-modal";
-                
-                helpContent.innerHTML = `
-                    <div class="modal-title" id="helpTitle">Keyboard Shortcuts</div>
-                    <div class="help-content">
-                        <div class="shortcut-row"><span class="key">Ctrl+S</span> <span>Save current bank</span></div>
-                        <div class="shortcut-row"><span class="key">Ctrl+Z</span> <span>Undo edit</span></div>
-                        <div class="shortcut-row"><span class="key">Ctrl+N</span> <span>Create new bank</span></div>
-                        <div class="shortcut-row"><span class="key">Ctrl+D</span> <span>Download current bank</span></div>
-                        <div class="shortcut-row"><span class="key">F1</span> <span>Show this help</span></div>
-                        <div class="shortcut-row"><span class="key">Esc</span> <span>Close dialogs</span></div>
-                        <div class="shortcut-row"><span class="key">Tab</span> <span>In editor: insert tab character</span></div>
-                    </div>
-                    <div class="modal-buttons">
-                        <button id="closeHelp">Close</button>
-                    </div>
-                `;
-                
-                document.body.appendChild(helpOverlay);
-                
-                // Add event listener
-                document.getElementById("closeHelp").addEventListener("click", () => {
-                    helpOverlay.style.display = "none";
-                });
-                
-                // Close on escape key
-                helpOverlay.addEventListener("keydown", (e) => {
-                    if (e.key === "Escape") {
-                        helpOverlay.style.display = "none";
-                    }
-                });
-                
-                // Close when clicking outside modal
-                helpOverlay.addEventListener("click", (e) => {
-                    if (e.target === helpOverlay) {
-                        helpOverlay.style.display = "none";
-                    }
-                });
-            }
-            
-            // Show help overlay
-            helpOverlay.style.display = "flex";
-            document.getElementById("closeHelp").focus();
-        }
-
-        // Undo edit
-        function undoEdit(bankId) {
-            if (app.undoHistory[bankId] && app.undoHistory[bankId].length > 0) {
-                // Get the previous state
-                const previousState = app.undoHistory[bankId].pop();
-                
-                // Save current state to temp in case we need to restore it
-                const currentState = JSON.stringify(app.banks[bankId]);
-                
-                // Apply the previous state
-                app.banks[bankId] = JSON.parse(previousState);
-                
-                // Refresh the editor
-                const textEditor = document.getElementById(`textEditor_${bankId}`);
-                if (textEditor) {
-                    textEditor.value = generateBankText(app.banks[bankId]);
-                }
-                
-                showToast("Undo successful");
-            } else {
-                showToast("Nothing to undo");
-            }
-        }
-
+		
         // Theme management
         function changeTheme() {
             const selectedTheme = elements.themeSelect.value;
             
             // Remove existing theme classes
-            document.body.classList.remove('theme-cpp', 'theme-dark', 'theme-light');
+            document.body.classList.remove('theme-cpp', 'theme-minecraft');
             
             // Add new theme class if not default
             if (selectedTheme !== 'default') {
@@ -444,105 +263,54 @@
             }
         }
 
-		function handleFileUpload(event) {
-			const files = event.target.files;
-			if (!files || files.length === 0) return;
+        // File handling methods
+        function handleFileUpload(event) {
+            const files = event.target.files;
+            if (!files || files.length === 0) return;
 
-			setStatusMessage("Processing files...");
+            setStatusMessage("Processing files...");
 
-			let processedCount = 0;
-			let errorCount = 0;
-			
-			// Generate a unique ID for this progress toast
-			const toastId = 'progress-toast-' + Date.now();
+            let processedCount = 0;
+            let errorCount = 0;
 
-			// Create progress notification with ID
-			const progressToast = document.createElement("div");
-			progressToast.className = "progress-toast";
-			progressToast.id = toastId;
-			progressToast.innerHTML = `
-				<div>Processing files...</div>
-				<div class="progress-bar">
-					<div class="progress-fill" style="width: 0%"></div>
-				</div>
-				<div class="progress-text">0/${files.length}</div>
-			`;
-			document.body.appendChild(progressToast);
+            // Process each file
+            Array.from(files).forEach(file => {
+                // Check filename format (should be number.txt)
+                const match = file.name.match(/^(\d+)\.txt$/);
 
-			// Process each file
-			const promises = Array.from(files).map((file, index) => {
-				return new Promise((resolve) => {
-					// Check filename format (should be number.txt)
-					const match = file.name.match(/^(\d+)\.txt$/);
+                if (!match) {
+                    showToast(`Skipped ${file.name} - Invalid filename format. Should be 'number.txt'`);
+                    errorCount++;
+                    return;
+                }
 
-					if (!match) {
-						showToast(`Skipped ${file.name} - Invalid filename format. Should be 'number.txt'`);
-						errorCount++;
-						updateProgress(index + 1);
-						resolve();
-						return;
-					}
+                const bankId = parseInt(match[1]);
 
-					const bankId = parseInt(match[1]);
+                // Read file content
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const content = e.target.result;
+                        processFileContent(bankId, content);
+                        processedCount++;
 
-					// Read file content
-					const reader = new FileReader();
-					reader.onload = function(e) {
-						try {
-							const content = e.target.result;
-							processFileContent(bankId, content);
-							processedCount++;
-						} catch (e) {
-							errorCount++;
-							showToast(`Failed to read file: ${file.name} - ${e.message}`);
-						}
-						updateProgress(index + 1);
-						resolve();
-					};
-					
-					reader.onerror = function() {
-						errorCount++;
-						showToast(`Error reading file: ${file.name}`);
-						updateProgress(index + 1);
-						resolve();
-					};
+                        // Show notification when all files are processed
+                        if (processedCount + errorCount === files.length) {
+                            setStatusMessage("File processing complete");
+                            showToast(`Processed ${processedCount} bank files, ${errorCount} errors`);
+                        }
+                    } catch (e) {
+                        errorCount++;
+                        showToast(`Failed to read file: ${file.name} - ${e.message}`);
+                    }
+                };
 
-					reader.readAsText(file);
-				});
-			});
+                reader.readAsText(file);
+            });
 
-			// When all files are processed, ensure toast is removed
-			Promise.all(promises).then(() => {
-				// Final update
-				setStatusMessage("File processing complete");
-				showToast(`Processed ${processedCount} bank files, ${errorCount} errors`);
-				
-				// Force remove the progress toast
-				setTimeout(() => {
-					const toast = document.getElementById(toastId);
-					if (toast) {
-						toast.remove();
-					}
-				}, 1000);
-			});
-
-			// Update progress
-			function updateProgress(completed) {
-				const percent = Math.round((completed / files.length) * 100);
-				const toast = document.getElementById(toastId);
-				
-				if (toast) {
-					const progressFill = toast.querySelector(".progress-fill");
-					const progressText = toast.querySelector(".progress-text");
-					
-					if (progressFill) progressFill.style.width = `${percent}%`;
-					if (progressText) progressText.textContent = `${completed}/${files.length}`;
-				}
-			}
-
-			// Reset file input
-			event.target.value = "";
-		}
+            // Reset file input
+            event.target.value = "";
+        }
 
         function processFileContent(bankId, content) {
             try {
@@ -667,44 +435,21 @@
                 return; // Tab already exists
             }
 
-            // Create new tab with more interactive features
+            // Create new tab
             const tab = document.createElement("div");
             tab.className = "tab";
             tab.id = `bankTab_${bankId}`;
+            tab.textContent = `Bank ${bankId}`;
             tab.setAttribute("role", "tab");
             tab.setAttribute("tabindex", "0");
             tab.setAttribute("aria-selected", "false");
             
-            // Add bank ID and close button to tab
-            tab.innerHTML = `
-                <span class="tab-title">Bank ${bankId}</span>
-                <button class="tab-close" aria-label="Close Bank ${bankId}" tabindex="0">&times;</button>
-            `;
-            
             // Add event listeners
-            tab.addEventListener("click", (e) => {
-                // Don't select if clicking the close button
-                if (!e.target.classList.contains("tab-close")) {
-                    selectBank(bankId);
-                }
-            });
+            tab.addEventListener("click", () => selectBank(bankId));
             tab.addEventListener("keydown", (e) => {
                 if (e.key === "Enter" || e.key === " ") {
                     e.preventDefault();
                     selectBank(bankId);
-                }
-            });
-            
-            // Add event listener for close button
-            tab.querySelector(".tab-close").addEventListener("click", (e) => {
-                e.stopPropagation();
-                closeBank(bankId);
-            });
-            tab.querySelector(".tab-close").addEventListener("keydown", (e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    closeBank(bankId);
                 }
             });
 
@@ -718,37 +463,6 @@
             content.setAttribute("role", "tabpanel");
             content.setAttribute("aria-labelledby", `bankTab_${bankId}`);
             elements.bankContents.appendChild(content);
-        }
-
-        // Close a bank
-        function closeBank(bankId) {
-            if (confirm(`Are you sure you want to close Bank ${bankId}? Any unsaved changes will be lost.`)) {
-                // Remove the tab
-                const tab = document.getElementById(`bankTab_${bankId}`);
-                if (tab) tab.remove();
-                
-                // Remove the content
-                const content = document.getElementById(`bankContent_${bankId}`);
-                if (content) content.remove();
-                
-                // Remove from app state
-                delete app.banks[bankId];
-                delete app.editMode[bankId];
-                delete app.undoHistory[bankId];
-                
-                // If this was the current bank, select another one
-                if (app.currentBankId === bankId) {
-                    app.currentBankId = null;
-                    
-                    // Find another bank to select
-                    const bankIds = Object.keys(app.banks);
-                    if (bankIds.length > 0) {
-                        selectBank(parseInt(bankIds[0]));
-                    }
-                }
-                
-                showToast(`Bank ${bankId} closed`);
-            }
         }
 
         function selectBank(bankId) {
@@ -802,17 +516,14 @@
         function displayEditMode(bankId, container) {
             const bank = app.banks[bankId];
 
-            // Create edit control toolbar with improved layout
+            // Create edit control toolbar
             const toolbar = document.createElement("div");
             toolbar.className = "bank-toolbar";
             toolbar.innerHTML = `
-                <div class="toolbar-title">
-                    <span>Editing Bank ${bankId}</span>
-                    <span class="edit-hint">(Ctrl+S to save, Ctrl+Z to undo)</span>
-                </div>
-                <div class="toolbar-actions">
+                <div>Editing Bank ${bankId}</div>
+                <div>
                     <button id="cancelEditBank_${bankId}" tabindex="0">Cancel</button>
-                    <button id="saveEditBank_${bankId}" tabindex="0" class="primary-button">Save</button>
+                    <button id="saveEditBank_${bankId}" tabindex="0">Save</button>
                 </div>
             `;
             container.appendChild(toolbar);
@@ -826,31 +537,11 @@
             editorContainer.className = "editor-container";
             container.appendChild(editorContainer);
 
-            // Create helpful syntax hints
-            const syntaxHints = document.createElement("div");
-            syntaxHints.className = "syntax-hints";
-            syntaxHints.innerHTML = `
-                <div>Format: <code>register</code> followed by <code>⭾address⭾value</code> lines</div>
-                <div>For multi-line values: <code>⭾address⭾"""</code> followed by content and ending with <code>"""</code></div>
-            `;
-            editorContainer.appendChild(syntaxHints);
-
-            // Create text editor with line numbers
-            const editorWrapper = document.createElement("div");
-            editorWrapper.className = "editor-wrapper";
-            editorContainer.appendChild(editorWrapper);
-
-            // Line numbers container
-            const lineNumbers = document.createElement("div");
-            lineNumbers.className = "line-numbers";
-            editorWrapper.appendChild(lineNumbers);
-
-            // Text editor
+            // Create text editor
             const textEditor = document.createElement("textarea");
             textEditor.className = "text-editor";
             textEditor.id = `textEditor_${bankId}`;
             textEditor.spellcheck = false;
-            textEditor.wrap = "off"; // Disable word wrapping for better code editing
             
             // Enable tab character insertion
             textEditor.addEventListener("keydown", function(e) {
@@ -867,73 +558,27 @@
                 }
             });
             
-            // Track changes for undo history
-            textEditor.addEventListener("input", () => {
-                // Create undo history array if it doesn't exist
-                if (!app.undoHistory[bankId]) {
-                    app.undoHistory[bankId] = [];
-                }
-                
-                // Store current state for undo (limit history to 50 steps)
-                if (app.undoHistory[bankId].length >= 50) {
-                    app.undoHistory[bankId].shift();
-                }
-                app.undoHistory[bankId].push(JSON.stringify(app.banks[bankId]));
-            });
-            
-            // Update line numbers when scrolling or changing content
-            textEditor.addEventListener("scroll", updateLineNumbers);
-            textEditor.addEventListener("input", updateLineNumbers);
-            
-            editorWrapper.appendChild(textEditor);
+            editorContainer.appendChild(textEditor);
 
             // Generate bank text content
             const bankText = generateBankText(bank);
             textEditor.value = bankText;
             
-            // Initialize line numbers
-            updateLineNumbers();
-            
             // Focus the editor
             setTimeout(() => textEditor.focus(), 0);
-            
-            // Function to update line numbers
-            function updateLineNumbers() {
-                const lines = textEditor.value.split('\n');
-                const lineCount = lines.length;
-                let lineNumbersHTML = '';
-                
-                for (let i = 1; i <= lineCount; i++) {
-                    lineNumbersHTML += `<div>${i}</div>`;
-                }
-                
-                lineNumbers.innerHTML = lineNumbersHTML;
-                
-                // Sync scroll position
-                lineNumbers.scrollTop = textEditor.scrollTop;
-            }
         }
 
         function displayViewMode(bankId, container) {
             const bank = app.banks[bankId];
 
-            // Create toolbar with search functionality
+            // Create toolbar
             const toolbar = document.createElement("div");
             toolbar.className = "bank-toolbar";
             toolbar.innerHTML = `
-                <div class="toolbar-info">
-                    <h3 class="bank-title">Bank ${bankId}</h3>
-                    <div class="bank-stats">${countRegisters(bank)} registers, ${countAddresses(bank)} addresses</div>
-                </div>
-                <div class="toolbar-controls">
-                    <div class="search-container">
-                        <input type="text" id="searchBank_${bankId}" placeholder="Search..." aria-label="Search in this bank">
-                        <button id="clearSearch_${bankId}" class="clear-search" aria-label="Clear search">&times;</button>
-                    </div>
-                    <div class="button-container">
-                        <button id="editBank_${bankId}" tabindex="0" aria-label="Edit Bank ${bankId}">Edit</button>
-                        <button id="downloadBank_${bankId}" tabindex="0" aria-label="Download Bank ${bankId}">Download</button>
-                    </div>
+                <div>Bank ${bankId}</div>
+                <div>
+                    <button id="editBank_${bankId}" tabindex="0">Edit Bank</button>
+                    <button id="downloadBank_${bankId}" tabindex="0">Download</button>
                 </div>
             `;
             container.appendChild(toolbar);
@@ -941,22 +586,6 @@
             // Add event listeners to buttons
             document.getElementById(`editBank_${bankId}`).addEventListener("click", () => startEditMode(bankId));
             document.getElementById(`downloadBank_${bankId}`).addEventListener("click", () => downloadBank(bankId));
-            
-            // Add search functionality
-            const searchInput = document.getElementById(`searchBank_${bankId}`);
-            const clearSearch = document.getElementById(`clearSearch_${bankId}`);
-            
-            searchInput.addEventListener("input", () => {
-                const searchTerm = searchInput.value.toLowerCase();
-                app.searchTerm = searchTerm;
-                highlightSearchResults(bankId, searchTerm);
-            });
-            
-            clearSearch.addEventListener("click", () => {
-                searchInput.value = "";
-                app.searchTerm = "";
-                highlightSearchResults(bankId, "");
-            });
 
             // Create a scrollable container for registers
             const registersContainer = document.createElement("div");
@@ -966,61 +595,35 @@
             // Sort registers by ID
             const registerIds = Object.keys(bank.registers).map(id => parseInt(id)).sort((a, b) => a - b);
 
-            // Create UI for each register with improved layout
+            // Create UI for each register
             registerIds.forEach(registerId => {
                 const register = bank.registers[registerId];
 
                 // Register container
                 const registerContainer = document.createElement("div");
                 registerContainer.className = "register-container";
-                registerContainer.id = `bank_${bankId}_register_${registerId}`;
                 registersContainer.appendChild(registerContainer);
 
-                // Register header with collapsible functionality
+                // Register header
                 const registerHeader = document.createElement("div");
                 registerHeader.className = "register-header";
-                registerHeader.innerHTML = `
-                    <div class="register-title">
-                        <span class="collapse-icon">▼</span>
-                        Register ${registerId}
-                    </div>
-                    <div class="register-count">${Object.keys(register.addresses).length} addresses</div>
-                `;
+                registerHeader.textContent = `Register ${registerId}`;
                 registerContainer.appendChild(registerHeader);
-                
-                // Make register collapsible
-                registerHeader.addEventListener("click", () => {
-                    registerContainer.classList.toggle("collapsed");
-                    const icon = registerHeader.querySelector(".collapse-icon");
-                    icon.textContent = registerContainer.classList.contains("collapsed") ? "▶" : "▼";
-                });
 
-                // Addresses table with improved sorting and filtering
-                const tableContainer = document.createElement("div");
-                tableContainer.className = "table-container";
-                registerContainer.appendChild(tableContainer);
-                
+                // Addresses table
                 const table = document.createElement("table");
                 table.className = "addresses-table";
-                tableContainer.appendChild(table);
+                registerContainer.appendChild(table);
 
-                // Table header with sorting functionality
+                // Table header
                 const thead = document.createElement("thead");
                 thead.innerHTML = `
                     <tr>
-                        <th class="sortable" data-sort="address">Address <span class="sort-icon">⇅</span></th>
-                        <th class="sortable" data-sort="value">Value <span class="sort-icon">⇅</span></th>
+                        <th>Address</th>
+                        <th>Value</th>
                     </tr>
                 `;
                 table.appendChild(thead);
-                
-                // Add sorting functionality
-                thead.querySelectorAll(".sortable").forEach(th => {
-                    th.addEventListener("click", () => {
-                        const sortField = th.getAttribute("data-sort");
-                        sortTableByColumn(table, sortField, th);
-                    });
-                });
 
                 // Table body
                 const tbody = document.createElement("tbody");
@@ -1029,47 +632,24 @@
                 // Sort addresses by ID
                 const addressIds = Object.keys(register.addresses).map(id => parseInt(id)).sort((a, b) => a - b);
 
-                // Create rows for each address with improved formatting
+                // Create rows for each address
                 addressIds.forEach(addressId => {
                     const value = register.addresses[addressId];
                     const row = document.createElement("tr");
-                    row.dataset.addressId = addressId;
-                    row.dataset.value = value || "";
                     
                     // Address ID cell
                     const addressCell = document.createElement("td");
                     addressCell.textContent = addressId;
-                    addressCell.className = "address-cell";
                     addressCell.setAttribute("data-label", "Address:");
                     row.appendChild(addressCell);
                     
-                    // Value cell with copy capability
+                    // Value cell
                     const valueCell = document.createElement("td");
-                    valueCell.className = "value-cell";
                     valueCell.setAttribute("data-label", "Value:");
-                    
-                    // Add a copy button for easier value copying
-                    const copyButton = document.createElement("button");
-                    copyButton.className = "copy-value";
-                    copyButton.innerHTML = "Copy";
-                    copyButton.setAttribute("aria-label", "Copy value to clipboard");
-                    copyButton.addEventListener("click", (e) => {
-                        e.stopPropagation();
-                        // Copy the raw or resolved value to clipboard
-                        const textToCopy = app.readingMode === "resolve" && containsReferences(value) 
-                            ? resolveValue(value)
-                            : value || "";
-                        navigator.clipboard.writeText(textToCopy)
-                            .then(() => showToast("Value copied to clipboard"))
-                            .catch(() => showToast("Failed to copy value"));
-                    });
                     
                     if (app.readingMode === "resolve" && containsReferences(value)) {
                         // Raw value with reference highlighting
-                        const rawValueDiv = document.createElement("div");
-                        rawValueDiv.className = "raw-value";
-                        rawValueDiv.appendChild(formatValueWithReferences(value, bankId, registerId, addressId));
-                        valueCell.appendChild(rawValueDiv);
+                        valueCell.appendChild(formatValueWithReferences(value, bankId, registerId, addressId));
                         
                         // Resolved value
                         const resolvedValue = resolveValue(value);
@@ -1096,236 +676,10 @@
                         valueCell.appendChild(displayValueWithFormatting(value));
                     }
                     
-                    // Add copy button
-                    valueCell.appendChild(copyButton);
-                    
                     row.appendChild(valueCell);
                     tbody.appendChild(row);
                 });
             });
-            
-            // Apply any active search
-            if (app.searchTerm) {
-                highlightSearchResults(bankId, app.searchTerm);
-            }
-        }
-        
-        // Count registers in a bank
-        function countRegisters(bank) {
-            return Object.keys(bank.registers).length;
-        }
-        
-        // Count total addresses in a bank
-        function countAddresses(bank) {
-            let count = 0;
-            for (const registerId in bank.registers) {
-                count += Object.keys(bank.registers[registerId].addresses).length;
-            }
-            return count;
-        }
-        
-        // Sort table by column
-        function sortTableByColumn(table, column, header) {
-            const tbody = table.querySelector("tbody");
-            const rows = Array.from(tbody.querySelectorAll("tr"));
-            
-            // Toggle sort direction
-            const currentDir = header.getAttribute("data-sort-dir") || "asc";
-            const newDir = currentDir === "asc" ? "desc" : "asc";
-            
-            // Update all headers
-            table.querySelectorAll("th").forEach(th => {
-                th.removeAttribute("data-sort-dir");
-                th.querySelector(".sort-icon").textContent = "⇅";
-            });
-            
-            // Update this header
-            header.setAttribute("data-sort-dir", newDir);
-            header.querySelector(".sort-icon").textContent = newDir === "asc" ? "↑" : "↓";
-            
-            // Sort rows
-            rows.sort((rowA, rowB) => {
-                let valueA, valueB;
-                
-                if (column === "address") {
-                    valueA = parseInt(rowA.dataset.addressId);
-                    valueB = parseInt(rowB.dataset.addressId);
-                } else { // value
-                    valueA = rowA.dataset.value || "";
-                    valueB = rowB.dataset.value || "";
-                }
-                
-                if (valueA < valueB) {
-                    return newDir === "asc" ? -1 : 1;
-                } else if (valueA > valueB) {
-                    return newDir === "asc" ? 1 : -1;
-                }
-                return 0;
-            });
-            
-            // Reorder rows
-            rows.forEach(row => tbody.appendChild(row));
-        }
-        
-        // Search and highlight results
-        function highlightSearchResults(bankId, searchTerm) {
-            const container = document.getElementById(`bankContent_${bankId}`);
-            if (!container) return;
-            
-            // Get all rows
-            const rows = container.querySelectorAll("tbody tr");
-            
-            // Reset all highlights
-            rows.forEach(row => {
-                row.classList.remove("search-match");
-                
-                // Reset text highlighting in values
-                row.querySelectorAll(".highlighted").forEach(span => {
-                    // Replace the highlighted span with its text content
-                    const text = span.textContent;
-                    span.parentNode.replaceChild(document.createTextNode(text), span);
-                });
-            });
-            
-            // If no search term, we're done
-            if (!searchTerm) return;
-            
-            let matchCount = 0;
-            
-            // Highlight matching rows
-            rows.forEach(row => {
-                const addressId = row.querySelector("td:first-child").textContent;
-                const valueCell = row.querySelector("td:nth-child(2)");
-                let valueText = "";
-                
-                // Get all text from the value cell
-                valueCell.querySelectorAll("*").forEach(el => {
-                    if (el.textContent) valueText += el.textContent + " ";
-                });
-                
-                // Check for matches
-                if (addressId.includes(searchTerm) || valueText.toLowerCase().includes(searchTerm)) {
-                    row.classList.add("search-match");
-                    matchCount++;
-                    
-                    // Highlight the matching text in address
-                    if (addressId.includes(searchTerm)) {
-                        highlightText(row.querySelector("td:first-child"), searchTerm);
-                    }
-                    
-                    // Highlight the matching text in value
-                    if (valueText.toLowerCase().includes(searchTerm)) {
-                        // For each text node in the value cell
-                        highlightTextInNode(valueCell, searchTerm);
-                    }
-                }
-            });
-            
-            // Show search result count
-            if (matchCount > 0) {
-                showToast(`Found ${matchCount} matches for "${searchTerm}"`);
-            } else {
-                showToast(`No matches found for "${searchTerm}"`);
-            }
-        }
-        
-        // Highlight text in a node and its children
-        function highlightTextInNode(node, searchTerm) {
-            // Skip if this is a "highlighted" span we've already processed
-            if (node.classList && node.classList.contains("highlighted")) {
-                return;
-            }
-            
-            if (node.nodeType === Node.TEXT_NODE) {
-                const text = node.textContent;
-                const lowerText = text.toLowerCase();
-                const lowerSearchTerm = searchTerm.toLowerCase();
-                
-                // If this text node contains the search term
-                if (lowerText.includes(lowerSearchTerm)) {
-                    // Create a temporary container
-                    const temp = document.createElement("span");
-                    
-                    // Split by the search term and add highlighting
-                    let pos = 0;
-                    let i = lowerText.indexOf(lowerSearchTerm);
-                    
-                    while (i >= 0) {
-                        // Add text before match
-                        if (i > pos) {
-                            temp.appendChild(document.createTextNode(text.substring(pos, i)));
-                        }
-                        
-                        // Add highlighted match
-                        const match = document.createElement("span");
-                        match.className = "highlighted";
-                        match.textContent = text.substring(i, i + searchTerm.length);
-                        temp.appendChild(match);
-                        
-                        // Update position
-                        pos = i + searchTerm.length;
-                        i = lowerText.indexOf(lowerSearchTerm, pos);
-                    }
-                    
-                    // Add remaining text
-                    if (pos < text.length) {
-                        temp.appendChild(document.createTextNode(text.substring(pos)));
-                    }
-                    
-                    // Replace the original node with the highlighted content
-                    const fragment = document.createDocumentFragment();
-                    while (temp.firstChild) {
-                        fragment.appendChild(temp.firstChild);
-                    }
-                    node.parentNode.replaceChild(fragment, node);
-                }
-            } else if (node.nodeType === Node.ELEMENT_NODE) {
-                // Skip certain elements like buttons
-                if (node.tagName === "BUTTON") return;
-                
-                // Process child nodes
-                Array.from(node.childNodes).forEach(child => {
-                    highlightTextInNode(child, searchTerm);
-                });
-            }
-        }
-        
-        // Simple text highlighting for a text node
-        function highlightText(element, searchTerm) {
-            const text = element.textContent;
-            const lowerText = text.toLowerCase();
-            const lowerSearchTerm = searchTerm.toLowerCase();
-            
-            if (lowerText.includes(lowerSearchTerm)) {
-                // Clear the element
-                element.innerHTML = "";
-                
-                // Split by the search term and add highlighting
-                let pos = 0;
-                let i = lowerText.indexOf(lowerSearchTerm);
-                
-                while (i >= 0) {
-                    // Add text before match
-                    if (i > pos) {
-                        element.appendChild(document.createTextNode(text.substring(pos, i)));
-                    }
-                    
-                    // Add highlighted match
-                    const match = document.createElement("span");
-                    match.className = "highlighted";
-                    match.textContent = text.substring(i, i + searchTerm.length);
-                    element.appendChild(match);
-                    
-                    // Update position
-                    pos = i + searchTerm.length;
-                    i = lowerText.indexOf(lowerSearchTerm, pos);
-                }
-                
-                // Add remaining text
-                if (pos < text.length) {
-                    element.appendChild(document.createTextNode(text.substring(pos)));
-                }
-            }
         }
 
         // Helper function to display value with proper formatting
@@ -1416,7 +770,6 @@
                     refLink.setAttribute("tabindex", "0"); // Make focusable
                     refLink.setAttribute("role", "button");
                     refLink.setAttribute("aria-label", `Navigate to reference ${part}`);
-                    refLink.title = `Navigate to reference ${part}`;
                     
                     // Add click and keyboard handlers
                     refLink.addEventListener("click", () => handleReferenceClick(part));
@@ -1454,20 +807,20 @@
         }
 
         function highlightReference(bankId, registerId, addressId) {
-            // First check if we need to switch to a different bank
-            if (app.currentBankId !== bankId) {
-                // If we need to switch banks, select the bank and then try highlighting again
-                selectBank(bankId);
-                
-                // Allow time for the UI to update before trying to highlight
-                setTimeout(() => {
-                    highlightReferenceInCurrentBank(registerId, addressId);
-                }, 100);
-            } else {
-                // We're already on the correct bank, so just highlight
-                highlightReferenceInCurrentBank(registerId, addressId);
-            }
-        }
+    // First check if we need to switch to a different bank
+    if (app.currentBankId !== bankId) {
+        // If we need to switch banks, select the bank and then try highlighting again
+        selectBank(bankId);
+        
+        // Allow time for the UI to update before trying to highlight
+        setTimeout(() => {
+            highlightReferenceInCurrentBank(registerId, addressId);
+        }, 100);
+    } else {
+        // We're already on the correct bank, so just highlight
+        highlightReferenceInCurrentBank(registerId, addressId);
+    }
+}
 
         function highlightReferenceInCurrentBank(registerId, addressId) {
             // Get the current bank's content container
@@ -1478,46 +831,39 @@
             }
             
             // Find the register container within this bank content
-            const registerContainer = document.getElementById(`bank_${app.currentBankId}_register_${registerId}`);
+            const registerContainers = bankContent.querySelectorAll('.register-container');
+            let found = false;
             
-            if (registerContainer) {
-                // Make sure the register is expanded
-                if (registerContainer.classList.contains("collapsed")) {
-                    // Click the header to expand
-                    registerContainer.querySelector('.register-header').click();
-                }
-                
-                // Find the row for this address
-                const rows = registerContainer.querySelectorAll('tbody tr');
-                let found = false;
-                
-                for (const row of rows) {
-                    if (row.dataset.addressId === addressId.toString()) {
-                        // Highlight the row
-                        row.style.backgroundColor = 'var(--bg-highlight)';
-                        
-                        // Add a pulsing effect
-                        row.classList.add("highlight-pulse");
-                        
-                        // Scroll to the row
-                        row.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        
-                        // Remove highlight after a delay
-                        setTimeout(() => {
-                            row.style.backgroundColor = '';
-                            row.classList.remove("highlight-pulse");
-                        }, 2000);
-                        
-                        found = true;
-                        break;
+            for (const container of registerContainers) {
+                const header = container.querySelector('.register-header');
+                if (header && header.textContent === `Register ${registerId}`) {
+                    const rows = container.querySelectorAll('tbody tr');
+                    
+                    for (const row of rows) {
+                        const addressCell = row.querySelector('td:first-child');
+                        if (addressCell && addressCell.textContent === addressId.toString()) {
+                            // Highlight the row
+                            row.style.backgroundColor = 'var(--bg-highlight)';
+                            
+                            // Scroll to the row
+                            row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            
+                            // Remove highlight after a delay
+                            setTimeout(() => {
+                                row.style.backgroundColor = '';
+                            }, 2000);
+                            
+                            found = true;
+                            break;
+                        }
                     }
+                    
+                    if (found) break;
                 }
-                
-                if (!found) {
-                    showToast(`Address ${addressId} not found in Register ${registerId}`);
-                }
-            } else {
-                showToast(`Register ${registerId} not found`);
+            }
+            
+            if (!found) {
+                showToast(`Reference not found: Register ${registerId}, Address ${addressId}`);
             }
         }
 
@@ -1583,8 +929,6 @@
 
         // Bank editing methods
         function startEditMode(bankId) {
-            // Store current state for undo
-            app.undoHistory[bankId] = [JSON.stringify(app.banks[bankId])];
             app.editMode[bankId] = true;
             displayBankData(bankId);
         }
@@ -1605,9 +949,6 @@
                 // Exit edit mode
                 app.editMode[bankId] = false;
                 
-                // Clear undo history
-                app.undoHistory[bankId] = [];
-                
                 // Refresh display
                 displayBankData(bankId);
                 
@@ -1619,22 +960,8 @@
         }
 
         function cancelBankEdits(bankId) {
-            if (hasUnsavedChanges(bankId)) {
-                if (confirm("You have unsaved changes. Are you sure you want to cancel?")) {
-                    app.editMode[bankId] = false;
-                    app.undoHistory[bankId] = [];
-                    displayBankData(bankId);
-                }
-            } else {
-                app.editMode[bankId] = false;
-                app.undoHistory[bankId] = [];
-                displayBankData(bankId);
-            }
-        }
-        
-        // Check if there are unsaved changes
-        function hasUnsavedChanges(bankId) {
-            return app.undoHistory[bankId] && app.undoHistory[bankId].length > 0;
+            app.editMode[bankId] = false;
+            displayBankData(bankId);
         }
 
         // Updated generateBankText function to support multi-line values
@@ -1745,11 +1072,6 @@
             // Add a multi-line example in the first register
             if (numRegisters > 0 && numAddresses > 0) {
                 bank.registers[1].addresses[1] = `This is a\nmulti-line\nvalue example\n  with preserved indentation`;
-                
-                // Add reference example
-                if (numRegisters > 1 && numAddresses > 1) {
-                    bank.registers[1].addresses[2] = `Reference example: ${bankId}.2.1`;
-                }
             }
             
             // Add to app state
@@ -1849,23 +1171,11 @@
         }
 
         function showToast(message) {
-            // Clear any existing timeout
-            if (window.toastTimeout) {
-                clearTimeout(window.toastTimeout);
-            }
-            
-            // Update toast content
             elements.toast.textContent = message;
             elements.toast.style.display = "block";
-            elements.toast.classList.remove("extended");
-            
-            // Add animation class
-            elements.toast.classList.remove("toast-fade-in");
-            void elements.toast.offsetWidth; // Force reflow
-            elements.toast.classList.add("toast-fade-in");
             
             // Hide toast after 3 seconds
-            window.toastTimeout = setTimeout(() => {
+            setTimeout(() => {
                 elements.toast.style.display = "none";
             }, 3000);
         }
@@ -1880,32 +1190,12 @@
                 .replace(/'/g, "&#039;");
         }
 
-        // Auto-save feature for bank edits
-        function setupAutoSave() {
-            setInterval(() => {
-                // Check if we're in edit mode
-                if (app.currentBankId && app.editMode[app.currentBankId]) {
-                    // Try to save the current state to localStorage
-                    try {
-                        const textEditor = document.getElementById(`textEditor_${app.currentBankId}`);
-                        if (textEditor) {
-                            localStorage.setItem(`bankAutoSave_${app.currentBankId}`, textEditor.value);
-                        }
-                    } catch (e) {
-                        console.warn("Failed to auto-save:", e);
-                        // Silently fail - auto-save is a convenience feature
-                    }
-                }
-            }, 10000); // Auto-save every 10 seconds
-        }
-
         // Add JSZip for ZIP file creation
         const script = document.createElement("script");
         script.src = "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js";
         script.onload = function() {
             // Initialize application after JSZip is loaded
             initApp();
-            setupAutoSave();
         };
         document.head.appendChild(script);
     </script>
