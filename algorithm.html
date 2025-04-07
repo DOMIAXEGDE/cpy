@@ -792,15 +792,14 @@
             try {
                 const [bankId, registerId, addressId] = refPath.split('.').map(part => parseInt(part));
                 
-                // Check if we need to switch banks
-                if (app.currentBankId !== bankId && app.banks[bankId]) {
-                    selectBank(bankId);
-                    
-                    // We need to give the UI time to update before trying to highlight
-                    setTimeout(() => highlightReference(bankId, registerId, addressId), 100);
-                } else {
-                    highlightReference(bankId, registerId, addressId);
+                // Check if the bank exists
+                if (!app.banks[bankId]) {
+                    showToast(`Bank ${bankId} not found`);
+                    return;
                 }
+                
+                // Use the improved highlighting function
+                highlightReference(bankId, registerId, addressId);
                 
             } catch (e) {
                 showToast(`Invalid reference format: ${refPath}`);
@@ -808,8 +807,32 @@
         }
 
         function highlightReference(bankId, registerId, addressId) {
-            // Find the cell containing the reference
-            const registerContainers = document.querySelectorAll('.register-container');
+    // First check if we need to switch to a different bank
+    if (app.currentBankId !== bankId) {
+        // If we need to switch banks, select the bank and then try highlighting again
+        selectBank(bankId);
+        
+        // Allow time for the UI to update before trying to highlight
+        setTimeout(() => {
+            highlightReferenceInCurrentBank(registerId, addressId);
+        }, 100);
+    } else {
+        // We're already on the correct bank, so just highlight
+        highlightReferenceInCurrentBank(registerId, addressId);
+    }
+}
+
+        function highlightReferenceInCurrentBank(registerId, addressId) {
+            // Get the current bank's content container
+            const bankContent = document.querySelector('.tab-content.active');
+            if (!bankContent) {
+                showToast("Error: Cannot find active bank content");
+                return;
+            }
+            
+            // Find the register container within this bank content
+            const registerContainers = bankContent.querySelectorAll('.register-container');
+            let found = false;
             
             for (const container of registerContainers) {
                 const header = container.querySelector('.register-header');
@@ -820,7 +843,7 @@
                         const addressCell = row.querySelector('td:first-child');
                         if (addressCell && addressCell.textContent === addressId.toString()) {
                             // Highlight the row
-                            row.style.backgroundColor = '#fff3cd'; // Soft yellow
+                            row.style.backgroundColor = 'var(--bg-highlight)';
                             
                             // Scroll to the row
                             row.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -830,13 +853,18 @@
                                 row.style.backgroundColor = '';
                             }, 2000);
                             
-                            return;
+                            found = true;
+                            break;
                         }
                     }
+                    
+                    if (found) break;
                 }
             }
             
-            showToast(`Reference not found: Bank ${bankId}, Register ${registerId}, Address ${addressId}`);
+            if (!found) {
+                showToast(`Reference not found: Register ${registerId}, Address ${addressId}`);
+            }
         }
 
         function resolveValue(value, visited = null) {
