@@ -1,0 +1,30 @@
+1
+	1	https://www.udemy.com/course/aws-certified-solutions-architect-associate-saa-c03/learn/lecture/13528014#overview
+	2	https://youtu.be/c3Cn4xYfxJY?si=KnDyiCrItMklS4cP
+	3	"""
+{
+
+1
+	1	3.1.1 [not started]
+	2	3.1.2 [not started]
+	3	3.1.4 [not started]
+
+}
+"""
+	4	https://www.linkedin.com/learning/paths/prepare-for-the-aws-certified-cloud-practitioner-clf-c02-certification
+	5	https://www.linkedin.com/learning/complete-guide-to-c-plus-plus-programming-foundations/getting-started-with-c-plus-plus?resume=false
+	6	https://www.udemy.com/course/quick-start-to-modern-c-for-programmers/learn/lecture/34881300?start=0#overview
+	7	https://www.youtube.com/watch?v=_bYFu9mBnr4
+	8	"""
+{
+
+1
+	1	3.1.5 [pending completion]
+	2	3.1.6 [pending completion]
+	3	3.1.7 [pending completion]
+	4	3.1.9 [pending completion] <current>
+
+}
+"""
+	9	https://www.youtube.com/watch?v=dOiA2nNJpc0
+

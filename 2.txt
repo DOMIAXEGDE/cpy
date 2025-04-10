@@ -1,0 +1,22 @@
+1
+	1	Mastery of 2.1.2
+	2	C++
+	3	Define 2.1.4 in 2.1.5 to 2.1.4
+	4	<concept>
+	5	relation
+	6	Engineering
+	7	2.1.2 2.1.9 2.1.6
+	8	"""
+{
+
+1	Generate all context relevant combinations
+2	Execute integer enumerated 3D line intersection filtering algorithm
+3	Perform human-centric solutions engineering within the resulting, filtered spatial context
+4	convert 1 2 3 into a presentation
+
+}
+"""
+	9	Assembly
+	10	1.1.12(2.1.11) 2.1.8
+	11	filter
+

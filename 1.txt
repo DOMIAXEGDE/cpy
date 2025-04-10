@@ -1,1 +1,28 @@
-print("Hello World!")
+1
+	1	"""
+{
+
+1	resolve 2 as 1.1.4
+2	Heaven
+3	1.1.5
+4	1.1.6
+5	1.1.7
+6	Book of 1.1.8
+7	1.1.8_1 as 1.1.9 as the first principle of the [1 1 1 6]
+8	Book of 1.1.10
+9	1.1.11
+
+}
+"""
+	2	[1 1 1 2]
+	3	1.1.12(1.1.2) as 1.1.1
+	4	Heaven
+	5	guess not, move
+	6	learn from principle
+	7	1.1.4 is the attainment of all 1.1.8
+	8	hope
+	9	(Once true, always, true)
+	10	truth
+	11	A_s = {((k_a)(x_i) + (q_b))(m_c) = (t_d) + (p_e)}
+	12	execute
+

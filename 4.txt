@@ -1,0 +1,146 @@
+1
+	1	4.1.30 IAM
+	2	4.1.30 CloudFront
+	3	4.1.30 S3
+	4	4.1.30 DymanoDB
+	5	4.1.30 EC2
+	6	4.1.30 RDS
+	7	"""
+{
+
+1	4.1.19
+
+}
+"""
+	8	4.1.9(fully competent) in 4.1.7
+	9	now
+	10	4.1.30 Policy
+	11	4.1.30 Elastic Beanstalk
+	12	4.1.30 Lambda Functions
+	13	4.1.30 Lightsail
+	14	hardware
+	15	software
+	16	engineering
+	17	resource management
+	18	computer architecture
+	19	listening
+	20	input
+	21	output
+	22	input-output
+	23	output-input
+	24	4.1.14 4.1.16
+	25	4.1.15 4.1.16
+	26	4.1.20 4.1.16
+	27	4.1.21 4.1.16
+	28	4.1.22 4.1.16
+	29	4.1.23 4.1.16
+	30	Amazon Web Services
+	31	"""
+{
+
+1
+	1	form factor
+	2	system
+	3	workstation
+	4	non-profit company
+	5	power supply
+	6	controller
+	7	drive
+	8	solid
+	9	cache
+	10	computer
+	11	processing
+	12	unit
+	13	10 11 12
+	14	instruction
+	15	set
+	16	14 15
+	17	direct
+	18	computation
+	19	store
+	20	stepwise
+	21	execute
+	22	21 20
+	23	stable
+	24	volatile
+	25	stable
+	26	storage
+	27	25 26
+	28	mechanical
+	29	component
+	30	digital
+	31	28 29
+	32	30 29
+	33	rotation
+	34	left
+	35	right
+	36	line
+	37	symmetry
+	38	36 of 37
+	39	wear levelling
+	40	attachment
+	41	bus
+	42	using
+	43	ribbon table
+	44	access
+	45	data
+	46	bank
+	47	register
+	48	address
+	49	value
+	50	partition
+	51	table
+	52	disk
+	53	scheme
+	54	boot
+	55	shift
+	56	strap
+	57	loader
+	58	dedicate
+	59	relative
+	60	absolute
+	61	state
+	62	free
+	63	space
+	64	preserve
+	65	reserve
+	66	service
+	67	out
+	68	in
+	69	of
+	70	schedule
+	71	delay
+	72	acceleration
+	73	seek
+	74	head
+	75	structure
+	76	algorithm
+	77	<label>
+	78	<delimited-label>
+	79	sector
+	80	service
+	81	request
+	82	modern
+	83	historical
+	84	approximate
+	85	precise
+	86	accurate
+	87	and
+	88	or
+	89	not
+	90	exclusive
+	91	extension
+	92	frame
+	93	reference
+	94	automatic
+	95	magnet
+	96	network
+	97	<integer-id>
+	98	no-action
+	99	1.1.12
+
+}
+"""
+	32	C++ 4.1.16
+	33	<architectural research and development>
+
